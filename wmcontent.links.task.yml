@@ -1,0 +1,3 @@
+wmcontent.local_tasks:
+  deriver: 'Drupal\wmcontent\Plugin\Derivative\WmContentLocalTasks'
+  weight: 2

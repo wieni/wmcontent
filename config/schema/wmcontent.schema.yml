@@ -1,0 +1,26 @@
+wmcontent.wmcontent_container.*:
+  type: config_entity
+  label: 'WmContent Container'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    host_entity_type:
+      type: string
+      label: 'Host entity type'
+    host_bundles:
+      type: sequence
+      label: 'Host bundles'
+      sequence:
+        type: string
+    child_entity_type:
+      type: string
+      label: 'Child entity type'
+    child_bundles:
+      type: sequence
+      label: 'Child bundles'
+      sequence:
+        type: string

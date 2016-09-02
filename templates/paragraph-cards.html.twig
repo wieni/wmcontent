@@ -1,0 +1,27 @@
+{#
+/**
+ * @file
+ * Cards are fake paragraphs :)
+ *
+ * Variables:
+ * - cards: Array of all cards
+ * - size: Preferred size small, medium, large, full
+ * - type: some type for a class
+ *
+ * @ingroup themeable
+ */
+#}
+
+{%
+    set classes = [
+        size,
+        'paragraph',
+        'paragraph--' ~ type
+    ]
+%}
+{% for key, item in cards %}
+
+    <div{{ attributes.addClass(classes).addclass('paragraph--' ~ type|clean_class ~ '__delta-' ~ (key+1)).removeClass('paragraph--' ~ type|clean_class ~ '__delta-' ~ key) }}>
+        {{ item }}
+    </div>
+{% endfor %}

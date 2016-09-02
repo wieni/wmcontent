@@ -1,0 +1,447 @@
+<?php
+
+/**
+ * @file
+ * Defines the Wieni Content module.
+ *
+ * @category module
+ *
+ * @package Wieni
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\wmcontent\Entity\WmContentContainer;
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function wmcontent_entity_extra_field_info()
+{
+    $extra = [];
+
+    foreach (wmContentContainer::loadMultiple() as $conf) {
+        $config = $conf->getConfig();
+        foreach ($config['host_bundles'] as $bundle) {
+            $extra[$config['host_entity_type']][$bundle]['display'][$config['id']] = array(
+                'label' => 'WmContent: ' . $config['label'],
+                'description' => $config['label'],
+                'weight' => 0,
+                'visible' => true,
+            );
+        }
+    }
+
+    return $extra;
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function wmcontent_entity_type_alter(array &$entity_types)
+{
+    // TODO: This is needed for the correct translation links. language_content_id
+    // foreach (wmContentContainer::loadMultiple() as $conf) {
+    //     $config = $conf->getConfig();
+
+    //     if (array_key_exists($config['host_entity_type'], $entity_types)) {
+    //         if ($entity_types[$config['host_entity_type']]->hasViewBuilderClass() && $entity_types[$config['host_entity_type']]->hasLinkTemplate('canonical')) {
+    //             $entity_types[$config['host_entity_type']]->setLinkTemplate(
+    //                 'drupal:wmcontent-overview',
+    //                 '/' . $entity_type_id . '/{{' . $entity_type_id . '}}/content/{container}'
+    //             );
+    //         }
+    //     }
+    // }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function wmcontent_entity_operation(EntityInterface $entity)
+{
+    $operations = [];
+
+    foreach (WmContentContainer::loadMultiple() as $conf) {
+        $config = $conf->getConfig();
+
+        if ($config['host_entity_type'] == $entity->getEntityType()->id()) {
+            if (empty($config['host_bundles']) || in_array($entity->bundle(), $config['host_bundles'])) {
+                $url = Url::fromRoute(
+                    'entity.' . $entity->getEntityType()->id() . '.wmcontent_overview',
+                    [
+                        $entity->getEntityType()->id() => $entity->id(),
+                        'container' => $config['id'],
+                    ]
+                );
+
+                $operations[$config['id']] = array(
+                    'title' => $config['label'],
+                    'url' => $url,
+                    'weight' => 50,
+                );
+            }
+        }
+    }
+
+    return $operations;
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function wmcontent_entity_insert(EntityInterface $entity)
+{
+    _wmcontent_containersave_cacheclear($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function wmcontent_entity_update(EntityInterface $entity)
+{
+    _wmcontent_containersave_cacheclear($entity);
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode)
+{
+
+    // Loadup our config.
+    foreach (wmContentContainer::loadMultiple() as $container) {
+        // Only load if our container is enabled in the display.
+        if ($display->getComponent($container->getId())) {
+            // Load up our service and get the content, ordered by weight.
+            $manager = \Drupal::service('wmcontent.manager');
+            $entities = $manager->getContent(
+                $entity,
+                $container->getId()
+            );
+
+            $delta = 0;
+            $paragraph_type_count = 1;
+            $paragraph_type_last = false;
+            $sections = [
+                $delta => [
+                    '#theme' => 'wmcontent_section',
+                    '#background' => '',
+                    '#items' => [],
+                    '#delta' => $delta,
+                ],
+            ];
+
+            foreach ($entities as $content) {
+                // If this is a 'break' then add it to the higher level break and switch.
+                if ($content->bundle() == 'break') {
+                    $background = '';
+                    if ($content->get('break_background')->value) {
+                        $background = $content->get('break_background')->value;
+                    }
+
+                    $delta++;
+                    $sections[$delta] = [
+                        '#theme' => 'wmcontent_section',
+                        '#background' => $background,
+                        '#items' => [],
+                        '#delta' => $delta,
+                    ];
+
+                    // Reset the paragraph type count coz we're starting a new
+                    // section.
+                    $paragraph_type_count = 1;
+                    $paragraph_type_last = false;
+                } else {
+                    // If it's not a break, just add this paragraph.
+                    // Do look at the type tough.
+                    if ($content->bundle() != $paragraph_type_last) {
+                        $paragraph_type_count = 1;
+                        $paragraph_type_last = $content->bundle();
+                    }
+                    $item = entity_view($content, 'full');
+                    $item['#weight'] = $content->get('wmcontent_weight')->getString();
+                    $item['#size'] = $content->get('wmcontent_size')->getString();
+                    $item['#delta'] = $paragraph_type_count;
+
+                    $sections[$delta]['#items'][] = $item;
+                    $paragraph_type_count++;
+                }
+            }
+
+
+            // Fetch empty ones (mainly, the first one).
+            foreach ($sections as $delta => $section) {
+                if (empty($section['#items'])) {
+                    unset($sections[$delta]);
+                }
+            }
+
+            $build['wmcontent'][$container->getId()] = array(
+                '#sections' => $sections,
+                '#theme' => 'wmcontent',
+            );
+        }
+    }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wmcontent_theme($existing, $type, $theme, $path)
+{
+    return [
+        'wmcontent' => [
+            'variables' => [
+                'sections' => null,
+            ],
+        ],
+        'wmcontent_section' => [
+            'variables' => [
+                'items' => null,
+                'background' => null,
+                'delta' => null,
+            ],
+        ],
+        'paragraph' => [
+            'render element' => 'elements',
+        ],
+        // Cards is used to explode 1 paragraph into multiple 'fake'
+        // paragraphs on the frontend. Bv voor autofill paragraph types.
+        'paragraph_cards' => [
+            'variables' => [
+                'cards' => null,
+                'size' => null,
+                'type' => null,
+            ],
+        ],
+    ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function wmcontent_theme_suggestions_eck_entity_alter(array &$suggestions, array $variables)
+{
+    // Detect references to paragraph entities and override the suggestions.
+    if (!empty($variables['entity']) && $variables['entity']['#entity_type'] == 'paragraph') {
+        $suggestions = [
+            'paragraph',
+            'paragraph__' . $variables['entity']['#entity']->bundle(),
+        ];
+    }
+}
+
+/**
+ * Prepares variables for paragraph templates.
+ */
+function wmcontent_preprocess_paragraph(&$variables)
+{
+    $paragraph = $variables['entity']['#entity'];
+
+    $variables['bundle'] = $paragraph->bundle();
+
+    // Add size.
+    $size = $paragraph->get('wmcontent_size')->value;
+    if (strlen($size) > 0) {
+        $variables['wmcontent_size'] = $size;
+    }
+
+    // Add delta.
+    $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
+
+    $strip = [
+        'created',
+        'wmcontent_size',
+        'wmcontent_weight',
+        'wmcontent_parent',
+    ];
+
+    // Add to render array except size.
+    $variables['content'] = [];
+    foreach (Element::children($variables['entity']) as $key) {
+        if (!empty($variables['entity'][$key]['#field_name'])
+            && !in_array($variables['entity'][$key]['#field_name'], $strip)
+            ) {
+            $variables['content'][] = $variables['entity'][$key];
+        }
+    }
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ *
+ * More intel at https://www.drupal.org/node/1879542
+ */
+function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
+{
+    // Loadup our config.
+    $config = wmContentContainer::loadMultiple();
+
+    $fields = array();
+    foreach (wmContentContainer::loadMultiple() as $conf) {
+        // Match. This is kind of wrong because we're going to overload all
+        // the bundles of the entity type with our fields.
+        if ($entity_type->id() == $conf->getChildEntityType()) {
+            $fields['wmcontent_size'] = BaseFieldDefinition::create('list_string')
+                ->setLabel(t('Size'))
+                ->setDescription(t('Select the size.'))
+                ->setRequired(true)
+                ->setSetting('allowed_values', _wmcontent_sizes())
+                ->setSetting('default_value', 'default')
+                ->setDisplayConfigurable('form', true)
+                ->setDisplayOptions(
+                    'form',
+                    array(
+                        'type' => 'options_select',
+                        'settings' => array(
+                           'display_label' => true,
+                            ),
+                        'weight' => 20,
+                        )
+                )
+                ->setDisplayOptions(
+                    'view',
+                    array(
+                        'label' => 'hidden',
+                        'type' => 'string',
+                        'weight' => -5,
+                    )
+                );
+
+            $fields['wmcontent_weight'] = BaseFieldDefinition::create('integer')
+                ->setLabel(t('Weight'))
+                ->setRequired(true)
+                ->setSetting('default_value', 0)
+                ->setDescription(t('The weight of this child.'))
+                ->setDisplayConfigurable('form', true)
+                ->setDisplayOptions(
+                    'form',
+                    array(
+                        'type' => 'hidden',
+                        'settings' => array(
+                            'display_label' => true,
+                        ),
+                    'weight' => 20,
+                    )
+                )
+                ->setDisplayOptions(
+                    'view',
+                    array(
+                        'label' => 'hidden',
+                        'type' => 'string',
+                        'weight' => -5,
+                    )
+                );
+
+            // The parent is an entity reference to the parent entity, which allows
+            // to access the parent id with $entity->parent->target_id and the parent
+            // entity with $entity->parent->entity.
+            $fields['wmcontent_parent'] = BaseFieldDefinition::create('integer')
+                ->setLabel(t('Host'))
+                ->setDescription(t('The entity id of the host.'))
+                ->setRequired(true)
+                ->setReadOnly(true)
+                ->setDisplayConfigurable('form', true)
+                ->setDisplayOptions(
+                    'form',
+                    array(
+                        'type' => 'hidden',
+                        'settings' => array(
+                            'display_label' => true,
+                        ),
+                        'weight' => 20,
+                    )
+                )
+                ->setDisplayOptions(
+                    'view',
+                    array(
+                        'label' => 'hidden',
+                        'type' => 'string',
+                        'weight' => -5,
+                    )
+                );
+
+            $fields['wmcontent_parent_type'] = BaseFieldDefinition::create('string')
+                ->setLabel(t('Host Type'))
+                ->setDescription(t('The entity type of the host.'))
+                ->setRequired(true)
+                ->setReadOnly(true)
+                ->setDisplayConfigurable('form', true)
+                ->setDisplayOptions(
+                    'form',
+                    array(
+                        'type' => 'hidden',
+                        'settings' => array(
+                            'display_label' => true,
+                        ),
+                        'weight' => 20,
+                    )
+                );
+
+            $fields['wmcontent_container'] = BaseFieldDefinition::create('string')
+                ->setLabel(t('Container'))
+                ->setDescription(t('The container in the host.'))
+                ->setRequired(true)
+                ->setReadOnly(true)
+                ->setSetting('default_value', 'content')
+                ->setDisplayConfigurable('form', true)
+                ->setDisplayOptions(
+                    'form',
+                    array(
+                    'type' => 'hidden',
+                    'settings' => array(
+                        'display_label' => true,
+                    ),
+                      'weight' => 20,
+                    )
+                );
+        }
+    }
+
+    return $fields;
+}
+
+/**
+ * Default list of available sizes.
+ */
+function _wmcontent_sizes()
+{
+    return [
+        'small' => t('Small'),
+        'medium' => t('Medium'),
+        'large' => t('Large'),
+        'full' => t('Full'),
+    ];
+}
+
+/**
+ * Checks if a given entity's type is registered as a child entity type somewhere,
+ * and clear the host cache if it is.
+ */
+function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface $entity)
+{
+    $clearParent = false;
+
+    // Load up our service clear cache for the host.
+    $manager = \Drupal::service('wmcontent.manager');
+    // $entities = $manager->hostClearCache($p);
+    foreach (wmContentContainer::loadMultiple() as $conf) {
+        $config = $conf->getConfig();
+        if ($config['child_entity_type'] == $entity->getEntityType()->id()) {
+            if (empty($config['child_bundles']) || in_array($entity->bundle(), $config['child_bundles'])) {
+                $clearParent = true;
+            }
+        }
+    }
+
+    if ($clearParent) {
+        // Clear Drupals cache for the parent entity.
+        $manager->hostClearCache($entity);
+    }
+}

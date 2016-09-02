@@ -1,0 +1,39 @@
+wmcontent:
+  path: '/admin/config/wmcontent'
+  defaults:
+    _entity_list: 'wmcontent_container'
+    _title: 'WmContent - Container configuration'
+  requirements:
+    _permission: 'administer wmcontent'
+
+wmcontent.collection:
+  path: '/admin/config/wmcontent/containers'
+  defaults:
+    _entity_list: 'wmcontent_container'
+    _title: 'WmContent - Container configuration'
+  requirements:
+    _permission: 'administer wmcontent'
+
+entity.wmcontent_container.add_form:
+  path: '/admin/config/wmcontent/containers/add'
+  defaults:
+    _entity_form: 'wmcontent_container.add'
+    _title: 'Add container'
+  requirements:
+    _permission: 'administer wmcontent'
+
+entity.wmcontent_container.edit_form:
+  path: '/admin/config/wmcontent/containers/{wmcontent_container}'
+  defaults:
+    _entity_form: 'wmcontent_container.edit'
+    _title: 'Edit container'
+  requirements:
+    _permission: 'administer wmcontent'
+
+entity.wmcontent_container.delete_form:
+  path: '/admin/config/wmcontent/containers/{wmcontent_container}/delete'
+  defaults:
+    _entity_form: 'wmcontent_container.delete'
+    _title: 'Delete container'
+  requirements:
+    _permission: 'administer wmcontent'

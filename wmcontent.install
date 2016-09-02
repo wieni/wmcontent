@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Installation file for wmcontent module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function wmcontent_install() {
+  // Add our base fields to the schema.
+  \Drupal::service('entity.definition_update_manager')->applyUpdates();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function wmcontent_uninstall() {
+  // Remove our base fields from the schema.
+  \Drupal::service('entity.definition_update_manager')->applyUpdates();
+}

@@ -1,0 +1,8 @@
+name: Wieni Content
+type: module
+core: 8.x
+package: Wieni
+dependencies:
+  - eck
+  - node
+  - options
