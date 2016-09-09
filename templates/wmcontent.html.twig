@@ -29,13 +29,11 @@
 
 {%
 set classes = [
-'paragraphs',
-'wmcontent',
+'wmcontent-container',
+'wmcontent-container-' ~ container
 ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
-  {% for section in sections %}
-    {{ section }}
-  {% endfor %}
+  {{ sections }}
 </div>

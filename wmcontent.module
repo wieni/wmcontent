@@ -134,6 +134,7 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
                     '#background' => '',
                     '#items' => [],
                     '#delta' => $delta,
+                    '#container' => $container->getId(),
                 ],
             ];
 
@@ -168,6 +169,9 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
                     $item['#weight'] = $content->get('wmcontent_weight')->getString();
                     $item['#size'] = $content->get('wmcontent_size')->getString();
                     $item['#delta'] = $paragraph_type_count;
+                    $item['#type'] = $content->getEntityTypeId();
+                    $item['#bundle'] = $content->bundle();
+
 
                     $sections[$delta]['#items'][] = $item;
                     $paragraph_type_count++;
@@ -185,6 +189,7 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
             $build['wmcontent'][$container->getId()] = array(
                 '#sections' => $sections,
                 '#theme' => 'wmcontent',
+                '#container' => $container->getId(),
             );
         }
     }
@@ -199,6 +204,7 @@ function wmcontent_theme($existing, $type, $theme, $path)
         'wmcontent' => [
             'variables' => [
                 'sections' => null,
+                'container' => null,
             ],
         ],
         'wmcontent_section' => [
@@ -206,9 +212,13 @@ function wmcontent_theme($existing, $type, $theme, $path)
                 'items' => null,
                 'background' => null,
                 'delta' => null,
+                'container' => null,
             ],
         ],
         'paragraph' => [
+            'render element' => 'elements',
+        ],
+        'items' => [
             'render element' => 'elements',
         ],
         // Cards is used to explode 1 paragraph into multiple 'fake'
@@ -228,12 +238,15 @@ function wmcontent_theme($existing, $type, $theme, $path)
  */
 function wmcontent_theme_suggestions_eck_entity_alter(array &$suggestions, array $variables)
 {
-    // Detect references to paragraph entities and override the suggestions.
-    if (!empty($variables['entity']) && $variables['entity']['#entity_type'] == 'paragraph') {
+    // Add theme suggestiongs for the type and the the type__bundle.
+    if (!empty($variables['entity']) && $variables['entity']['#entity_type']) {
+
         $suggestions = [
-            'paragraph',
-            'paragraph__' . $variables['entity']['#entity']->bundle(),
+            $variables['entity']['#entity_type'],
+            $variables['entity']['#entity_type'] . '__' . $variables['entity']['#entity']->bundle(),
         ];
+
+
     }
 }
 
@@ -445,3 +458,5 @@ function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface 
         $manager->hostClearCache($entity);
     }
 }
+
+
