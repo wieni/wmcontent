@@ -96,9 +96,9 @@ class WmContentManager implements WmContentManagerInterface
 
         // Load the container.
         $current_container = $this
-        ->entityManager
-        ->getStorage('wmcontent_container')
-        ->load($container);
+            ->entityManager
+            ->getStorage('wmcontent_container')
+            ->load($container);
 
         // Create an entity query for our entity type.
         $query = $this->entityQuery->get($current_container->getChildEntityType());
@@ -108,11 +108,11 @@ class WmContentManager implements WmContentManagerInterface
 
         // Filter by parent and sort.
         $query
-        ->condition('wmcontent_parent', $entity->id())
-        ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
-        ->condition('langcode', $langcode)
-        ->condition('wmcontent_container', $container)
-        ->sort('wmcontent_weight', 'ASC');
+            ->condition('wmcontent_parent', $entity->id())
+            ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
+            ->condition('langcode', $langcode)
+            ->condition('wmcontent_container', $container)
+            ->sort('wmcontent_weight', 'ASC');
 
         // Return the entities.
         $result = $query->execute();
@@ -157,32 +157,32 @@ class WmContentManager implements WmContentManagerInterface
 
         // Do not consider these fields when making a teaser.
         $ignorefields = [
-        'id',
-        'uuid',
-        'type',
-        'langcode',
-        'created',
-        'changed',
-        'default_langcode',
-        'wmcontent_size',
-        'wmcontent_weight',
-        'wmcontent_parent',
-        'wmcontent_parent_type',
-        'wmcontent_container',
-        'weight',
-        'content_translation_source',
-        'content_translation_outdated',
-        'content_translation_uid',
-        'content_translation_status',
-        'content_translation_changed',
-        'list_items',
-        'program_items',
+            'id',
+            'uuid',
+            'type',
+            'langcode',
+            'created',
+            'changed',
+            'default_langcode',
+            'wmcontent_size',
+            'wmcontent_weight',
+            'wmcontent_parent',
+            'wmcontent_parent_type',
+            'wmcontent_container',
+            'weight',
+            'content_translation_source',
+            'content_translation_outdated',
+            'content_translation_uid',
+            'content_translation_status',
+            'content_translation_changed',
+            'list_items',
+            'program_items',
         ];
 
         // Setup a priority for key indexes.
         $trickleindexes = [
-        'value',
-        'title',
+            'value',
+            'title',
         ];
 
         // Get the type (paragraph).
@@ -201,12 +201,12 @@ class WmContentManager implements WmContentManagerInterface
                 $value = $entity->get($field_name)->getValue();
 
                 if (is_array($value)) {
-                  // Go through the value, find a trickle index.
+                    // Go through the value, find a trickle index.
                     foreach ($trickleindexes as $i) {
                         if (isset($value[0]) && isset($value[0][$i]) && !empty($value[0][$i])) {
                             $value = substr(trim(strip_tags($value[0][$i])), 0, 60);
                             if (!is_numeric($value)) {
-                              // Good to go.
+                                // Good to go.
                                 $return = $value;
                             }
                         }
@@ -214,15 +214,15 @@ class WmContentManager implements WmContentManagerInterface
                 }
 
                 if (!$return) {
-                  // OK There was nothing in the value that was interesting.
-                  // So let's try the string.
+                    // OK There was nothing in the value that was interesting.
+                    // So let's try the string.
                     $value = $entity->get($field_name)->getString();
 
-                  // See if the string value has something nice.
+                    // See if the string value has something nice.
                     if (!empty($value)) {
                         $value = substr(trim(strip_tags($value)), 0, 60);
                         if (!is_numeric($value)) {
-                          // Good to go.
+                            // Good to go.
                             $return = $value;
                         }
                     }

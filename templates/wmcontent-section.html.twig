@@ -31,15 +31,16 @@
 
 {%
 set classes = [
-'wmcontent-section',
-'paragraphs__section',
-'paragraphs__section--' ~ delta,
+'wmcontent-container-section',
+'wmcontent-container-' ~ container ~ '-section',
+'wmcontent-container-' ~ container ~ '-section-' ~ delta,
 background ? 'background--' ~ background|clean_class : '',
 ]
 %}
-
 <div{{ attributes.addClass(classes) }}>
   {% for item in items %}
-    {{ item }}
+    <div class="wmcontent-item wmcontent-item-{{ item['#type'] }} wmcontent-item-{{ item['#type'] }}-{{ item['#bundle'] }} {{ item['#size'] }}">
+      {{ item }}
+    </div>
   {% endfor %}
 </div>
