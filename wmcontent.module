@@ -234,20 +234,21 @@ function wmcontent_theme($existing, $type, $theme, $path)
 }
 
 /**
- * Implements hook_theme_suggestions_HOOK_alter().
+ * Implements hook_theme_suggestions_HOOK().
  */
-function wmcontent_theme_suggestions_eck_entity_alter(array &$suggestions, array $variables)
+function wmcontent_theme_suggestions_eck_entity(array $variables)
 {
+    $suggestions = [];
+    
     // Add theme suggestiongs for the type and the the type__bundle.
     if (!empty($variables['entity']) && $variables['entity']['#entity_type']) {
-
         $suggestions = [
             $variables['entity']['#entity_type'],
             $variables['entity']['#entity_type'] . '__' . $variables['entity']['#entity']->bundle(),
         ];
-
-
     }
+
+    return $suggestions;
 }
 
 /**
@@ -293,9 +294,6 @@ function wmcontent_preprocess_paragraph(&$variables)
  */
 function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
 {
-    // Loadup our config.
-    $config = wmContentContainer::loadMultiple();
-
     $fields = array();
     foreach (wmContentContainer::loadMultiple() as $conf) {
         // Match. This is kind of wrong because we're going to overload all
@@ -458,5 +456,3 @@ function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface 
         $manager->hostClearCache($entity);
     }
 }
-
-
