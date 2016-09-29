@@ -42,22 +42,32 @@ function wmcontent_entity_extra_field_info()
 
 /**
  * Implements hook_entity_type_alter().
+ *
+ * This is very necesarry to provide us with the correct content translation
+ * language (adds the language_content_entity query string when needed.
+ *
+ * TODO: Ideally we only add this on the enabled entity types/bundles
+ * but if we load wmContentContainer::loadMultiple() then we end up looping.
+ *
+ * @see \Drupal\Core\Entity\Annotation\EntityType
  */
 function wmcontent_entity_type_alter(array &$entity_types)
 {
-    // TODO: This is needed for the correct translation links. language_content_id
-    // foreach (wmContentContainer::loadMultiple() as $conf) {
-    //     $config = $conf->getConfig();
-
-    //     if (array_key_exists($config['host_entity_type'], $entity_types)) {
-    //         if ($entity_types[$config['host_entity_type']]->hasViewBuilderClass() && $entity_types[$config['host_entity_type']]->hasLinkTemplate('canonical')) {
-    //             $entity_types[$config['host_entity_type']]->setLinkTemplate(
-    //                 'drupal:wmcontent-overview',
-    //                 '/' . $entity_type_id . '/{{' . $entity_type_id . '}}/content/{container}'
-    //             );
-    //         }
-    //     }
-    // }
+    // Provide defaults for translation info.
+    /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+    foreach ($entity_types as $entity_type) {
+        if ($entity_type->hasLinkTemplate('canonical')) {
+            // Provide default route names for the wmcontent paths.
+            if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
+                $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
+                
+                $entity_type->setLinkTemplate(
+                    'drupal:wmcontent-overview',
+                    $wmcontent_path
+                );
+            }
+        }
+    }
 }
 
 /**

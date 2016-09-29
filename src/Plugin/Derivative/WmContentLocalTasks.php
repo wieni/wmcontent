@@ -74,14 +74,14 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
             $config = $container->getConfig();
 
             // Get the route name for the wmcontent overview.
-            $translation_route_name = 'entity.' . $config['host_entity_type'] . '.wmcontent_overview';
+            $wmcontent_route_name = 'entity.' . $config['host_entity_type'] . '.wmcontent_overview';
 
             $base_route_name = "entity." . $config['host_entity_type'] . ".canonical";
 
-            $this->derivatives[$translation_route_name . '.' . $config['id']] = array(
+            $this->derivatives[$wmcontent_route_name . '.' . $config['id']] = array(
                 'entity_type' => $config['host_entity_type'],
-                'title' => $config['label'],
-                'route_name' => $translation_route_name,
+                'title' => $config['label'] . 'y',
+                'route_name' => $wmcontent_route_name,
                 'route_parameters' => [
                     'container' => $config['id'],
                 ],

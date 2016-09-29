@@ -54,7 +54,7 @@ class WmContentContextualLinks extends DeriverBase implements ContainerDeriverIn
         foreach ($storage->loadMultiple() as $container) {
             $config = $container->getConfig();
 
-            $key = $config['host_entity_type'] . '.' . $config['id']
+            $key = $config['host_entity_type'] . '.' . $config['id'];
 
             $this->derivatives[$key]['title'] = $config['label'];
             $this->derivatives[$key]['title']['route_name'] = 'entity.' . $config['host_entity_type'] . '.wmcontent_overview';
