@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\wmcontent\Event\WmContentEntityLabelEvent;
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Provides common functionality for content translation.
@@ -45,18 +46,18 @@ class WmContentManager implements WmContentManagerInterface
      * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
      */
     protected $eventDispatcher;
-
+    
     /**
      * Constructs a WmContentManageAccessCheck object.
      *
-     * @param \Drupal\Core\Entity\EntityManagerInterface $manager
-     *   The entity type manager.
-     * @param \Drupal\Core\Entity\QueryFactory $query
+     * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
+     * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+     * @param \Drupal\Core\Entity\Query\QueryFactory|\Drupal\Core\Entity\QueryFactory $query
      *   The query factory.
      * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
      *   The language manager.
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
-     *   The event dispatcher.
+     *   The event dispatcher.The entity type manager.
      */
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -77,7 +78,7 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function getCurrentLanguage()
     {
-        return $this->languageManager->getCurrentLanguage();
+        return $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
     }
 
     /**
@@ -105,7 +106,7 @@ class WmContentManager implements WmContentManagerInterface
 
         // Get the current host language.
         $langcode = $this->getCurrentLanguage()->getId();
-
+        
         // Filter by parent and sort.
         $query
             ->condition('wmcontent_parent', $entity->id())
