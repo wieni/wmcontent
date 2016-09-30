@@ -1,0 +1,14 @@
+{
+    name: "wieni/wmcontent",
+    description: "Adds configurable content 'containers' to entity types (for eg.paragraphs)",
+    license: "MIT",
+    authors: [
+        {
+            name: "Wieni",
+            email: "info@wieni.be"
+        }
+    ],
+    minimum-stability: "dev",
+    prefer-stable: true,
+    type: "drupal-module"
+}

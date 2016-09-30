@@ -80,7 +80,7 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
 
             $this->derivatives[$wmcontent_route_name . '.' . $config['id']] = array(
                 'entity_type' => $config['host_entity_type'],
-                'title' => $config['label'] . 'y',
+                'title' => $config['label'],
                 'route_name' => $wmcontent_route_name,
                 'route_parameters' => [
                     'container' => $config['id'],
