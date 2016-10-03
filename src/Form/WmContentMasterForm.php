@@ -201,11 +201,12 @@ class WmContentMasterForm extends FormBase
 
             // Weight.
             $row['wmcontent_weight'] = [
-            '#type' => 'weight',
-            '#default_value' => $child->get('wmcontent_weight')->getString(),
-            '#attributes' => array(
-              'class' => array('wmcontent_weight', 'wmcontent_weight-' . $child->id()),
-            ),
+                '#type' => 'weight',
+                '#default_value' => $child->get('wmcontent_weight')->getString(),
+                '#attributes' => array(
+                    'class' => array('wmcontent_weight', 'wmcontent_weight-' . $child->id()),
+                ),
+                '#delta' => 100,
             ];
 
             // Add the oprations.
