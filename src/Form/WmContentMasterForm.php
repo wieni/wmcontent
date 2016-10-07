@@ -4,7 +4,6 @@ namespace Drupal\wmcontent\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\wmcontent\WmContentManager;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
@@ -29,9 +28,9 @@ class WmContentMasterForm extends FormBase
      * The main entity that we are adding and managing paragraphs for.
      */
     protected $host;
-
+    
     /**
-     * The container we are working with.
+     * @var Drupal\wmcontent\Entity\WmContentContainer $container
      */
     protected $container;
 
@@ -58,7 +57,30 @@ class WmContentMasterForm extends FormBase
      */
     public function buildForm(array $form, FormStateInterface $form_state)
     {
-
+        $config = $this->container->getConfig();
+    
+        // Get the children.
+        $list = $this->wmContentManager->getContent(
+            $this->host,
+            $this->container->getid()
+        );
+        
+        // The query (including the destination) Will be the same for all actions.
+        // We must add our own language param, however, since adding it in via
+        // link parameters is a no go.
+        $query = [
+            'destination' => Url::fromRoute(
+                "entity." . $this->container->getHostEntityType() . ".wmcontent_overview",
+                [
+                    $this->container->getHostEntityType() => $this->host->id(),
+                    'container' => $this->container->getId(),
+                ]
+            )->toString(),
+        ];
+        if (!empty($_GET['language_content_entity'])) {
+            $query['language_content_entity'] = $_GET['language_content_entity'];
+        }
+        
         // Some internal values.
         $form['container'] = [
             '#type' => 'value',
@@ -93,19 +115,8 @@ class WmContentMasterForm extends FormBase
                 ],
             ],
         ];
-
-        // Get container config.
-        $config = $this->container->getConfig();
-
-        $rows = [];
-
-        // Get the childs.
-        $list = $this->wmContentManager->getContent(
-            $this->host,
-            $this->container->getid()
-        );
-
-        // Make a row out of each child.
+        
+        /** @var Drupal\eck\Entity\EckEntity $child */
         foreach ($list as $child) {
             // Edit and delete operations.
             $operations = [
@@ -122,15 +133,7 @@ class WmContentMasterForm extends FormBase
                                 $this->container->getHostEntityType() => $this->host->id(),
                             ],
                             [
-                                'query' => [
-                                    'destination' => Url::fromRoute(
-                                        "entity." . $this->container->getHostEntityType() . ".wmcontent_overview",
-                                        [
-                                            $this->container->getHostEntityType() => $this->host->id(),
-                                            'container' => $this->container->getId(),
-                                        ]
-                                    )->toString(),
-                                ]
+                                'query' => $query,
                             ]
                         ),
                         'title' => $this->t('Edit'),
@@ -145,15 +148,7 @@ class WmContentMasterForm extends FormBase
                               $this->container->getHostEntityType() => $this->host->id(),
                             ],
                             [
-                              'query' => [
-                                'destination' => Url::fromRoute(
-                                    "entity." . $this->container->getHostEntityType() . ".wmcontent_overview",
-                                    [
-                                     $this->container->getHostEntityType() => $this->host->id(),
-                                        'container' => $this->container->getId(),
-                                    ]
-                                )->toString(),
-                              ]
+                              'query' => $query,
                             ]
                         ),
                         'title' => $this->t('Delete'),
@@ -184,7 +179,7 @@ class WmContentMasterForm extends FormBase
             // Bundle label.
             $row['bundle'] = [
                 '#type' => 'container',
-                '#markup' => $child->type->entity->label(),
+                '#markup' => $child->get('type')->entity->label(),
             ];
 
             // Teaser.
@@ -209,7 +204,7 @@ class WmContentMasterForm extends FormBase
                 '#delta' => 100,
             ];
 
-            // Add the oprations.
+            // Add the operations.
             $row['operations'] = $operations;
 
             // Add the row to the rows.
@@ -218,16 +213,7 @@ class WmContentMasterForm extends FormBase
 
         // Make some add links.
         $links = [];
-
-        // Come back to here when you are done.
-        $destination = Url::fromRoute(
-            "entity." . $this->container->getHostEntityType() . ".wmcontent_overview",
-            [
-                $this->container->getHostEntityType() => $this->host->id(),
-                'container' => $this->container->getId(),
-            ]
-        )->toString();
-
+        
         foreach ($config['child_bundles'] as $bundle) {
             $links[$bundle] = array(
                 'title' => $this->t('Add @label', array('@label' => $bundle)),
@@ -237,7 +223,9 @@ class WmContentMasterForm extends FormBase
                         'bundle' => $bundle,
                         $this->container->getHostEntityType() => $this->host->id(),
                         'container' => $this->container->getId(),
-                        'destination' => $destination,
+                    ],
+                    [
+                        'query' => $query,
                     ]
                 ),
             );
@@ -272,14 +260,18 @@ class WmContentMasterForm extends FormBase
         // Get the values from the form.
         $values = $form_state->getValues();
 
-        // Go through each row and resave the weight.
+        // Go through each row and update the weight.
+        $p = false;
         foreach ($values['rows'] as $row) {
+            /** @var Drupal\eck\Entity\EckEntity $p */
             $p = Drupal::entityTypeManager()->getStorage($row['hiddens']['type'])->load($row['hiddens']['id']);
             $p->set('wmcontent_weight', $row['wmcontent_weight']);
             $p->save();
         }
-
-        // Clear Drupals cache for the parent entity.
-        $this->wmContentManager->hostClearCache($p);
+        
+        if ($p) {
+            // Clear Drupal cache for the parent entity.
+            $this->wmContentManager->hostClearCache($p);
+        }
     }
 }
