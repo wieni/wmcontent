@@ -143,7 +143,7 @@ class WmContentController extends ControllerBase
         $child->set('wmcontent_container', $current_container->getId());
 
         // In the correct language.
-        $child->set('langcode', $this->wmContentManager->getCurrentLanguage()->getId());
+        $child->set('langcode', $host->get('langcode')->value);
 
         // Get the form.
         $form = $this->entityFormBuilder()->getForm($child);
