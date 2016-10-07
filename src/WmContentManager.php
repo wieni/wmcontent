@@ -76,14 +76,6 @@ class WmContentManager implements WmContentManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getCurrentLanguage()
-    {
-        return $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getTranslationHandler($entity_type_id)
     {
         return $this->entityManager->getHandler($entity_type_id, 'translation');
@@ -103,15 +95,12 @@ class WmContentManager implements WmContentManagerInterface
 
         // Create an entity query for our entity type.
         $query = $this->entityQuery->get($current_container->getChildEntityType());
-
-        // Get the current host language.
-        $langcode = $this->getCurrentLanguage()->getId();
         
         // Filter by parent and sort.
         $query
             ->condition('wmcontent_parent', $entity->id())
             ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
-            ->condition('langcode', $langcode)
+            ->condition('langcode', $entity->get('langcode')->value)
             ->condition('wmcontent_container', $container)
             ->sort('wmcontent_weight', 'ASC');
 
