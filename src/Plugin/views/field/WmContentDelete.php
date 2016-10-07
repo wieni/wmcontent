@@ -9,22 +9,22 @@ use Drupal\views\Plugin\views\field\EntityLink;
  *
  * @ingroup views_field_handlers
  *
- * @ViewsField("wmcontent_overview_link")
+ * @ViewsField("wmcontent_delete_link")
  */
-class WmContentLink extends EntityLink {
+class WmContentDelete extends EntityLink {
 
   /**
    * {@inheritdoc}
    */
   protected function getEntityLinkTemplate() {
-    return 'drupal:wmcontent-overview';
+    return 'drupal:wmcontent-delete';
   }
 
   /**
    * {@inheritdoc}
    */
   protected function getDefaultLabel() {
-    return $this->t('WmContent');
+    return $this->t('Delete WmContent');
   }
 
 }

@@ -60,9 +60,26 @@ function wmcontent_entity_type_alter(array &$entity_types)
             // Provide default route names for the wmcontent paths.
             if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
                 $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
-                
                 $entity_type->setLinkTemplate(
                     'drupal:wmcontent-overview',
+                    $wmcontent_path
+                );
+    
+                $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/add/{bundle}';
+                $entity_type->setLinkTemplate(
+                    'drupal:wmcontent-add',
+                    $wmcontent_path
+                );
+    
+                $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/edit';
+                $entity_type->setLinkTemplate(
+                    'drupal:wmcontent-edit',
+                    $wmcontent_path
+                );
+    
+                $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/delete';
+                $entity_type->setLinkTemplate(
+                    'drupal:wmcontent-delete',
                     $wmcontent_path
                 );
             }
