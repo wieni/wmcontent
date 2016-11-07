@@ -277,7 +277,10 @@ function wmcontent_preprocess_paragraph(&$variables)
     }
 
     // Add delta.
-    $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
+    $variables['wmcontent_delta'] = 0;
+    if (isset($variables['entity']['#delta'])) {
+        $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
+    }
 
     $strip = [
         'created',

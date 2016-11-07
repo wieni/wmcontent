@@ -2,6 +2,8 @@
 
 namespace Drupal\wmcontent;
 
+use Drupal\eck\EckEntityInterface;
+use Drupal\eck\Entity\EckEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -94,12 +96,15 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function getContent($entity, $container)
     {
-
+        $data = &drupal_static(__FUNCTION__);
+        $key = $container . ':' . $entity->getEntityTypeId() . ':' . $entity->id();
+    
         // Load the container.
         $current_container = $this
             ->entityManager
             ->getStorage('wmcontent_container')
             ->load($container);
+<<<<<<< Updated upstream
 
         // Create an entity query for our entity type.
         $query = $this->entityQuery->get($current_container->getChildEntityType());
@@ -117,9 +122,40 @@ class WmContentManager implements WmContentManagerInterface
 
         // Return the entities.
         $result = $query->execute();
+=======
+        
+        if (!isset($data[$key])) {
+            // Create an entity query for our entity type.
+            $query = $this->entityQuery->get($current_container->getChildEntityType());
+    
+            // Filter by parent and sort.
+            $query
+                ->condition('wmcontent_parent', $entity->id())
+                ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
+                ->condition('langcode', $entity->get('langcode')->value)
+                ->condition('wmcontent_container', $container)
+                ->sort('wmcontent_weight', 'ASC');
+    
+            // Return the entities.
+            $data[$key] = $query->execute();
+        }
+>>>>>>> Stashed changes
 
         $controller = $this->entityManager->getStorage($current_container->getChildEntityType());
-        return $controller->loadMultiple($result);
+        return $controller->loadMultiple($data[$key]);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getHost(EckEntity $entity)
+    {
+        if ($entity->hasField('wmcontent_parent') && !$entity->get('wmcontent_parent')->isEmpty()) {
+            return $this
+                ->entityManager
+                ->getStorage($entity->get('wmcontent_parent_type')->value)
+                ->load($entity->get('wmcontent_parent')->value);
+        }
     }
 
     /**
