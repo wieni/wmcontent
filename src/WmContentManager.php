@@ -11,6 +11,7 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\wmcontent\Event\WmContentEntityLabelEvent;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Cache\CacheBackendInterface;
 
 /**
  * Provides common functionality for content translation.
@@ -50,6 +51,11 @@ class WmContentManager implements WmContentManagerInterface
     protected $eventDispatcher;
     
     /**
+     * @var CacheBackendInterface
+     */
+    protected $cacheBackend;
+    
+    /**
      * Constructs a WmContentManageAccessCheck object.
      *
      * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
@@ -60,27 +66,22 @@ class WmContentManager implements WmContentManagerInterface
      *   The language manager.
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
      *   The event dispatcher.The entity type manager.
+     * @param \Drupal\Core\Cache\CacheBackendInterface $cacheBackend
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         EntityTypeManagerInterface $entityTypeManager,
         QueryFactory $query,
         LanguageManagerInterface $language_manager,
-        EventDispatcherInterface $event_dispatcher
+        EventDispatcherInterface $event_dispatcher,
+        CacheBackendInterface $cacheBackend
     ) {
         $this->entityManager = $entityManager;
         $this->entityTypeManager = $entityTypeManager;
         $this->entityQuery = $query;
         $this->languageManager = $language_manager;
         $this->eventDispatcher = $event_dispatcher;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getCurrentLanguage()
-    {
-        return $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
+        $this->cacheBackend = $cacheBackend;
     }
 
     /**
@@ -97,52 +98,80 @@ class WmContentManager implements WmContentManagerInterface
     public function getContent($entity, $container)
     {
         $data = &drupal_static(__FUNCTION__);
-        $key = $container . ':' . $entity->getEntityTypeId() . ':' . $entity->id();
+        $key = 'wmcontent:' . $container . ':' . $entity->getEntityTypeId() . ':' . $entity->id() . ':' . $entity->get('langcode')->value;
     
         // Load the container.
         $current_container = $this
             ->entityManager
             ->getStorage('wmcontent_container')
             ->load($container);
-<<<<<<< Updated upstream
-
-        // Create an entity query for our entity type.
-        $query = $this->entityQuery->get($current_container->getChildEntityType());
-
-        // Get the current host language.
-        $langcode = $this->getCurrentLanguage()->getId();
-        
-        // Filter by parent and sort.
-        $query
-            ->condition('wmcontent_parent', $entity->id())
-            ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
-            ->condition('langcode', $langcode)
-            ->condition('wmcontent_container', $container)
-            ->sort('wmcontent_weight', 'ASC');
-
-        // Return the entities.
-        $result = $query->execute();
-=======
         
         if (!isset($data[$key])) {
-            // Create an entity query for our entity type.
-            $query = $this->entityQuery->get($current_container->getChildEntityType());
+            if ($cache = $this->cacheBackend->get($key)) {
+                $data[$key] = $cache->data;
+            } else {
+                // Create an entity query for our entity type.
+                $query = $this->entityQuery->get($current_container->getChildEntityType());
     
-            // Filter by parent and sort.
-            $query
-                ->condition('wmcontent_parent', $entity->id())
-                ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
-                ->condition('langcode', $entity->get('langcode')->value)
-                ->condition('wmcontent_container', $container)
-                ->sort('wmcontent_weight', 'ASC');
+                // Filter by parent and sort.
+                $query
+                    ->condition('wmcontent_parent', $entity->id())
+                    ->condition('wmcontent_parent_type', $entity->getEntityTypeId())
+                    ->condition('langcode', $entity->get('langcode')->value)
+                    ->condition('wmcontent_container', $container)
+                    ->sort('wmcontent_weight', 'ASC');
     
-            // Return the entities.
-            $data[$key] = $query->execute();
+                // Return the entities.
+                $data[$key] = $query->execute();
+    
+                // Put in cache. Mind the invalidating array that should invalidate
+                // this cache when the node gets cleared.
+                $this->cacheBackend->set(
+                    $key,
+                    $data[$key],
+                    CacheBackendInterface::CACHE_PERMANENT,
+                    $entity->getCacheTags()
+                );
+            }
         }
->>>>>>> Stashed changes
 
         $controller = $this->entityManager->getStorage($current_container->getChildEntityType());
         return $controller->loadMultiple($data[$key]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getToc($entity, $container)
+    {
+        // Start a return.
+        $r = [];
+
+        // Get the kids.
+        $kids = $this->getContent($entity, $container);
+
+        // Start a counter.
+        $i = 1;
+
+        // Loop through the kids.
+        foreach ($kids as $kid) {
+            // If this kid is a title then ...
+            if ($kid->bundle() == "title") {
+                // get the title.
+                $t = $kid->get('plain_title')->value;
+                // Just put the id number of the thing there....
+                $id = "entity-" . $kid->id();
+
+                // Add this title to the TOC
+                $r[] = [
+                    'label' => $t,
+                    'href' => "#" . $id,
+                ];
+            }
+            $i++;
+        }
+
+        return $r;
     }
     
     /**

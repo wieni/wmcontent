@@ -143,7 +143,7 @@ class WmContentController extends ControllerBase
         $child->set('wmcontent_container', $current_container->getId());
 
         // In the correct language.
-        $child->set('langcode', $this->wmContentManager->getCurrentLanguage()->getId());
+        $child->set('langcode', $host->get('langcode')->value);
 
         // Get the form.
         $form = $this->entityFormBuilder()->getForm($child);
@@ -174,7 +174,7 @@ class WmContentController extends ControllerBase
     {
         // Get the container.
         $current_container = $this
-            ->entityManager()
+            ->entityTypeManager()
             ->getStorage('wmcontent_container')
             ->load($container);
 
@@ -182,7 +182,7 @@ class WmContentController extends ControllerBase
 
         // Load up the child.
         $child = $this
-            ->entityManager()
+            ->entityTypeManager()
             ->getStorage($current_container->getChildEntityType())
             ->load($child_id);
 
@@ -222,13 +222,13 @@ class WmContentController extends ControllerBase
     {
         // Get the container.
         $current_container = $this
-            ->entityManager()
+            ->entityTypeManager()
             ->getStorage('wmcontent_container')
             ->load($container);
 
         // Load up the child.
         $child = $this
-            ->entityManager()
+            ->entityTypeManager()
             ->getStorage($current_container->getChildEntityType())
             ->load($child_id);
 

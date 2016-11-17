@@ -59,12 +59,34 @@ function wmcontent_entity_type_alter(array &$entity_types)
         if ($entity_type->hasLinkTemplate('canonical')) {
             // Provide default route names for the wmcontent paths.
             if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
-                $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
-                
-                $entity_type->setLinkTemplate(
-                    'drupal:wmcontent-overview',
-                    $wmcontent_path
-                );
+                // This breaks on taxonomy terms.
+                if ($entity_type->id() == 'node') {
+                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
+                    $entity_type->setLinkTemplate(
+                        'drupal:wmcontent-overview',
+                        $wmcontent_path
+                    );
+                }
+
+                // I leave this in because it's ultimately what I'ld like to accomplish, however I found no
+                // currently to add link templates with parameters that aren't default...
+                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/add/{bundle}';
+                //$entity_type->setLinkTemplate(
+                //    'drupal:wmcontent-overview',
+                //    $wmcontent_path
+                //);
+                //
+                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/edit';
+                //$entity_type->setLinkTemplate(
+                //    'drupal:wmcontent-overview',
+                //    $wmcontent_path
+                //);
+                //
+                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/delete';
+                //$entity_type->setLinkTemplate(
+                //    'drupal:wmcontent-overview',
+                //    $wmcontent_path
+                //);
             }
         }
     }
@@ -251,7 +273,7 @@ function wmcontent_theme_suggestions_eck_entity(array $variables)
     $suggestions = [];
     
     // Add theme suggestiongs for the type and the the type__bundle.
-    if (!empty($variables['entity']) && $variables['entity']['#entity_type']) {
+    if (!empty($variables['entity']) && isset($variables['entity']['#entity_type'])) {
         $suggestions = [
             $variables['entity']['#entity_type'],
             $variables['entity']['#entity_type'] . '__' . $variables['entity']['#entity']->bundle(),

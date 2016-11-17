@@ -153,7 +153,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
 
         if (empty($config['host_bundles'])) {
             // Load them all.
-            $config['host_bundles'] = array_keys($this->entityManager()->getBundleInfo($this->getHostEntityType()));
+            $config['host_bundles'] = array_keys($this->entityTypeManager()->getBundleInfo($this->getHostEntityType()));
         }
         if (empty($config['child_bundles'])) {
             // Load them all.
