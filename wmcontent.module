@@ -42,22 +42,54 @@ function wmcontent_entity_extra_field_info()
 
 /**
  * Implements hook_entity_type_alter().
+ *
+ * This is very necesarry to provide us with the correct content translation
+ * language (adds the language_content_entity query string when needed.
+ *
+ * TODO: Ideally we only add this on the enabled entity types/bundles
+ * but if we load wmContentContainer::loadMultiple() then we end up looping.
+ *
+ * @see \Drupal\Core\Entity\Annotation\EntityType
  */
 function wmcontent_entity_type_alter(array &$entity_types)
 {
-    // TODO: This is needed for the correct translation links. language_content_id
-    // foreach (wmContentContainer::loadMultiple() as $conf) {
-    //     $config = $conf->getConfig();
+    // Provide defaults for translation info.
+    /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+    foreach ($entity_types as $entity_type) {
+        if ($entity_type->hasLinkTemplate('canonical')) {
+            // Provide default route names for the wmcontent paths.
+            if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
+                // This breaks on taxonomy terms.
+                if ($entity_type->id() == 'node') {
+                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
+                    $entity_type->setLinkTemplate(
+                        'drupal:wmcontent-overview',
+                        $wmcontent_path
+                    );
+                }
 
-    //     if (array_key_exists($config['host_entity_type'], $entity_types)) {
-    //         if ($entity_types[$config['host_entity_type']]->hasViewBuilderClass() && $entity_types[$config['host_entity_type']]->hasLinkTemplate('canonical')) {
-    //             $entity_types[$config['host_entity_type']]->setLinkTemplate(
-    //                 'drupal:wmcontent-overview',
-    //                 '/' . $entity_type_id . '/{{' . $entity_type_id . '}}/content/{container}'
-    //             );
-    //         }
-    //     }
-    // }
+                // I leave this in because it's ultimately what I'ld like to accomplish, however I found no
+                // currently to add link templates with parameters that aren't default...
+                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/add/{bundle}';
+                //$entity_type->setLinkTemplate(
+                //    'drupal:wmcontent-overview',
+                //    $wmcontent_path
+                //);
+                //
+                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/edit';
+                //$entity_type->setLinkTemplate(
+                //    'drupal:wmcontent-overview',
+                //    $wmcontent_path
+                //);
+                //
+                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/delete';
+                //$entity_type->setLinkTemplate(
+                //    'drupal:wmcontent-overview',
+                //    $wmcontent_path
+                //);
+            }
+        }
+    }
 }
 
 /**
@@ -234,20 +266,21 @@ function wmcontent_theme($existing, $type, $theme, $path)
 }
 
 /**
- * Implements hook_theme_suggestions_HOOK_alter().
+ * Implements hook_theme_suggestions_HOOK().
  */
-function wmcontent_theme_suggestions_eck_entity_alter(array &$suggestions, array $variables)
+function wmcontent_theme_suggestions_eck_entity(array $variables)
 {
-    // Add theme suggestiongs for the type and the the type__bundle.
-    if (!empty($variables['entity']) && $variables['entity']['#entity_type']) {
+    $suggestions = [];
 
+    // Add theme suggestiongs for the type and the the type__bundle.
+    if (!empty($variables['entity']) && isset($variables['entity']['#entity_type'])) {
         $suggestions = [
             $variables['entity']['#entity_type'],
             $variables['entity']['#entity_type'] . '__' . $variables['entity']['#entity']->bundle(),
         ];
-
-
     }
+
+    return $suggestions;
 }
 
 /**
@@ -266,7 +299,10 @@ function wmcontent_preprocess_paragraph(&$variables)
     }
 
     // Add delta.
-    $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
+    $variables['wmcontent_delta'] = 0;
+    if (isset($variables['entity']['#delta'])) {
+        $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
+    }
 
     $strip = [
         'created',
@@ -293,9 +329,6 @@ function wmcontent_preprocess_paragraph(&$variables)
  */
 function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
 {
-    // Loadup our config.
-    $config = wmContentContainer::loadMultiple();
-
     $fields = array();
     foreach (wmContentContainer::loadMultiple() as $conf) {
         // Match. This is kind of wrong because we're going to overload all
@@ -308,6 +341,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setSetting('allowed_values', _wmcontent_sizes())
                 ->setSetting('default_value', 'default')
                 ->setDisplayConfigurable('form', true)
+                ->setDisplayConfigurable('view', true)
                 ->setDisplayOptions(
                     'form',
                     array(
@@ -322,7 +356,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                     'view',
                     array(
                         'label' => 'hidden',
-                        'type' => 'string',
+                        'type' => 'hidden',
                         'weight' => -5,
                     )
                 );
@@ -333,6 +367,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setSetting('default_value', 0)
                 ->setDescription(t('The weight of this child.'))
                 ->setDisplayConfigurable('form', true)
+                ->setDisplayConfigurable('view', true)
                 ->setDisplayOptions(
                     'form',
                     array(
@@ -347,7 +382,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                     'view',
                     array(
                         'label' => 'hidden',
-                        'type' => 'string',
+                        'type' => 'hidden',
                         'weight' => -5,
                     )
                 );
@@ -361,6 +396,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setRequired(true)
                 ->setReadOnly(true)
                 ->setDisplayConfigurable('form', true)
+                ->setDisplayConfigurable('view', true)
                 ->setDisplayOptions(
                     'form',
                     array(
@@ -375,7 +411,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                     'view',
                     array(
                         'label' => 'hidden',
-                        'type' => 'string',
+                        'type' => 'hidden',
                         'weight' => -5,
                     )
                 );
@@ -386,6 +422,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setRequired(true)
                 ->setReadOnly(true)
                 ->setDisplayConfigurable('form', true)
+                ->setDisplayConfigurable('view', true)
                 ->setDisplayOptions(
                     'form',
                     array(
@@ -394,6 +431,14 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                             'display_label' => true,
                         ),
                         'weight' => 20,
+                    )
+                )
+                ->setDisplayOptions(
+                    'view',
+                    array(
+                        'label' => 'hidden',
+                        'type' => 'hidden',
+                        'weight' => -5,
                     )
                 );
 
@@ -404,6 +449,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setReadOnly(true)
                 ->setSetting('default_value', 'content')
                 ->setDisplayConfigurable('form', true)
+                ->setDisplayConfigurable('view', true)
                 ->setDisplayOptions(
                     'form',
                     array(
@@ -412,6 +458,14 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                         'display_label' => true,
                     ),
                       'weight' => 20,
+                    )
+                )
+                ->setDisplayOptions(
+                    'view',
+                    array(
+                        'label' => 'hidden',
+                        'type' => 'hidden',
+                        'weight' => -5,
                     )
                 );
         }
@@ -458,5 +512,3 @@ function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface 
         $manager->hostClearCache($entity);
     }
 }
-
-
