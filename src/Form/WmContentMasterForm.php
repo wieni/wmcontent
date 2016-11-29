@@ -62,7 +62,7 @@ class WmContentMasterForm extends FormBase
         // Get the children.
         $list = $this->wmContentManager->getContent(
             $this->host,
-            $this->container->getid()
+            $this->container->getId()
         );
         
         // The query (including the destination) Will be the same for all actions.
