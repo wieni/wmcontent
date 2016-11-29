@@ -54,6 +54,20 @@ interface WmContentManagerInterface
     public function getTranslationHandler($entity_type_id);
     
     /**
+     * Returns the label of a bundle, given the key
+     *
+     * @param $entityType
+     *   The entity type of the bundle.
+     *
+     * @param $bundle
+     *   The bundle key
+     *
+     * @return string
+     *   The label of that bundle.
+     */
+    public function getLabel($entityType, $bundle);
+    
+    /**
      * Function getEntityTeaser.
      *
      * Returns hopefully a little teaser of a paragraph that is given.

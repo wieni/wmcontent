@@ -214,6 +214,22 @@ class WmContentManager implements WmContentManagerInterface
 
         return $return;
     }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getLabel($entityType, $bundle)
+    {
+        $labels = &drupal_static(__FUNCTION__);
+        if (!isset($labels[$entityType])) {
+            $labels[$entityType] = $this->entityManager->getBundleInfo($entityType);
+        }
+        
+        if (!empty($labels[$entityType][$bundle]['label'])) {
+            return $labels[$entityType][$bundle]['label'];
+        }
+        return $bundle;
+    }
 
     /**
      * {@inheritdoc}

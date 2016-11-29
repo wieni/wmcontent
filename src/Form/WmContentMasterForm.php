@@ -216,7 +216,12 @@ class WmContentMasterForm extends FormBase
         
         foreach ($config['child_bundles'] as $bundle) {
             $links[$bundle] = array(
-                'title' => $this->t('Add @label', array('@label' => $bundle)),
+                'title' => $this->t(
+                    'Add %label',
+                    [
+                        '%label' => $this->wmContentManager->getLabel($config['child_entity_type'], $bundle)
+                    ]
+                ),
                 'url' => Url::fromRoute(
                     "entity." . $this->container->getHostEntityType() . ".wmcontent_add",
                     [
