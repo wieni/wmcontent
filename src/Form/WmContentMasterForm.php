@@ -175,6 +175,11 @@ class WmContentMasterForm extends FormBase
                 '#type' => 'hidden',
                 '#value' => $child->getEntityTypeId(),
             ];
+    
+            $row['hiddens']['bundle'] =[
+                '#type' => 'hidden',
+                '#value' => $child->get('type')->entity->id(),
+            ];
 
             // Bundle label.
             $row['bundle'] = [
