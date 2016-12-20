@@ -343,17 +343,7 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function hostClearCache($child_entity)
     {
-        // Ideally we should add cache tags to our content, then this won't be
-        // necesarry. If it works at all.
-        $host_type = $child_entity->get('wmcontent_parent_type')->getString();
-        $host_id = $child_entity->get('wmcontent_parent')->getString();
-
-        // Load the master entity.
-        $host_entity = $this
-            ->entityManager
-            ->getStorage($host_type)
-            ->load($host_id);
-        if ($host_entity) {
+        if ($host_entity = $this->getHost($child_entity)) {
             $this
                 ->entityManager
                 ->getViewBuilder($child_entity->get('wmcontent_parent_type')->getString())
