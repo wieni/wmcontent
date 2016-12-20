@@ -362,4 +362,17 @@ class WmContentManager implements WmContentManagerInterface
                 ]);
         }
     }
+
+    /**
+     * Get all containers
+     *
+     * @return WmContentContainerInterface[]
+     */
+    private function getContainers()
+    {
+        return $this
+            ->entityManager
+            ->getStorage('wmcontent_container')
+            ->loadMultiple();
+    }
 }
