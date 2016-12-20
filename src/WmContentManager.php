@@ -105,6 +105,13 @@ class WmContentManager implements WmContentManagerInterface
             ->entityManager
             ->getStorage('wmcontent_container')
             ->load($container);
+
+        if (!$current_container) {
+            throw new \Exception(sprintf(
+                'Could not find wmcontent container `%s`',
+                $container
+            ));
+        }
         
         if (!isset($data[$key])) {
             if ($cache = $this->cacheBackend->get($key)) {
