@@ -105,6 +105,13 @@ class WmContentManager implements WmContentManagerInterface
             ->entityManager
             ->getStorage('wmcontent_container')
             ->load($container);
+
+        if (!$current_container) {
+            throw new \Exception(sprintf(
+                'Could not find wmcontent container `%s`',
+                $container
+            ));
+        }
         
         if (!isset($data[$key])) {
             if ($cache = $this->cacheBackend->get($key)) {
@@ -336,17 +343,7 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function hostClearCache($child_entity)
     {
-        // Ideally we should add cache tags to our content, then this won't be
-        // necesarry. If it works at all.
-        $host_type = $child_entity->get('wmcontent_parent_type')->getString();
-        $host_id = $child_entity->get('wmcontent_parent')->getString();
-
-        // Load the master entity.
-        $host_entity = $this
-            ->entityManager
-            ->getStorage($host_type)
-            ->load($host_id);
-        if ($host_entity) {
+        if ($host_entity = $this->getHost($child_entity)) {
             $this
                 ->entityManager
                 ->getViewBuilder($child_entity->get('wmcontent_parent_type')->getString())
@@ -354,5 +351,18 @@ class WmContentManager implements WmContentManagerInterface
                     $host_entity,
                 ]);
         }
+    }
+
+    /**
+     * Get all containers
+     *
+     * @return WmContentContainerInterface[]
+     */
+    private function getContainers()
+    {
+        return $this
+            ->entityManager
+            ->getStorage('wmcontent_container')
+            ->loadMultiple();
     }
 }
