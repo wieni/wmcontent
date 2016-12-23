@@ -2,6 +2,8 @@
 
 namespace Drupal\wmcontent;
 
+use Drupal\Core\Entity\Entity;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\eck\EckEntityInterface;
 use Drupal\eck\Entity\EckEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -241,88 +243,12 @@ class WmContentManager implements WmContentManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getEntityTeaser($entity)
+    public function getEntityTeaser(EntityInterface $entity)
     {
-
-        // Do not consider these fields when making a teaser.
-        $ignorefields = [
-            'id',
-            'uuid',
-            'type',
-            'langcode',
-            'created',
-            'changed',
-            'default_langcode',
-            'wmcontent_size',
-            'wmcontent_weight',
-            'wmcontent_parent',
-            'wmcontent_parent_type',
-            'wmcontent_container',
-            'weight',
-            'content_translation_source',
-            'content_translation_outdated',
-            'content_translation_uid',
-            'content_translation_status',
-            'content_translation_changed',
-            'list_items',
-            'program_items',
-        ];
-
-        // Setup a priority for key indexes.
-        $trickleindexes = [
-            'value',
-            'title',
-        ];
-
-        // Get the type (paragraph).
-        $entity_type_id = $entity->getEntityTypeId();
-        // Get the bundle.
-        $bundle = $entity->bundle();
-
-        // Get the fields.
-        $fields = $this->entityManager->getFieldDefinitions($entity_type_id, $bundle);
-        $return = false;
-        // Loop through the fields.
-        foreach ($fields as $field_name => $field_definition) {
-            // Is this a non standard field?
-            if (!in_array($field_name, $ignorefields)) {
-                // Get the container array for the value.
-                $value = $entity->get($field_name)->getValue();
-
-                if (is_array($value)) {
-                    // Go through the value, find a trickle index.
-                    foreach ($trickleindexes as $i) {
-                        if (isset($value[0]) && isset($value[0][$i]) && !empty($value[0][$i])) {
-                            $value = substr(trim(strip_tags($value[0][$i])), 0, 60);
-                            if (!is_numeric($value)) {
-                                // Good to go.
-                                $return = $value;
-                            }
-                        }
-                    }
-                }
-
-                if (!$return) {
-                    // OK There was nothing in the value that was interesting.
-                    // So let's try the string.
-                    $value = $entity->get($field_name)->getString();
-
-                    // See if the string value has something nice.
-                    if (!empty($value)) {
-                        $value = substr(trim(strip_tags($value)), 0, 60);
-                        if (!is_numeric($value)) {
-                            // Good to go.
-                            $return = $value;
-                        }
-                    }
-                }
-            }
-        }
-
-
         // Allow overrides through event dispatching.
         $event = new WmContentEntityLabelEvent($entity);
 
+        // Return the event results.
         $this
             ->eventDispatcher
             ->dispatch('wmcontent.entitylabel', $event);
@@ -330,12 +256,15 @@ class WmContentManager implements WmContentManagerInterface
             $return = $event->getLabel();
         }
 
-        // If we got to here just return the id().
-        if (!$return) {
-            $return = "ID: " . $entity->id();
+        // If we got to here do the title.
+        $title = "ID: " . $entity->id();
+        try {
+            $title = $entity->getLabel();
+        } catch (\InvalidArgumentException $exception) {
+            // Do nothing.
         }
 
-        return $return;
+        return $title;
     }
 
     /**
