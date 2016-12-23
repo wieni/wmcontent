@@ -119,7 +119,7 @@ class WmContentController extends ControllerBase
     {
         // Get the container.
         $current_container = $this
-            ->entityManager()
+            ->entityTypeManager()
             ->getStorage('wmcontent_container')
             ->load($container);
 
@@ -127,7 +127,7 @@ class WmContentController extends ControllerBase
 
         // Create an empty entity of the chosen entity type and the bundle.
         $child = $this
-            ->entityManager()
+            ->entityTypeManager()
             ->getStorage($current_container->getChildEntityType())
             ->create(
                 array(
@@ -139,6 +139,7 @@ class WmContentController extends ControllerBase
         $child->set('wmcontent_parent', $host->id());
         $child->set('wmcontent_parent_type', $host_type_id);
         $child->set('wmcontent_size', 'full');
+        $child->set('wmcontent_alignment', 'left');
         $child->set('wmcontent_weight', 50);
         $child->set('wmcontent_container', $current_container->getId());
 
