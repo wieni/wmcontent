@@ -98,6 +98,7 @@ class WmContentMasterForm extends FormBase
             t('Type'),
             t('Content'),
             t('Size'),
+            t('Alignment'),
             t('Weight'),
             t('Operations'),
         ];
@@ -197,6 +198,12 @@ class WmContentMasterForm extends FormBase
             $row['size'] = [
                 '#type' => 'container',
                 '#markup' => $child->get('wmcontent_size')->getString(),
+            ];
+
+            // Size?
+            $row['alignment'] = [
+                '#type' => 'container',
+                '#markup' => $child->get('wmcontent_alignment')->getString(),
             ];
 
             // Weight.
