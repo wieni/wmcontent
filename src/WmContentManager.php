@@ -259,7 +259,7 @@ class WmContentManager implements WmContentManagerInterface
         // If we got to here do the title.
         $title = "ID: " . $entity->id();
         try {
-            $title = $entity->getLabel();
+            $title = $entity->get('title')->value;
         } catch (\InvalidArgumentException $exception) {
             // Do nothing.
         }
