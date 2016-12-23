@@ -20,3 +20,11 @@ function wmcontent_uninstall() {
   // Remove our base fields from the schema.
   \Drupal::service('entity.definition_update_manager')->applyUpdates();
 }
+
+/**
+ * Implements hook_update().
+ */
+function wmcontent_update_8001() {
+    // Remove our base fields from the schema.
+    \Drupal::service('entity.definition_update_manager')->applyUpdates();
+}
