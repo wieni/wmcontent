@@ -3,6 +3,7 @@
 namespace Drupal\wmcontent;
 
 use Drupal\eck\Entity\EckEntity;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Provides an interface for common functionality for wmcontent.
@@ -78,7 +79,7 @@ interface WmContentManagerInterface
      * @return string
      *   A small string that should help the user know what this is.
      */
-    public function getEntityTeaser($entity);
+    public function getEntityTeaser(EntityInterface $entity);
     
     /**
      * Clears caches for the host, so that adding wmcontent shows always the right
