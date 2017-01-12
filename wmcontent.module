@@ -573,6 +573,22 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                     // Alter the form.
                     $form['wmcontent_alignment']['widget']['#options'] = $alignments;
                 }
+
+                // Did we get 1 size?
+                if (count($sizes) == 1) {
+                    unset($form['wmcontent_size']);
+                    // Alter the form.
+                    $form['wmcontent_size']['#type'] = "hidden";
+                    $form['wmcontent_size']['#value'] = [array_keys($sizes)[0]];
+                }
+
+                // Did we have 1 alignment?
+                if (count($alignments) == 1) {
+                    unset($form['wmcontent_alignment']);
+                    // Alter the form.
+                    $form['wmcontent_alignment']['#type'] = "hidden";
+                    $form['wmcontent_alignment']['#value'] = [array_keys($alignments)[0]];
+                }
             }
         }
     }
