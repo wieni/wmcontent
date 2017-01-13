@@ -40,7 +40,9 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "host_entity_type",
  *     "host_bundles",
  *     "child_entity_type",
- *     "child_bundles"
+ *     "child_bundles",
+ *     "hide_single_option_sizes",
+ *     "hide_single_option_alignments",
  *   }
  * )
  */
@@ -88,6 +90,20 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
      * @var array
      */
     public $child_bundles = [];
+
+    /**
+     * If the options for sizes is is just one option do we then
+     * hide the field in the form?
+     * @var bool
+     */
+    public $hide_single_option_sizes = false;
+
+    /**
+     * If the options for the alignments is just one option
+     * then do we hide the field in the form.
+     * @var bool
+     */
+    public $hide_single_option_alignments = false;
 
     /**
      * {@inheritdoc}
@@ -139,6 +155,22 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return bool
+     */
+    public function getHideSingleOptionSizes()
+    {
+        return $this->hide_single_option_sizes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getHideSingleOptionAlignments()
+    {
+        return $this->hide_single_option_alignments;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getConfig() {
@@ -149,6 +181,8 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'child_entity_type' => $this->getChildEntityType(),
             'host_bundles' => $this->getHostBundles(),
             'child_bundles' => $this->getChildBundles(),
+            'hide_single_option_sizes' => $this->getHideSingleOptionSizes(),
+            'hide_single_option_alignments' => $this->getHideSingleOptionAlignments(),
         ];
 
         if (empty($config['host_bundles'])) {
