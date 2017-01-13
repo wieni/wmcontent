@@ -24,3 +24,9 @@ wmcontent.wmcontent_container.*:
       label: 'Child bundles'
       sequence:
         type: string
+    hide_single_option_sizes:
+      type: boolean
+      label: 'Hide single option sizes'
+    hide_single_option_alignments:
+      type: boolean
+      label: 'Hide single option alignments'

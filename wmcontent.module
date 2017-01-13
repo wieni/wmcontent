@@ -99,6 +99,7 @@ function wmcontent_entity_operation(EntityInterface $entity)
 {
     $operations = [];
 
+    /** @var WmContentContainer $conf */
     foreach (WmContentContainer::loadMultiple() as $conf) {
         $config = $conf->getConfig();
 
@@ -544,6 +545,7 @@ function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface 
 function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
 {
     // Go through all the containers.
+    /** @var WmContentContainer $conf */
     foreach (wmContentContainer::loadMultiple() as $conf) {
         // Get the config.
         $config = $conf->getConfig();
@@ -572,6 +574,22 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                 if (count($alignments) > 0) {
                     // Alter the form.
                     $form['wmcontent_alignment']['widget']['#options'] = $alignments;
+                }
+
+                // Did we get 1 size?
+                if (count($sizes) == 1 && $config['hide_single_option_sizes']) {
+                    unset($form['wmcontent_size']);
+                    // Alter the form.
+                    $form['wmcontent_size']['#type'] = "hidden";
+                    $form['wmcontent_size']['#value'] = [array_keys($sizes)[0]];
+                }
+
+                // Did we have 1 alignment?
+                if (count($alignments) == 1 && $config['hide_single_option_alignments']) {
+                    unset($form['wmcontent_alignment']);
+                    // Alter the form.
+                    $form['wmcontent_alignment']['#type'] = "hidden";
+                    $form['wmcontent_alignment']['#value'] = [array_keys($alignments)[0]];
                 }
             }
         }
