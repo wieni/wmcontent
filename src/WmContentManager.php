@@ -247,8 +247,12 @@ class WmContentManager implements WmContentManagerInterface
     {
         // Allow overrides through event dispatching.
         $event = new WmContentEntityLabelEvent($entity);
-
-        // Return the event results.
+    
+        if (!$return = $entity->label()) {
+            $return = "ID: " . $entity->id();
+        }
+        
+        // Event allow override.
         $this
             ->eventDispatcher
             ->dispatch('wmcontent.entitylabel', $event);
@@ -256,15 +260,7 @@ class WmContentManager implements WmContentManagerInterface
             $return = $event->getLabel();
         }
 
-        // If we got to here do the title.
-        $title = "ID: " . $entity->id();
-        try {
-            $title = $entity->get('title')->value;
-        } catch (\InvalidArgumentException $exception) {
-            // Do nothing.
-        }
-
-        return $title;
+        return $return;
     }
 
     /**
