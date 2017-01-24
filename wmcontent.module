@@ -99,6 +99,7 @@ function wmcontent_entity_operation(EntityInterface $entity)
 {
     $operations = [];
 
+    /** @var WmContentContainer $conf */
     foreach (WmContentContainer::loadMultiple() as $conf) {
         $config = $conf->getConfig();
 
@@ -200,6 +201,7 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
                     $item = entity_view($content, 'full');
                     $item['#weight'] = $content->get('wmcontent_weight')->getString();
                     $item['#size'] = $content->get('wmcontent_size')->getString();
+                    $item['#alignment'] = $content->get('wmcontent_alignment')->getString();
                     $item['#delta'] = $paragraph_type_count;
                     $item['#type'] = $content->getEntityTypeId();
                     $item['#bundle'] = $content->bundle();
@@ -259,6 +261,7 @@ function wmcontent_theme($existing, $type, $theme, $path)
             'variables' => [
                 'cards' => null,
                 'size' => null,
+                'alignment' => null,
                 'type' => null,
             ],
         ],
@@ -298,6 +301,11 @@ function wmcontent_preprocess_paragraph(&$variables)
         $variables['wmcontent_size'] = $size;
     }
 
+    $alignment = $paragraph->get('wmcontent_alignment')->value;
+    if (strlen($size) > 0) {
+        $variables['wmcontent_alignment'] = $alignment;
+    }
+
     // Add delta.
     $variables['wmcontent_delta'] = 0;
     if (isset($variables['entity']['#delta'])) {
@@ -307,6 +315,7 @@ function wmcontent_preprocess_paragraph(&$variables)
     $strip = [
         'created',
         'wmcontent_size',
+        'wmcontent_alignment',
         'wmcontent_weight',
         'wmcontent_parent',
     ];
@@ -339,7 +348,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setDescription(t('Select the size.'))
                 ->setRequired(true)
                 ->setSetting('allowed_values', _wmcontent_sizes())
-                ->setSetting('default_value', 'default')
+                ->setSetting('default_value', 'full')
                 ->setDisplayConfigurable('form', true)
                 ->setDisplayOptions(
                     'form',
@@ -350,6 +359,32 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                             ),
                         'weight' => 20,
                         )
+                )
+                ->setDisplayOptions(
+                    'view',
+                    array(
+                        'label' => 'hidden',
+                        'type' => 'string',
+                        'weight' => -5,
+                    )
+                );
+
+            $fields['wmcontent_alignment'] = BaseFieldDefinition::create('list_string')
+                ->setLabel(t('Alignment'))
+                ->setDescription(t('Select the Alignment.'))
+                ->setRequired(true)
+                ->setSetting('allowed_values', _wmcontent_alignments())
+                ->setSetting('default_value', 'left')
+                ->setDisplayConfigurable('form', true)
+                ->setDisplayOptions(
+                    'form',
+                    array(
+                        'type' => 'options_select',
+                        'settings' => array(
+                            'display_label' => true,
+                        ),
+                        'weight' => 20,
+                    )
                 )
                 ->setDisplayOptions(
                     'view',
@@ -467,6 +502,18 @@ function _wmcontent_sizes()
 }
 
 /**
+ * Default list of available sizes.
+ */
+function _wmcontent_alignments()
+{
+    return [
+        'left' => t('Left'),
+        'right' => t('Right'),
+        'justified' => t('Justified'),
+    ];
+}
+
+/**
  * Checks if a given entity's type is registered as a child entity type somewhere,
  * and clear the host cache if it is.
  */
@@ -489,5 +536,62 @@ function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface 
     if ($clearParent) {
         // Clear Drupals cache for the parent entity.
         $manager->hostClearCache($entity);
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
+{
+    // Go through all the containers.
+    /** @var WmContentContainer $conf */
+    foreach (wmContentContainer::loadMultiple() as $conf) {
+        // Get the config.
+        $config = $conf->getConfig();
+
+        // Establish entity type.
+        $type = $config['child_entity_type'];
+
+        // Go through the bundles.
+        foreach ($config['child_bundles'] as $bundle) {
+            // Build up what the form id for this child would be.
+            $test = $config['child_entity_type'] . "_" . $bundle . "_form";
+
+            // Sweet baby jesus we got a child entity form.
+            if ($test == $form_id) {
+                // What do other modules have to say about the sizes.
+                $sizes = \Drupal::moduleHandler()->invokeAll('wmcontent_sizes_alter', [$type, $bundle]);
+                $alignments = \Drupal::moduleHandler()->invokeAll('wmcontent_alignments_alter', [$type, $bundle]);
+
+                // Ok did we have some sizes?
+                if (count($sizes) > 0) {
+                    // Alter the form.
+                    $form['wmcontent_size']['widget']['#options'] = $sizes;
+                }
+
+                // Did we have some alignments.
+                if (count($alignments) > 0) {
+                    // Alter the form.
+                    $form['wmcontent_alignment']['widget']['#options'] = $alignments;
+                }
+
+                // Did we get 1 size?
+                if (count($sizes) == 1 && $config['hide_single_option_sizes']) {
+                    unset($form['wmcontent_size']);
+                    // Alter the form.
+                    $form['wmcontent_size']['#type'] = "hidden";
+                    $form['wmcontent_size']['#value'] = [array_keys($sizes)[0]];
+                }
+
+                // Did we have 1 alignment?
+                if (count($alignments) == 1 && $config['hide_single_option_alignments']) {
+                    unset($form['wmcontent_alignment']);
+                    // Alter the form.
+                    $form['wmcontent_alignment']['#type'] = "hidden";
+                    $form['wmcontent_alignment']['#value'] = [array_keys($alignments)[0]];
+                }
+            }
+        }
     }
 }

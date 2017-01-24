@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Component\Utility\Xss;
 use Drupal\eck\Entity\EckEntityType;
+use Drupal\wmcontent\Entity\WmContentContainer;
 
 /**
  * Form controller for the container entity type edit form.
@@ -29,7 +30,7 @@ class WmContentContainerForm extends EntityForm
         $types = $this->getContentEntityTypes();
         $firsttype = array_keys($types)[0];
 
-        /** @var \Drupal\wmcontent\Entity\WmContentContainerFormInterface $entity */
+        /** @var WmContentContainer $entity */
         $entity = $this->entity;
 
         // Change page title for the edit operation.
@@ -69,7 +70,7 @@ class WmContentContainerForm extends EntityForm
             '#title' => $this->t('Host entity type'),
             '#default_value' => $entity->getHostEntityType(),
             '#options' => $this->getContentEntityTypes(),
-            '#validated' => TRUE,
+            '#validated' => true,
             '#required' => true,
             '#description' => $this->t('The host entity type to which attach content to.'),
             '#ajax' => [
@@ -93,11 +94,9 @@ class WmContentContainerForm extends EntityForm
         $host_bundles = [];
         if ($entity->getHostEntityType()) {
             $host_bundles = $this->getAllBundles($entity->getHostEntityType());
-        }
-        elseif (isset($values['host_entity_type'])) {
+        } elseif (isset($values['host_entity_type'])) {
             $host_bundles = $this->getAllBundles($values['host_entity_type']);
-        }
-        else {
+        } else {
             $host_bundles = $this->getAllBundles($firsttype);
         }
 
@@ -108,13 +107,12 @@ class WmContentContainerForm extends EntityForm
         ];
 
 
-
         $form['wrapper']['child_entity_type'] = array(
             '#type' => 'select',
             '#title' => $this->t('Child entity type'),
             '#default_value' => $entity->getChildEntityType(),
             '#options' => $this->getContentEntityTypes(),
-            '#validated' => TRUE,
+            '#validated' => true,
             '#required' => true,
             '#description' => $this->t('The child entity type to which attach content to.'),
             '#ajax' => [
@@ -138,11 +136,9 @@ class WmContentContainerForm extends EntityForm
         $child_bundles = [];
         if ($entity->getHostEntityType()) {
             $child_bundles = $this->getAllBundles($entity->getChildEntityType());
-        }
-        elseif (isset($values['child_entity_type'])) {
+        } elseif (isset($values['child_entity_type'])) {
             $child_bundles = $this->getAllBundles($values['child_entity_type']);
-        }
-        else {
+        } else {
             $child_bundles = $this->getAllBundles($firsttype);
         }
 
@@ -150,6 +146,18 @@ class WmContentContainerForm extends EntityForm
             '#type' => 'checkboxes',
             '#options' => $child_bundles,
             '#default_value' => $entity->getChildBundles(),
+        ];
+
+        $form['hide_single_option_sizes'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $entity->getHideSingleOptionSizes(),
+            '#title' => $this->t('Hide single option sizes'),
+        ];
+
+        $form['hide_single_option_alignments'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $entity->getHideSingleOptionAlignments(),
+            '#title' => $this->t('Hide single option alignments'),
         ];
 
         return parent::form($form, $form_state, $entity);
@@ -160,7 +168,7 @@ class WmContentContainerForm extends EntityForm
      */
     public function save(array $form, FormStateInterface $form_state)
     {
-        /** @var \Drupal\wmcontent\Entity\WmContentContainer $entity */
+        /** @var WmContentContainer $entity */
         $entity = $this->entity;
 
         // Prevent leading and trailing spaces.
@@ -203,8 +211,7 @@ class WmContentContainerForm extends EntityForm
     {
         $actions = parent::actions($form, $form_state);
         $actions['submit']['#value'] = $this->t('Update container');
-        if ($this->entity->isNew())
-        {
+        if ($this->entity->isNew()) {
             $actions['submit']['#value'] = $this->t('Add container');
         }
         return $actions;
@@ -253,8 +260,9 @@ class WmContentContainerForm extends EntityForm
         return $bundles;
     }
 
-    public function updateForm($form, FormStateInterface $form_state) {
-        $form_state->setRebuild(TRUE);
+    public function updateForm($form, FormStateInterface $form_state)
+    {
+        $form_state->setRebuild(true);
         return $form['wrapper'];
     }
 }
