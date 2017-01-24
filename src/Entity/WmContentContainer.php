@@ -7,6 +7,7 @@ use Drupal\wmcontent\WmContentContainerInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Defines the wmcontent_container entity.
@@ -195,6 +196,15 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         }
 
         return $config;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isHost(EntityInterface $host)
+    {
+        return $host->getEntityTypeId() == $this->getHostEntityType()
+            && in_array($host->bundle(), $this->getHostBundles());
     }
 
     /**
