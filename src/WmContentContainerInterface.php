@@ -14,8 +14,10 @@ interface WmContentContainerInterface extends ConfigEntityInterface
     public function getId();
     public function getHostEntityType();
     public function getHostBundles();
+    public function getHostBundlesAll();
     public function getChildEntityType();
     public function getChildBundles();
+    public function getChildBundlesAll();
     public function getConfig();
     public function getHideSingleOptionSizes();
     public function getHideSingleOptionAlignments();

@@ -2,10 +2,10 @@
 
 namespace Drupal\wmcontent;
 
-
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\eck\Entity\EckEntity;
+use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
@@ -25,6 +25,10 @@ class WmContentManager implements WmContentManagerInterface
      * @var \Drupal\Core\Entity\EntityTypeManagerInterface
      */
     protected $entityTypeManager;
+
+
+    /** @var EntityTypeBundleInfo */
+    protected $entityTypeBundleInfo;
 
     /**
      * The query interface.
@@ -48,26 +52,27 @@ class WmContentManager implements WmContentManagerInterface
      */
     protected $cacheBackend;
 
+
     /**
-     * Constructs a WmContentManageAccessCheck object.
+     * WmContentManager constructor.
      *
      * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-     * @param QueryFactory $query
-     *   The query factory.
+     * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entityTypeBundleInfo
+     * @param \Drupal\Core\Entity\Query\QueryFactory $query
      * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-     *   The language manager.
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
-     *   The event dispatcher.The entity type manager.
      * @param \Drupal\Core\Cache\CacheBackendInterface $cacheBackend
      */
     public function __construct(
         EntityTypeManagerInterface $entityTypeManager,
+        EntityTypeBundleInfo $entityTypeBundleInfo,
         QueryFactory $query,
         LanguageManagerInterface $language_manager,
         EventDispatcherInterface $event_dispatcher,
         CacheBackendInterface $cacheBackend
     ) {
         $this->entityTypeManager = $entityTypeManager;
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityQuery = $query;
         $this->languageManager = $language_manager;
         $this->eventDispatcher = $event_dispatcher;
@@ -85,12 +90,13 @@ class WmContentManager implements WmContentManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getContent($entity, $container)
+    public function getContent(EntityInterface $entity, $container)
     {
         $data = &drupal_static(__FUNCTION__);
         $key = 'wmcontent:' . $container . ':' . $entity->getEntityTypeId() . ':' . $entity->id() . ':' . $entity->get('langcode')->value;
 
         // Load the container.
+        /** @var WmContentContainer $current_container */
         $current_container = $this
             ->entityTypeManager
             ->getStorage('wmcontent_container')
@@ -104,7 +110,8 @@ class WmContentManager implements WmContentManagerInterface
         }
 
         if (!isset($data[$key])) {
-            if ($cache = $this->cacheBackend->get($key)) {
+            $cache = $this->cacheBackend->get($key);
+            if ($cache) {
                 $data[$key] = $cache->data;
             } else {
                 // Create an entity query for our entity type.
@@ -219,9 +226,7 @@ class WmContentManager implements WmContentManagerInterface
     public function getLabel($entityType, $bundle)
     {
         // If there is no selection then all need to be there.
-        /** @var EntityTypeBundleInfo $service */
-        $service = \Drupal::service('entity_type.bundle.info');
-        $bundles = $service->getBundleInfo($entityType);
+        $bundles = $this->entityTypeBundleInfo->getBundleInfo($entityType);
         if (isset($bundles[$bundle]['label'])) {
             return $bundles[$bundle]['label'];
         }

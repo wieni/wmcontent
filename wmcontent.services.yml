@@ -3,6 +3,7 @@ services:
     class: Drupal\wmcontent\WmContentManager
     arguments:
       - @entity_type.manager
+      - @entity_type.bundle.info
       - @entity.query
       - @language_manager
       - @event_dispatcher
@@ -20,6 +21,6 @@ services:
   wmcontent.container_access:
     class: Drupal\wmcontent\Access\WmContentContainerAccessCheck
     arguments:
-      - @entity.manager
+      - @entity_type.manager
     tags:
       - { name: access_check, applies_to: _wmcontent_container_view_access }

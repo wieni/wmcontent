@@ -2,13 +2,12 @@
 
 namespace Drupal\wmcontent\Controller;
 
-use Drupal\wmcontent\WmContentManagerInterface;
+use Drupal\Core\Form\FormBuilder;
+use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\WmContentManager;
 use Drupal\wmcontent\Form\WmContentMasterForm;
-use Drupal\Core\Form\FormBuilderInterface;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -18,27 +17,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class WmContentController extends ControllerBase
 {
 
-    /**
-     * The wmcontent manager.
-     *
-     * @var \Drupal\wmcontent\WmContentManagerInterface
-     */
+    /** @var WmContentManager */
     protected $wmContentManager;
 
-    /**
-     * The formbuilder.
-     *
-     * @var \Drupal\Core\Form\FormBuilderInterface
-     */
+    /** @var FormBuilder */
     protected $formbuilder;
 
+
     /**
-     * Initializes a wmcontent controller.
+     * WmContentController constructor.
      *
-     * @param \Drupal\wmcontent\WmContentManagerInterface $wmcontent_manager
-     *   A wmcontent manager instance.
+     * @param \Drupal\wmcontent\WmContentManager $wmcontent_manager
+     * @param \Drupal\Core\Form\FormBuilder $formbuilder
      */
-    public function __construct(WmContentManagerInterface $wmcontent_manager, FormBuilderInterface $formbuilder)
+    public function __construct(WmContentManager $wmcontent_manager, FormBuilder $formbuilder)
     {
         $this->wmContentManager = $wmcontent_manager;
         $this->formbuilder = $formbuilder;
@@ -49,9 +41,14 @@ class WmContentController extends ControllerBase
      */
     public static function create(ContainerInterface $container)
     {
+        /** @var WmContentManager $wmContentManager */
+        $wmContentManager = $container->get('wmcontent.manager');
+        /** @var FormBuilder $formbuilder */
+        $formbuilder = $container->get('form_builder');
+
         return new static(
-          $container->get('wmcontent.manager'),
-          $container->get('form_builder')
+            $wmContentManager,
+            $formbuilder
         );
     }
 
@@ -72,23 +69,23 @@ class WmContentController extends ControllerBase
         $build = [];
 
         // Get the container.
-        $current_container = $this->entityManager()->getStorage('wmcontent_container')->load($container);
-
+        /** @var WmContentContainer $current_container */
+        $current_container = $this->entityTypeManager()->getStorage('wmcontent_container')->load($container);
         $host_entity = $route_match->getParameter($host_type_id);
 
         if ($current_container->getId()) {
+            // Start a form.
             $form = new WmContentMasterForm(
-                $this->wmContentManager,
                 $host_entity,
                 $current_container
             );
 
             $build['#title'] = $this->t(
                 '%slug for %label',
-                array(
+                [
                     '%slug' => $current_container->getLabel(),
                     '%label' => $host_entity->label(),
-                )
+                ]
             );
 
 

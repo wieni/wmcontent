@@ -4,7 +4,6 @@ namespace Drupal\wmcontent\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\wmcontent\WmContentManager;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal;
@@ -22,7 +21,7 @@ class WmContentMasterForm extends FormBase
      *
      * @var Drupal\wmcontent\WmContentManager
      */
-    protected $wmContentManager;
+    private $wmContentManager;
 
     /**
      * The main entity that we are adding and managing paragraphs for.
@@ -34,12 +33,17 @@ class WmContentMasterForm extends FormBase
      */
     protected $container;
 
+    /**
+     * WmContentMasterForm constructor.
+     *
+     * @param \Drupal\Core\Entity\EntityInterface $host
+     * @param $container
+     */
     public function __construct(
-        WmContentManager $wmcontent_manager,
         EntityInterface $host,
         $container
     ) {
-        $this->wmContentManager = $wmcontent_manager;
+        $this->wmContentManager = \Drupal::service('wmcontent.manager');
         $this->host = $host;
         $this->container = $container;
     }
@@ -60,7 +64,7 @@ class WmContentMasterForm extends FormBase
         $config = $this->container->getConfig();
 
         // Get the children.
-        $list = $this->wmContentManager->getContent(
+        $children = $this->wmContentManager->getContent(
             $this->host,
             $this->container->getId()
         );
@@ -121,7 +125,7 @@ class WmContentMasterForm extends FormBase
         ];
 
         /** @var Drupal\eck\Entity\EckEntity $child */
-        foreach ($list as $child) {
+        foreach ($children as $child) {
             // Edit and delete operations.
             $operations = [
                 'data' => [
@@ -163,9 +167,9 @@ class WmContentMasterForm extends FormBase
 
             // Start the row.
             $row = [
-                '#attributes' => array(
-                    'class' => array('draggable'),
-                ),
+                '#attributes' => [
+                    'class' => ['draggable'],
+                ],
             ];
 
             // Put type and id in a hidden.
@@ -217,9 +221,9 @@ class WmContentMasterForm extends FormBase
             $row['wmcontent_weight'] = [
                 '#type' => 'weight',
                 '#default_value' => $child->get('wmcontent_weight')->getString(),
-                '#attributes' => array(
-                    'class' => array('wmcontent_weight', 'wmcontent_weight-' . $child->id()),
-                ),
+                '#attributes' => [
+                    'class' => ['wmcontent_weight', 'wmcontent_weight-' . $child->id()],
+                ],
                 '#delta' => 100,
             ];
 
@@ -234,7 +238,7 @@ class WmContentMasterForm extends FormBase
         $links = [];
 
         foreach ($config['child_bundles'] as $bundle) {
-            $links[$bundle] = array(
+            $links[$bundle] = [
                 'title' => $this->t(
                     'Add %label',
                     [
@@ -252,7 +256,7 @@ class WmContentMasterForm extends FormBase
                         'query' => $query,
                     ]
                 ),
-            );
+            ];
         }
 
         // Submit or add.

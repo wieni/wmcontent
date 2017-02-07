@@ -10,8 +10,6 @@ namespace Drupal\wmcontent\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Component\Utility\Xss;
 use Drupal\eck\Entity\EckEntityType;
 use Drupal\wmcontent\Entity\WmContentContainer;
 
@@ -92,18 +90,10 @@ class WmContentContainerForm extends EntityForm
             '#description' => t('Allowed bundles in this type.'),
         ];
 
-        $host_bundles = [];
-        if ($entity->getHostEntityType()) {
-            $host_bundles = $this->getAllBundles($entity->getHostEntityType());
-        } elseif (isset($values['host_entity_type'])) {
-            $host_bundles = $this->getAllBundles($values['host_entity_type']);
-        } else {
-            $host_bundles = $this->getAllBundles($firsttype);
-        }
 
         $form['wrapper']['host_bundles_fieldset']['host_bundles'] = [
             '#type' => 'checkboxes',
-            '#options' => $host_bundles,
+            '#options' => $entity->getHostBundlesAll(),
             '#default_value' => $entity->getHostBundles(),
         ];
 
@@ -134,18 +124,9 @@ class WmContentContainerForm extends EntityForm
             '#description' => t('Allowed bundles in this type.'),
         ];
 
-        $child_bundles = [];
-        if ($entity->getHostEntityType()) {
-            $child_bundles = $this->getAllBundles($entity->getChildEntityType());
-        } elseif (isset($values['child_entity_type'])) {
-            $child_bundles = $this->getAllBundles($values['child_entity_type']);
-        } else {
-            $child_bundles = $this->getAllBundles($firsttype);
-        }
-
         $form['wrapper']['child_bundles_fieldset']['child_bundles'] = [
             '#type' => 'checkboxes',
-            '#options' => $child_bundles,
+            '#options' => $entity->getChildBundlesAll(),
             '#default_value' => $entity->getChildBundles(),
         ];
 
@@ -198,7 +179,6 @@ class WmContentContainerForm extends EntityForm
 
         $status = $entity->save();
 
-        $edit_link = $this->entity->link($this->t('Edit'));
         $action = $status == SAVED_UPDATED ? 'updated' : 'added';
 
         // Tell the user we've updated their container.
@@ -211,7 +191,10 @@ class WmContentContainerForm extends EntityForm
         ));
         $this->logger('wmcontent')->notice(
             'Container %label has been %action.',
-            array('%label' => $entity->label(), 'link' => $edit_link)
+            [
+                '%label' => $entity->label(),
+                '%action' => $action
+            ]
         );
 
         // Redirect back to the list view.
@@ -250,22 +233,6 @@ class WmContentContainerForm extends EntityForm
         ksort($types);
 
         return $types;
-    }
-
-    /**
-     * Ideally filter this out. For now show all.
-     */
-    private function getAllBundles($type)
-    {
-        if (!$type) {
-            return [];
-        }
-        // Build master bundles list.
-        /** @var EntityTypeBundleInfo $service */
-        $service = \Drupal::service('entity_type.bundle.info');
-        $bundles = array_keys($service->getBundleInfo($type));
-        sort($bundles);
-        return $bundles;
     }
 
     /**

@@ -3,10 +3,11 @@
 namespace Drupal\wmcontent\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\wmcontent\Entity\WmContentContainer;
 
 /**
  * Access check for wmcontent container overview.
@@ -19,17 +20,17 @@ class WmContentContainerAccessCheck implements AccessInterface
      *
      * @var \Drupal\Core\Entity\EntityManagerInterface
      */
-    protected $entityManager;
+    protected $entityTypeManager;
+
 
     /**
-     * Constructs a WmContentContainerAccessCheck object.
+     * WmContentContainerAccessCheck constructor.
      *
-     * @param \Drupal\Core\Entity\EntityManagerInterface $manager
-     *   The entity type manager.
+     * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
      */
-    public function __construct(EntityManagerInterface $manager)
+    public function __construct(EntityTypeManager $entityTypeManager)
     {
-        $this->entityManager = $manager;
+        $this->entityTypeManager = $entityTypeManager;
     }
 
     /**
@@ -50,8 +51,9 @@ class WmContentContainerAccessCheck implements AccessInterface
         /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
         $entity = $route_match->getParameter($host_type_id);
 
+        /** @var WmContentContainer $container */
         $container = $this
-            ->entityManager
+            ->entityTypeManager
             ->getStorage('wmcontent_container')
             ->load($route_match->getParameter('container'));
 

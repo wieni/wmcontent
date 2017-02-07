@@ -51,6 +51,9 @@ use Drupal\Core\Entity\EntityInterface;
 class WmContentContainer extends ConfigEntityBase implements WmContentContainerInterface
 {
 
+    /** @var EntityTypeBundleInfo */
+    private $entityTypeBundleInfo;
+
     /**
      * The WmContent Container ID.
      *
@@ -150,6 +153,20 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return array
+     */
+    public function getHostBundlesAll()
+    {
+        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($this->getHostEntityType()));
+        sort($bundles);
+        $return = [];
+        foreach ($bundles as $bundle) {
+            $return[$bundle] = $bundle;
+        }
+        return $return;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getChildEntityType()
@@ -164,6 +181,20 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     public function getChildBundles()
     {
         return $this->child_bundles;
+    }
+
+    /**
+     * @return array
+     */
+    public function getChildBundlesAll()
+    {
+        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($this->getChildEntityType()));
+        sort($bundles);
+        $return = [];
+        foreach ($bundles as $bundle) {
+            $return[$bundle] = $bundle;
+        }
+        return $return;
     }
 
     /**
@@ -199,6 +230,33 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return \Drupal\Core\Entity\EntityTypeBundleInfo|object
+     */
+    private function entityTypeBundleInfo()
+    {
+        if (!$this->entityTypeBundleInfo) {
+            $this->entityTypeBundleInfo = $this->container()->get('entity_type.bundle.info');
+        }
+        return $this->entityTypeBundleInfo;
+    }
+
+    /**
+     * Returns the service container.
+     *
+     * This method is marked private to prevent sub-classes from retrieving
+     * services from the container through it. Instead,
+     * \Drupal\Core\DependencyInjection\ContainerInjectionInterface should be used
+     * for injecting services.
+     *
+     * @return \Symfony\Component\DependencyInjection\ContainerInterface $container
+     *   The service container.
+     */
+    private function container()
+    {
+        return \Drupal::getContainer();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getConfig()
@@ -216,19 +274,13 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'show_alignment_column' => $this->getShowAlignmentColumn()
         ];
 
-        // If there is no selection then all need to be there.
-        /** @var EntityTypeBundleInfo $service */
-        $service = \Drupal::service('entity_type.bundle.info');
-        $host_bundles = $service->getBundleInfo($this->getHostEntityType());
-        $child_bundles = $service->getBundleInfo($this->getChildEntityType());
-
         if (empty($config['host_bundles'])) {
             // Load them all.
-            $config['host_bundles'] = array_keys($host_bundles);
+            $config['host_bundles'] = $this->getHostBundlesAll();
         }
         if (empty($config['child_bundles'])) {
             // Load them all.
-            $config['child_bundles'] = array_keys($child_bundles);
+            $config['child_bundles'] = $this->getChildBundlesAll();
         }
 
         return $config;
