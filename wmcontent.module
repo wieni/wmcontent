@@ -61,7 +61,7 @@ function wmcontent_entity_type_alter(array &$entity_types)
             if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
                 // This breaks on taxonomy terms.
                 if ($entity_type->id() == 'node') {
-                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
+                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/wmcontent/{container}';
                     $entity_type->setLinkTemplate(
                         'drupal:wmcontent-overview',
                         $wmcontent_path
