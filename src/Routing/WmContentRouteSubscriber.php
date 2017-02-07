@@ -62,7 +62,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             }
 
             // Set a base path.
-            $path = $base_path . '/content/{container}';
+            $path = $base_path . '/wmcontent/{container}';
 
 
             // Overview.

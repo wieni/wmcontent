@@ -2,9 +2,10 @@
 
 namespace Drupal\wmcontent\Plugin\Derivative;
 
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
+use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
@@ -28,26 +29,24 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
      *
      * @var \Drupal\Core\Entity\EntityManagerInterface
      */
-    protected $entityManager;
+    protected $entityTypeManager;
+
 
     /**
-     * Constructs a new ContentTranslationLocalTasks.
+     * WmContentLocalTasks constructor.
      *
-     * @param string $base_plugin_id
-     *   The base plugin ID.
-     * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-     *   The content translation manager.
-     * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
-     *   The translation manager.
+     * @param $base_plugin_id
+     * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
+     * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
      */
     public function __construct(
         $base_plugin_id,
-        EntityManagerInterface $entity_manager,
-        TranslationInterface $string_translation
+        EntityTypeManager $entityTypeManager,
+        TranslationInterface $stringTranslation
     ) {
         $this->basePluginId = $base_plugin_id;
-        $this->entityManager = $entity_manager;
-        $this->stringTranslation = $string_translation;
+        $this->entityManager = $entityTypeManager;
+        $this->stringTranslation = $stringTranslation;
     }
 
     /**
@@ -55,10 +54,15 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
      */
     public static function create(ContainerInterface $container, $base_plugin_id)
     {
+        /** @var EntityTypeManager $entityTypeManager */
+        $entityTypeManager = $container->get('entity_type.manager');
+        /** @var TranslationInterface $stringTranslation */
+        $stringTranslation = $container->get('string_translation');
+
         return new static(
             $base_plugin_id,
-            $container->get('entity.manager'),
-            $container->get('string_translation')
+            $entityTypeManager,
+            $stringTranslation
         );
     }
 
@@ -68,8 +72,9 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
     public function getDerivativeDefinitions($base_plugin_definition)
     {
         // Load all config.
-        $storage = $this->entityManager->getStorage('wmcontent_container');
+        $storage = $this->entityTypeManager->getStorage('wmcontent_container');
 
+        /** @var WmContentContainer $container */
         foreach ($storage->loadMultiple() as $container) {
             $config = $container->getConfig();
 
