@@ -76,6 +76,7 @@ class WmContentController extends ControllerBase
         if ($current_container->getId()) {
             // Start a form.
             $form = new WmContentMasterForm(
+                $this->wmContentManager,
                 $host_entity,
                 $current_container
             );
@@ -99,18 +100,14 @@ class WmContentController extends ControllerBase
         return $build;
     }
 
+
     /**
-     * Provides the entity submission form.
-     *
-     * @param string $typebundle
-     *   The entity type bundle.
+     * @param $container
+     * @param $bundle
      * @param \Drupal\Core\Routing\RouteMatchInterface $route
-     *   The route match object from which to extract the entity type.
-     * @param string $entity_type_id
-     *   (optional) The entity type ID.
+     * @param $host_type_id
      *
      * @return array
-     *   The entity submission form.
      */
     public function add($container, $bundle, RouteMatchInterface $route, $host_type_id)
     {
@@ -155,18 +152,14 @@ class WmContentController extends ControllerBase
         return $form;
     }
 
+
     /**
-     * Function delete.
+     * @param $container
+     * @param $child_id
+     * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+     * @param null $host_type_id
      *
-     * Deletes a child entity and goes back to the content page.
-     *
-     * @param string $type
-     *   The type of child.
-     * @param int $child_id
-     *   The child id.
-     *
-     * @return RedirectResponse
-     *   Going to go back to the host content master editor.
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function delete($container, $child_id, RouteMatchInterface $route_match, $host_type_id = null)
     {
@@ -205,16 +198,12 @@ class WmContentController extends ControllerBase
         );
     }
 
+
     /**
-     * Builds the edit translation page.
-     *
-     * @param string $type
-     *   The type of child.
-     * @param int $child_id
-     *   The child id.
+     * @param $container
+     * @param $child_id
      *
      * @return array
-     *   A processed form array ready to be rendered.
      */
     public function edit($container, $child_id)
     {

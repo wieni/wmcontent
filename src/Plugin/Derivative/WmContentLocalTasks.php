@@ -45,7 +45,7 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
         TranslationInterface $stringTranslation
     ) {
         $this->basePluginId = $base_plugin_id;
-        $this->entityManager = $entityTypeManager;
+        $this->entityTypeManager = $entityTypeManager;
         $this->stringTranslation = $stringTranslation;
     }
 

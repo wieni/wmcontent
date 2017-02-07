@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal;
+use Drupal\wmcontent\WmContentManager;
 
 /**
  * Class WmContentMasterForm.
@@ -16,12 +17,8 @@ use Drupal;
 class WmContentMasterForm extends FormBase
 {
 
-    /**
-     * Drupal\wmcontent\WmContentManager definition.
-     *
-     * @var Drupal\wmcontent\WmContentManager
-     */
-    private $wmContentManager;
+    /** @var WmContentManager */
+    protected $wmContentManager;
 
     /**
      * The main entity that we are adding and managing paragraphs for.
@@ -33,17 +30,20 @@ class WmContentMasterForm extends FormBase
      */
     protected $container;
 
+
     /**
      * WmContentMasterForm constructor.
      *
+     * @param \Drupal\wmcontent\WmContentManager $wmContentManager
      * @param \Drupal\Core\Entity\EntityInterface $host
      * @param $container
      */
     public function __construct(
+        WmContentManager $wmContentManager,
         EntityInterface $host,
         $container
     ) {
-        $this->wmContentManager = \Drupal::service('wmcontent.manager');
+        $this->wmContentManager = $wmContentManager;
         $this->host = $host;
         $this->container = $container;
     }
