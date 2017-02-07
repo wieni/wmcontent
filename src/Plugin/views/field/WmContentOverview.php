@@ -11,20 +11,23 @@ use Drupal\views\Plugin\views\field\EntityLink;
  *
  * @ViewsField("wmcontent_overview_link")
  */
-class WmContentOverview extends EntityLink {
+class WmContentOverview extends EntityLink
+{
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEntityLinkTemplate() {
-    return 'drupal:wmcontent-overview';
-  }
+    /**
+     * {@inheritdoc}
+     */
+    protected function getEntityLinkTemplate()
+    {
+        return 'drupal:wmcontent-overview';
+    }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getDefaultLabel() {
-    return $this->t('WmContent');
-  }
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultLabel()
+    {
+        return $this->t('WmContent');
+    }
 
 }
