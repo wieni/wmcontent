@@ -168,7 +168,7 @@ class WmContentContainerForm extends EntityForm
             '#title' => $this->t('Show the size column'),
         ];
 
-        $form['show_aignment_column'] = [
+        $form['show_alignment_column'] = [
             '#type' => 'checkbox',
             '#default_value' => $entity->getShowAlignmentColumn(),
             '#title' => $this->t('Show the alignment column'),
