@@ -3,10 +3,10 @@
 namespace Drupal\wmcontent\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\wmcontent\WmContentContainerInterface;
-use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Defines the wmcontent_container entity.
@@ -43,6 +43,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "child_bundles",
  *     "hide_single_option_sizes",
  *     "hide_single_option_alignments",
+ *     "show_size_column",
+ *     "show_alignment_column"
  *   }
  * )
  */
@@ -104,6 +106,16 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
      * @var bool
      */
     public $hide_single_option_alignments = false;
+
+    /*
+     * If this is turned on then we show the column in the master container table.
+     */
+    public $show_size_column = true;
+
+    /*
+     * If this is turn then we will show the column in the master container table.
+     */
+    public $show_alignment_column = true;
 
     /**
      * {@inheritdoc}
@@ -171,9 +183,26 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return bool
+     */
+    public function getShowSizeColumn()
+    {
+        return $this->show_size_column;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getShowAlignmentColumn()
+    {
+        return $this->show_alignment_column;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function getConfig() {
+    public function getConfig()
+    {
         $config = [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
@@ -183,18 +212,35 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'child_bundles' => $this->getChildBundles(),
             'hide_single_option_sizes' => $this->getHideSingleOptionSizes(),
             'hide_single_option_alignments' => $this->getHideSingleOptionAlignments(),
+            'show_size_column' => $this->getShowSizeColumn(),
+            'show_alignment_column' => $this->getShowAlignmentColumn()
         ];
+
+        // If there is no selection then all need to be there.
+        /** @var EntityTypeBundleInfo $service */
+        $service = \Drupal::service('entity_type.bundle.info');
+        $host_bundles = $service->getBundleInfo($this->getHostEntityType());
+        $child_bundles = $service->getBundleInfo($this->getChildEntityType());
 
         if (empty($config['host_bundles'])) {
             // Load them all.
-            $config['host_bundles'] = array_keys($this->entityTypeManager()->getBundleInfo($this->getHostEntityType()));
+            $config['host_bundles'] = array_keys($host_bundles);
         }
         if (empty($config['child_bundles'])) {
             // Load them all.
-            $config['child_bundles'] = array_keys($this->entityManager()->getBundleInfo($this->getChildEntityType()));
+            $config['child_bundles'] = array_keys($child_bundles);
         }
 
         return $config;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isHost(EntityInterface $host)
+    {
+        return $host->getEntityTypeId() == $this->getHostEntityType()
+            && in_array($host->bundle(), $this->getHostBundles());
     }
 
     /**

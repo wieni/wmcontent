@@ -3,6 +3,7 @@
 namespace Drupal\wmcontent;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Provides an interface defining a Example entity.
@@ -18,4 +19,7 @@ interface WmContentContainerInterface extends ConfigEntityInterface
     public function getConfig();
     public function getHideSingleOptionSizes();
     public function getHideSingleOptionAlignments();
+    public function isHost(EntityInterface $host);
+    public function getShowSizeColumn();
+    public function getShowAlignmentColumn();
 }

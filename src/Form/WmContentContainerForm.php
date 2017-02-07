@@ -8,6 +8,7 @@
 namespace Drupal\wmcontent\Form;
 
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Component\Utility\Xss;
@@ -160,6 +161,19 @@ class WmContentContainerForm extends EntityForm
             '#title' => $this->t('Hide single option alignments'),
         ];
 
+
+        $form['show_size_column'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $entity->getShowSizeColumn(),
+            '#title' => $this->t('Show the size column'),
+        ];
+
+        $form['show_aignment_column'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $entity->getShowAlignmentColumn(),
+            '#title' => $this->t('Show the alignment column'),
+        ];
+
         return parent::form($form, $form_state, $entity);
     }
 
@@ -247,19 +261,19 @@ class WmContentContainerForm extends EntityForm
             return [];
         }
         // Build master bundles list.
-        $bundlesraw = $this->entityManager->getAllBundleInfo();
-        $bundles = [];
-        foreach ($bundlesraw as $k => $v) {
-            if ($k == $type) {
-                foreach ($v as $p => $q) {
-                    $bundles[$p] = $q['label'];
-                }
-            }
-        }
-        ksort($bundles);
+        /** @var EntityTypeBundleInfo $service */
+        $service = \Drupal::service('entity_type.bundle.info');
+        $bundles = array_keys($service->getBundleInfo($type));
+        sort($bundles);
         return $bundles;
     }
 
+    /**
+     * @param $form
+     * @param \Drupal\Core\Form\FormStateInterface $form_state
+     *
+     * @return mixed
+     */
     public function updateForm($form, FormStateInterface $form_state)
     {
         $form_state->setRebuild(true);
