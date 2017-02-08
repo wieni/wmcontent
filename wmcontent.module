@@ -28,7 +28,7 @@ function wmcontent_entity_extra_field_info()
     foreach (wmContentContainer::loadMultiple() as $conf) {
         $config = $conf->getConfig();
         foreach ($config['host_bundles'] as $bundle) {
-            $extra[$config['host_entity_type']][$bundle]['display'][$config['id']] = array(
+            $extra[$config['host_entity_type']][$bundle]['display']['wmc_' . $config['id']] = array(
                 'label' => 'WmContent: ' . $config['label'],
                 'description' => $config['label'],
                 'weight' => 0,
@@ -50,6 +50,8 @@ function wmcontent_entity_extra_field_info()
  * but if we load wmContentContainer::loadMultiple() then we end up looping.
  *
  * @see \Drupal\Core\Entity\Annotation\EntityType
+ *
+ * @param array $entity_types
  */
 function wmcontent_entity_type_alter(array &$entity_types)
 {
@@ -61,32 +63,12 @@ function wmcontent_entity_type_alter(array &$entity_types)
             if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
                 // This breaks on taxonomy terms.
                 if ($entity_type->id() == 'node') {
-                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}';
+                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/wmcontent/{container}';
                     $entity_type->setLinkTemplate(
                         'drupal:wmcontent-overview',
                         $wmcontent_path
                     );
                 }
-
-                // I leave this in because it's ultimately what I'ld like to accomplish, however I found no
-                // currently to add link templates with parameters that aren't default...
-                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/add/{bundle}';
-                //$entity_type->setLinkTemplate(
-                //    'drupal:wmcontent-overview',
-                //    $wmcontent_path
-                //);
-                //
-                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/edit';
-                //$entity_type->setLinkTemplate(
-                //    'drupal:wmcontent-overview',
-                //    $wmcontent_path
-                //);
-                //
-                //$wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/content/{container}/{child_id}/delete';
-                //$entity_type->setLinkTemplate(
-                //    'drupal:wmcontent-overview',
-                //    $wmcontent_path
-                //);
             }
         }
     }
@@ -94,6 +76,10 @@ function wmcontent_entity_type_alter(array &$entity_types)
 
 /**
  * Implements hook_entity_operation().
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *
+ * @return array
  */
 function wmcontent_entity_operation(EntityInterface $entity)
 {
@@ -127,6 +113,8 @@ function wmcontent_entity_operation(EntityInterface $entity)
 
 /**
  * Implements hook_entity_insert().
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
  */
 function wmcontent_entity_insert(EntityInterface $entity)
 {
@@ -135,22 +123,34 @@ function wmcontent_entity_insert(EntityInterface $entity)
 
 /**
  * Implements hook_entity_update().
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
  */
 function wmcontent_entity_update(EntityInterface $entity)
 {
     _wmcontent_containersave_cacheclear($entity);
 }
 
+
 /**
  * Implements hook_entity_view().
+ *
+ * @param array $build
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ * @param $view_mode
  */
-function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode)
-{
+function wmcontent_entity_view(
+    array &$build,
+    EntityInterface $entity,
+    EntityViewDisplayInterface $display,
+    $view_mode
+) {
 
     // Loadup our config.
     foreach (wmContentContainer::loadMultiple() as $container) {
         // Only load if our container is enabled in the display.
-        if ($display->getComponent($container->getId())) {
+        if ($display->getComponent('wmc_' . $container->getId())) {
             // Load up our service and get the content, ordered by weight.
             $manager = \Drupal::service('wmcontent.manager');
             $entities = $manager->getContent(
@@ -220,7 +220,7 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
                 }
             }
 
-            $build['wmcontent'][$container->getId()] = array(
+            $build['wmc_' . $container->getId()] = array(
                 '#sections' => $sections,
                 '#theme' => 'wmcontent',
                 '#container' => $container->getId(),
@@ -231,6 +231,13 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
 
 /**
  * Implements hook_theme().
+ *
+ * @param $existing
+ * @param $type
+ * @param $theme
+ * @param $path
+ *
+ * @return array
  */
 function wmcontent_theme($existing, $type, $theme, $path)
 {
@@ -270,6 +277,10 @@ function wmcontent_theme($existing, $type, $theme, $path)
 
 /**
  * Implements hook_theme_suggestions_HOOK().
+ *
+ * @param array $variables
+ *
+ * @return array
  */
 function wmcontent_theme_suggestions_eck_entity(array $variables)
 {
@@ -288,6 +299,8 @@ function wmcontent_theme_suggestions_eck_entity(array $variables)
 
 /**
  * Prepares variables for paragraph templates.
+ *
+ * @param $variables
  */
 function wmcontent_preprocess_paragraph(&$variables)
 {
@@ -335,6 +348,10 @@ function wmcontent_preprocess_paragraph(&$variables)
  * Implements hook_entity_base_field_info().
  *
  * More intel at https://www.drupal.org/node/1879542
+ *
+ * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+ *
+ * @return array
  */
 function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
 {
@@ -516,6 +533,8 @@ function _wmcontent_alignments()
 /**
  * Checks if a given entity's type is registered as a child entity type somewhere,
  * and clear the host cache if it is.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
  */
 function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface $entity)
 {
@@ -541,6 +560,10 @@ function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface 
 
 /**
  * Implements hook_form_alter().
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param $form_id
  */
 function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
 {

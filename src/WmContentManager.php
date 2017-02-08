@@ -198,25 +198,13 @@ class WmContentManager implements WmContentManagerInterface
     public function getHostContainers($host)
     {
         $containers = $this->getContainers();
-
-        $trigger = $host->getEntityTypeId() . "|" . $host->bundle();
-
-        // Holder.
         $return = [];
-
-        // Go through all containers.
         foreach ($containers as $container) {
-            // Look at the host bundles.
-            $typebundles = $container->host->host_typebundles;
-
-            // Go through all of them and if we are there give back that.
-            foreach ($typebundles as $typebundle) {
-                if ($typebundle == $trigger) {
-                    $return[] = $container;
-                }
+            if (!$container->isHost($host)) {
+                continue;
             }
+            $return[] = $container->getId();
         }
-
         return $return;
     }
 
