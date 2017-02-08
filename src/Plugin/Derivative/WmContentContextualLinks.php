@@ -3,8 +3,9 @@
 namespace Drupal\wmcontent\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -15,22 +16,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class WmContentContextualLinks extends DeriverBase implements ContainerDeriverInterface
 {
 
-   /**
-     * The entity manager.
-     *
-     * @var \Drupal\Core\Entity\EntityManagerInterface
-     */
-    protected $entityManager;
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface */
+    protected $entityTypeManager;
+
 
     /**
-     * Constructs a new WmContentContextualLinks.
+     * WmContentContextualLinks constructor.
      *
-     * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-     *   The entity manager.
+     * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
      */
-    public function __construct(EntityManagerInterface $entity_manager)
+    public function __construct(EntityTypeManagerInterface $entityTypeManager)
     {
-        $this->entityManager = $entity_manager;
+        $this->entityTypeManager = $entityTypeManager;
     }
 
     /**
@@ -38,8 +35,10 @@ class WmContentContextualLinks extends DeriverBase implements ContainerDeriverIn
      */
     public static function create(ContainerInterface $container, $base_plugin_id)
     {
+        /** @var EntityTypeManagerInterface $entityTypeManager */
+        $entityTypeManager = $container->get('entity_type.manager');
         return new static(
-            $container->get('entity.manager')
+            $entityTypeManager
         );
     }
 
@@ -49,8 +48,9 @@ class WmContentContextualLinks extends DeriverBase implements ContainerDeriverIn
     public function getDerivativeDefinitions($base_plugin_definition)
     {
         // Load all config.
-        $storage = $this->entityManager->getStorage('wmcontent_container');
+        $storage = $this->entityTypeManager->getStorage('wmcontent_container');
 
+        /** @var WmContentContainer $container */
         foreach ($storage->loadMultiple() as $container) {
             $config = $container->getConfig();
 

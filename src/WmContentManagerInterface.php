@@ -17,7 +17,7 @@ interface WmContentManagerInterface
      * @return array
      *   List of content entities.
      */
-    public function getContent($entity, $container);
+    public function getContent(EntityInterface $entity, $container);
 
     /**
      * Gets all the TOC that links to this entity.

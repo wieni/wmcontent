@@ -11,20 +11,22 @@ use Drupal\views\Plugin\views\field\EntityLink;
  *
  * @ViewsField("wmcontent_add_link")
  */
-class WmContentAdd extends EntityLink {
+class WmContentAdd extends EntityLink
+{
+    /**
+     * {@inheritdoc}
+     */
+    protected function getEntityLinkTemplate()
+    {
+        return 'drupal:wmcontent-add';
+    }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEntityLinkTemplate() {
-    return 'drupal:wmcontent-add';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getDefaultLabel() {
-    return $this->t('Add WmContent');
-  }
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultLabel()
+    {
+        return $this->t('Add WmContent');
+    }
 
 }

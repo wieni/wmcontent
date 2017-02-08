@@ -11,20 +11,23 @@ use Drupal\views\Plugin\views\field\EntityLink;
  *
  * @ViewsField("wmcontent_delete_link")
  */
-class WmContentDelete extends EntityLink {
+class WmContentDelete extends EntityLink
+{
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEntityLinkTemplate() {
-    return 'drupal:wmcontent-delete';
-  }
+    /**
+     * {@inheritdoc}
+     */
+    protected function getEntityLinkTemplate()
+    {
+        return 'drupal:wmcontent-delete';
+    }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getDefaultLabel() {
-    return $this->t('Delete WmContent');
-  }
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultLabel()
+    {
+        return $this->t('Delete WmContent');
+    }
 
 }

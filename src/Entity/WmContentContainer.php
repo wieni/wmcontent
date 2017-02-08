@@ -3,10 +3,9 @@
 namespace Drupal\wmcontent\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\wmcontent\WmContentContainerInterface;
-use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
@@ -44,11 +43,16 @@ use Drupal\Core\Entity\EntityInterface;
  *     "child_bundles",
  *     "hide_single_option_sizes",
  *     "hide_single_option_alignments",
+ *     "show_size_column",
+ *     "show_alignment_column"
  *   }
  * )
  */
 class WmContentContainer extends ConfigEntityBase implements WmContentContainerInterface
 {
+
+    /** @var EntityTypeBundleInfo */
+    private $entityTypeBundleInfo;
 
     /**
      * The WmContent Container ID.
@@ -106,6 +110,16 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
      */
     public $hide_single_option_alignments = false;
 
+    /*
+     * If this is turned on then we show the column in the master container table.
+     */
+    public $show_size_column = true;
+
+    /*
+     * If this is turn then we will show the column in the master container table.
+     */
+    public $show_alignment_column = true;
+
     /**
      * {@inheritdoc}
      */
@@ -139,6 +153,14 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return array
+     */
+    public function getHostBundlesAll()
+    {
+        return $this->allBundles($this->getHostEntityType());
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getChildEntityType()
@@ -153,6 +175,30 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     public function getChildBundles()
     {
         return $this->child_bundles;
+    }
+
+    /**
+     * @return array
+     */
+    public function getChildBundlesAll()
+    {
+        return $this->allBundles($this->getChildEntityType());
+    }
+
+    /**
+     * @param $type
+     *
+     * @return array
+     */
+    private function allBundles($type)
+    {
+        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($type));
+        sort($bundles);
+        $return = [];
+        foreach ($bundles as $bundle) {
+            $return[$bundle] = $bundle;
+        }
+        return $return;
     }
 
     /**
@@ -172,9 +218,53 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return bool
+     */
+    public function getShowSizeColumn()
+    {
+        return $this->show_size_column;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getShowAlignmentColumn()
+    {
+        return $this->show_alignment_column;
+    }
+
+    /**
+     * @return \Drupal\Core\Entity\EntityTypeBundleInfo|object
+     */
+    private function entityTypeBundleInfo()
+    {
+        if (!$this->entityTypeBundleInfo) {
+            $this->entityTypeBundleInfo = $this->container()->get('entity_type.bundle.info');
+        }
+        return $this->entityTypeBundleInfo;
+    }
+
+    /**
+     * Returns the service container.
+     *
+     * This method is marked private to prevent sub-classes from retrieving
+     * services from the container through it. Instead,
+     * \Drupal\Core\DependencyInjection\ContainerInjectionInterface should be used
+     * for injecting services.
+     *
+     * @return \Symfony\Component\DependencyInjection\ContainerInterface $container
+     *   The service container.
+     */
+    private function container()
+    {
+        return \Drupal::getContainer();
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function getConfig() {
+    public function getConfig()
+    {
         $config = [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
@@ -184,15 +274,17 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'child_bundles' => $this->getChildBundles(),
             'hide_single_option_sizes' => $this->getHideSingleOptionSizes(),
             'hide_single_option_alignments' => $this->getHideSingleOptionAlignments(),
+            'show_size_column' => $this->getShowSizeColumn(),
+            'show_alignment_column' => $this->getShowAlignmentColumn()
         ];
 
         if (empty($config['host_bundles'])) {
             // Load them all.
-            $config['host_bundles'] = array_keys($this->entityTypeManager()->getBundleInfo($this->getHostEntityType()));
+            $config['host_bundles'] = $this->getHostBundlesAll();
         }
         if (empty($config['child_bundles'])) {
             // Load them all.
-            $config['child_bundles'] = array_keys($this->entityManager()->getBundleInfo($this->getChildEntityType()));
+            $config['child_bundles'] = $this->getChildBundlesAll();
         }
 
         return $config;

@@ -2,17 +2,15 @@
 
 namespace Drupal\wmcontent;
 
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\eck\EckEntityInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\eck\Entity\EckEntity;
+use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\wmcontent\Event\WmContentEntityLabelEvent;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 
 /**
@@ -22,18 +20,15 @@ class WmContentManager implements WmContentManagerInterface
 {
 
     /**
-     * The entity manager.
-     *
-     * @var \Drupal\Core\Entity\EntityManagerInterface
-     */
-    protected $entityManager;
-
-    /**
      * The entity type manager.
      *
      * @var \Drupal\Core\Entity\EntityTypeManagerInterface
      */
     protected $entityTypeManager;
+
+
+    /** @var EntityTypeBundleInfo */
+    protected $entityTypeBundleInfo;
 
     /**
      * The query interface.
@@ -51,35 +46,33 @@ class WmContentManager implements WmContentManagerInterface
      * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
      */
     protected $eventDispatcher;
-    
+
     /**
      * @var CacheBackendInterface
      */
     protected $cacheBackend;
-    
+
+
     /**
-     * Constructs a WmContentManageAccessCheck object.
+     * WmContentManager constructor.
      *
-     * @param \Drupal\Core\Entity\EntityManagerInterface $entityManager
      * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-     * @param \Drupal\Core\Entity\Query\QueryFactory|\Drupal\Core\Entity\QueryFactory $query
-     *   The query factory.
+     * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entityTypeBundleInfo
+     * @param \Drupal\Core\Entity\Query\QueryFactory $query
      * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-     *   The language manager.
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
-     *   The event dispatcher.The entity type manager.
      * @param \Drupal\Core\Cache\CacheBackendInterface $cacheBackend
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
         EntityTypeManagerInterface $entityTypeManager,
+        EntityTypeBundleInfo $entityTypeBundleInfo,
         QueryFactory $query,
         LanguageManagerInterface $language_manager,
         EventDispatcherInterface $event_dispatcher,
         CacheBackendInterface $cacheBackend
     ) {
-        $this->entityManager = $entityManager;
         $this->entityTypeManager = $entityTypeManager;
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityQuery = $query;
         $this->languageManager = $language_manager;
         $this->eventDispatcher = $event_dispatcher;
@@ -91,20 +84,21 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function getTranslationHandler($entity_type_id)
     {
-        return $this->entityManager->getHandler($entity_type_id, 'translation');
+        return $this->entityTypeManager->getHandler($entity_type_id, 'translation');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getContent($entity, $container)
+    public function getContent(EntityInterface $entity, $container)
     {
         $data = &drupal_static(__FUNCTION__);
         $key = 'wmcontent:' . $container . ':' . $entity->getEntityTypeId() . ':' . $entity->id() . ':' . $entity->get('langcode')->value;
-    
+
         // Load the container.
+        /** @var WmContentContainer $current_container */
         $current_container = $this
-            ->entityManager
+            ->entityTypeManager
             ->getStorage('wmcontent_container')
             ->load($container);
 
@@ -114,14 +108,15 @@ class WmContentManager implements WmContentManagerInterface
                 $container
             ));
         }
-        
+
         if (!isset($data[$key])) {
-            if ($cache = $this->cacheBackend->get($key)) {
+            $cache = $this->cacheBackend->get($key);
+            if ($cache) {
                 $data[$key] = $cache->data;
             } else {
                 // Create an entity query for our entity type.
                 $query = $this->entityQuery->get($current_container->getChildEntityType());
-    
+
                 // Filter by parent and sort.
                 $query
                     ->condition('wmcontent_parent', $entity->id())
@@ -129,10 +124,10 @@ class WmContentManager implements WmContentManagerInterface
                     ->condition('langcode', $entity->get('langcode')->value)
                     ->condition('wmcontent_container', $container)
                     ->sort('wmcontent_weight', 'ASC');
-    
+
                 // Return the entities.
                 $data[$key] = $query->execute();
-    
+
                 // Put in cache. Mind the invalidating array that should invalidate
                 // this cache when the node gets cleared.
                 $this->cacheBackend->set(
@@ -144,7 +139,8 @@ class WmContentManager implements WmContentManagerInterface
             }
         }
 
-        $controller = $this->entityManager->getStorage($current_container->getChildEntityType());
+        $controller = $this->entityTypeManager->getStorage($current_container->getChildEntityType());
+
         return $controller->loadMultiple($data[$key]);
     }
 
@@ -182,7 +178,7 @@ class WmContentManager implements WmContentManagerInterface
 
         return $r;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -190,7 +186,7 @@ class WmContentManager implements WmContentManagerInterface
     {
         if ($entity->hasField('wmcontent_parent') && !$entity->get('wmcontent_parent')->isEmpty()) {
             return $this
-                ->entityManager
+                ->entityTypeManager
                 ->getStorage($entity->get('wmcontent_parent_type')->value)
                 ->load($entity->get('wmcontent_parent')->value);
         }
@@ -202,20 +198,16 @@ class WmContentManager implements WmContentManagerInterface
     public function getHostContainers($host)
     {
         $containers = $this->getContainers();
-
         $return = [];
-
         foreach ($containers as $container) {
             if (!$container->isHost($host)) {
                 continue;
             }
-
             $return[] = $container->getId();
         }
-
         return $return;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -223,13 +215,13 @@ class WmContentManager implements WmContentManagerInterface
     {
         $labels = &drupal_static(__FUNCTION__);
         if (!isset($labels[$entityType])) {
-            $labels[$entityType] = $this->entityManager->getBundleInfo($entityType);
+            $labels[$entityType] = $this->entityTypeBundleInfo->getBundleInfo($entityType);
         }
-        
+
         if (!empty($labels[$entityType][$bundle]['label'])) {
             return $labels[$entityType][$bundle]['label'];
         }
-        return $bundle;
+        return ucwords(str_replace("_", " ", $bundle));
     }
 
     /**
@@ -239,15 +231,10 @@ class WmContentManager implements WmContentManagerInterface
     {
         // Allow overrides through event dispatching.
         $event = new WmContentEntityLabelEvent($entity);
-    
-        if (!$return = $entity->label()) {
-            $return = "ID: " . $entity->id();
-        }
-        
+
+        $return = $entity->label() ?: "ID: $entity->id()";
         // Event allow override.
-        $this
-            ->eventDispatcher
-            ->dispatch('wmcontent.entitylabel', $event);
+        $this->eventDispatcher->dispatch('wmcontent.entitylabel', $event);
         if ($event->getLabel()) {
             $return = $event->getLabel();
         }
@@ -260,9 +247,10 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function hostClearCache($child_entity)
     {
-        if ($host_entity = $this->getHost($child_entity)) {
+        $host_entity = $this->getHost($child_entity);
+        if ($host_entity) {
             $this
-                ->entityManager
+                ->entityTypeManager
                 ->getViewBuilder($child_entity->get('wmcontent_parent_type')->getString())
                 ->resetCache([
                     $host_entity,
@@ -278,7 +266,7 @@ class WmContentManager implements WmContentManagerInterface
     private function getContainers()
     {
         return $this
-            ->entityManager
+            ->entityTypeManager
             ->getStorage('wmcontent_container')
             ->loadMultiple();
     }

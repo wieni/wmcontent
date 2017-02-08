@@ -2,13 +2,12 @@
 
 namespace Drupal\wmcontent\Controller;
 
-use Drupal\wmcontent\WmContentManagerInterface;
-use Drupal\wmcontent\Form\WmContentMasterForm;
 use Drupal\Core\Form\FormBuilderInterface;
-use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\WmContentManager;
+use Drupal\wmcontent\Form\WmContentMasterForm;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -18,27 +17,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class WmContentController extends ControllerBase
 {
 
-    /**
-     * The wmcontent manager.
-     *
-     * @var \Drupal\wmcontent\WmContentManagerInterface
-     */
+    /** @var WmContentManager */
     protected $wmContentManager;
 
-    /**
-     * The formbuilder.
-     *
-     * @var \Drupal\Core\Form\FormBuilderInterface
-     */
+    /** @var FormBuilderInterface */
     protected $formbuilder;
 
+
     /**
-     * Initializes a wmcontent controller.
+     * WmContentController constructor.
      *
-     * @param \Drupal\wmcontent\WmContentManagerInterface $wmcontent_manager
-     *   A wmcontent manager instance.
+     * @param \Drupal\wmcontent\WmContentManager $wmcontent_manager
+     * @param \Drupal\Core\Form\FormBuilderInterface $formbuilder
      */
-    public function __construct(WmContentManagerInterface $wmcontent_manager, FormBuilderInterface $formbuilder)
+    public function __construct(WmContentManager $wmcontent_manager, FormBuilderInterface $formbuilder)
     {
         $this->wmContentManager = $wmcontent_manager;
         $this->formbuilder = $formbuilder;
@@ -49,71 +41,64 @@ class WmContentController extends ControllerBase
      */
     public static function create(ContainerInterface $container)
     {
+        /** @var WmContentManager $wmContentManager */
+        $wmContentManager = $container->get('wmcontent.manager');
+        /** @var FormBuilderInterface $formbuilder */
+        $formbuilder = $container->get('form_builder');
+
         return new static(
-          $container->get('wmcontent.manager'),
-          $container->get('form_builder')
+            $wmContentManager,
+            $formbuilder
         );
     }
 
+
     /**
-     * Builds the translations overview page.
-     *
+     * @param string $container
      * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-     *   The route match.
-     * @param string $host_type_id
-     *   Host type ID.
+     * @param null $host_type_id
      *
      * @return array
-     *   Array of page elements to render.
      */
-    public function overview($container, RouteMatchInterface $route_match, $host_type_id = null)
+    public function overview(string $container, RouteMatchInterface $route_match, $host_type_id = null)
     {
-
         $build = [];
-
         // Get the container.
-        $current_container = $this->entityManager()->getStorage('wmcontent_container')->load($container);
-
+        /** @var WmContentContainer $current_container */
+        $current_container = $this->entityTypeManager()->getStorage('wmcontent_container')->load($container);
         $host_entity = $route_match->getParameter($host_type_id);
 
         if ($current_container->getId()) {
+            // Start a form.
             $form = new WmContentMasterForm(
                 $this->wmContentManager,
                 $host_entity,
                 $current_container
             );
-
             $build['#title'] = $this->t(
                 '%slug for %label',
-                array(
+                [
                     '%slug' => $current_container->getLabel(),
                     '%label' => $host_entity->label(),
-                )
+                ]
             );
-
-
             $build['form'] = $this->formbuilder->getForm($form);
         } else {
             throw new NotFoundHttpException(
                 $this->t('Container @container does not exist.', ['@container' => $container])
             );
         }
-
         return $build;
     }
 
+
     /**
-     * Provides the entity submission form.
-     *
-     * @param string $typebundle
-     *   The entity type bundle.
+     * @param $container
+     * @param $bundle
      * @param \Drupal\Core\Routing\RouteMatchInterface $route
-     *   The route match object from which to extract the entity type.
-     * @param string $entity_type_id
-     *   (optional) The entity type ID.
+     * @param $host_type_id
      *
      * @return array
-     *   The entity submission form.
      */
     public function add($container, $bundle, RouteMatchInterface $route, $host_type_id)
     {
@@ -158,18 +143,14 @@ class WmContentController extends ControllerBase
         return $form;
     }
 
+
     /**
-     * Function delete.
+     * @param $container
+     * @param $child_id
+     * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+     * @param null $host_type_id
      *
-     * Deletes a child entity and goes back to the content page.
-     *
-     * @param string $type
-     *   The type of child.
-     * @param int $child_id
-     *   The child id.
-     *
-     * @return RedirectResponse
-     *   Going to go back to the host content master editor.
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function delete($container, $child_id, RouteMatchInterface $route_match, $host_type_id = null)
     {
@@ -208,16 +189,12 @@ class WmContentController extends ControllerBase
         );
     }
 
+
     /**
-     * Builds the edit translation page.
-     *
-     * @param string $type
-     *   The type of child.
-     * @param int $child_id
-     *   The child id.
+     * @param $container
+     * @param $child_id
      *
      * @return array
-     *   A processed form array ready to be rendered.
      */
     public function edit($container, $child_id)
     {

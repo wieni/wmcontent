@@ -30,3 +30,9 @@ wmcontent.wmcontent_container.*:
     hide_single_option_alignments:
       type: boolean
       label: 'Hide single option alignments'
+    show_size_solumn:
+      type: boolean
+      label: 'Show size column'
+    show_alignment_column:
+      type: boolean
+      label: 'Show alignment column'
