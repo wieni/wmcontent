@@ -3,7 +3,7 @@
 namespace Drupal\wmcontent\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,16 +16,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class WmContentContextualLinks extends DeriverBase implements ContainerDeriverInterface
 {
 
-    /** @var \Drupal\Core\Entity\EntityTypeManager */
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface */
     protected $entityTypeManager;
 
 
     /**
      * WmContentContextualLinks constructor.
      *
-     * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
+     * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
      */
-    public function __construct(EntityTypeManager $entityTypeManager)
+    public function __construct(EntityTypeManagerInterface $entityTypeManager)
     {
         $this->entityTypeManager = $entityTypeManager;
     }
@@ -35,7 +35,7 @@ class WmContentContextualLinks extends DeriverBase implements ContainerDeriverIn
      */
     public static function create(ContainerInterface $container, $base_plugin_id)
     {
-        /** @var EntityTypeManager $entityTypeManager */
+        /** @var EntityTypeManagerInterface $entityTypeManager */
         $entityTypeManager = $container->get('entity_type.manager');
         return new static(
             $entityTypeManager

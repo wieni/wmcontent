@@ -3,7 +3,7 @@
 namespace Drupal\wmcontent\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,7 +27,7 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
     /**
      * The entity manager.
      *
-     * @var \Drupal\Core\Entity\EntityManagerInterface
+     * @var EntityTypeManagerInterface
      */
     protected $entityTypeManager;
 
@@ -36,12 +36,12 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
      * WmContentLocalTasks constructor.
      *
      * @param $base_plugin_id
-     * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
+     * @param EntityTypeManagerInterface $entityTypeManager
      * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
      */
     public function __construct(
         $base_plugin_id,
-        EntityTypeManager $entityTypeManager,
+        EntityTypeManagerInterface $entityTypeManager,
         TranslationInterface $stringTranslation
     ) {
         $this->basePluginId = $base_plugin_id;
@@ -54,7 +54,7 @@ class WmContentLocalTasks extends DeriverBase implements ContainerDeriverInterfa
      */
     public static function create(ContainerInterface $container, $base_plugin_id)
     {
-        /** @var EntityTypeManager $entityTypeManager */
+        /** @var EntityTypeManagerInterface $entityTypeManager */
         $entityTypeManager = $container->get('entity_type.manager');
         /** @var TranslationInterface $stringTranslation */
         $stringTranslation = $container->get('string_translation');

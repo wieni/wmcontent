@@ -213,10 +213,13 @@ class WmContentManager implements WmContentManagerInterface
      */
     public function getLabel($entityType, $bundle)
     {
-        // If there is no selection then all need to be there.
-        $bundles = $this->entityTypeBundleInfo->getBundleInfo($entityType);
-        if (isset($bundles[$bundle]['label'])) {
-            return $bundles[$bundle]['label'];
+        $labels = &drupal_static(__FUNCTION__);
+        if (!isset($labels[$entityType])) {
+            $labels[$entityType] = $this->entityTypeBundleInfo->getBundleInfo($entityType);
+        }
+
+        if (!empty($labels[$entityType][$bundle]['label'])) {
+            return $labels[$entityType][$bundle]['label'];
         }
         return ucwords(str_replace("_", " ", $bundle));
     }
@@ -229,7 +232,7 @@ class WmContentManager implements WmContentManagerInterface
         // Allow overrides through event dispatching.
         $event = new WmContentEntityLabelEvent($entity);
 
-        $return = $entity->label();
+        $return = $entity->label() ?: "ID: $entity->id()";
         // Event allow override.
         $this->eventDispatcher->dispatch('wmcontent.entitylabel', $event);
         if ($event->getLabel()) {

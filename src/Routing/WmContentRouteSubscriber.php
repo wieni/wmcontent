@@ -2,7 +2,7 @@
 
 namespace Drupal\wmcontent\Routing;
 
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\wmcontent\Entity\WmContentContainer;
@@ -14,15 +14,15 @@ use Symfony\Component\Routing\RouteCollection;
  */
 class WmContentRouteSubscriber extends RouteSubscriberBase
 {
-    /** @var EntityTypeManager */
+    /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
 
     /**
      * WmContentRouteSubscriber constructor.
      *
-     * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
+     * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
      */
-    public function __construct(EntityTypeManager $entityTypeManager)
+    public function __construct(EntityTypeManagerInterface $entityTypeManager)
     {
         $this->entityTypeManager = $entityTypeManager;
     }

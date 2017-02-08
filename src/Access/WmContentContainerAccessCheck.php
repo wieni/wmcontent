@@ -3,7 +3,7 @@
 namespace Drupal\wmcontent\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -18,7 +18,7 @@ class WmContentContainerAccessCheck implements AccessInterface
     /**
      * The entity type manager.
      *
-     * @var \Drupal\Core\Entity\EntityManagerInterface
+     * @var EntityTypeManagerInterface
      */
     protected $entityTypeManager;
 
@@ -26,9 +26,9 @@ class WmContentContainerAccessCheck implements AccessInterface
     /**
      * WmContentContainerAccessCheck constructor.
      *
-     * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
+     * @param EntityTypeManagerInterface $entityTypeManager
      */
-    public function __construct(EntityTypeManager $entityTypeManager)
+    public function __construct(EntityTypeManagerInterface $entityTypeManager)
     {
         $this->entityTypeManager = $entityTypeManager;
     }

@@ -157,13 +157,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
      */
     public function getHostBundlesAll()
     {
-        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($this->getHostEntityType()));
-        sort($bundles);
-        $return = [];
-        foreach ($bundles as $bundle) {
-            $return[$bundle] = $bundle;
-        }
-        return $return;
+        return $this->allBundles($this->getHostEntityType());
     }
 
     /**
@@ -188,7 +182,17 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
      */
     public function getChildBundlesAll()
     {
-        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($this->getChildEntityType()));
+        return $this->allBundles($this->getChildEntityType());
+    }
+
+    /**
+     * @param $type
+     *
+     * @return array
+     */
+    private function allBundles($type)
+    {
+        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($type));
         sort($bundles);
         $return = [];
         foreach ($bundles as $bundle) {

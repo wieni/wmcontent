@@ -2,7 +2,7 @@
 
 namespace Drupal\wmcontent\Controller;
 
-use Drupal\Core\Form\FormBuilder;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\WmContentManager;
 use Drupal\wmcontent\Form\WmContentMasterForm;
@@ -20,7 +20,7 @@ class WmContentController extends ControllerBase
     /** @var WmContentManager */
     protected $wmContentManager;
 
-    /** @var FormBuilder */
+    /** @var FormBuilderInterface */
     protected $formbuilder;
 
 
@@ -28,9 +28,9 @@ class WmContentController extends ControllerBase
      * WmContentController constructor.
      *
      * @param \Drupal\wmcontent\WmContentManager $wmcontent_manager
-     * @param \Drupal\Core\Form\FormBuilder $formbuilder
+     * @param \Drupal\Core\Form\FormBuilderInterface $formbuilder
      */
-    public function __construct(WmContentManager $wmcontent_manager, FormBuilder $formbuilder)
+    public function __construct(WmContentManager $wmcontent_manager, FormBuilderInterface $formbuilder)
     {
         $this->wmContentManager = $wmcontent_manager;
         $this->formbuilder = $formbuilder;
@@ -43,7 +43,7 @@ class WmContentController extends ControllerBase
     {
         /** @var WmContentManager $wmContentManager */
         $wmContentManager = $container->get('wmcontent.manager');
-        /** @var FormBuilder $formbuilder */
+        /** @var FormBuilderInterface $formbuilder */
         $formbuilder = $container->get('form_builder');
 
         return new static(
@@ -52,22 +52,17 @@ class WmContentController extends ControllerBase
         );
     }
 
+
     /**
-     * Builds the translations overview page.
-     *
+     * @param string $container
      * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-     *   The route match.
-     * @param string $host_type_id
-     *   Host type ID.
+     * @param null $host_type_id
      *
      * @return array
-     *   Array of page elements to render.
      */
-    public function overview($container, RouteMatchInterface $route_match, $host_type_id = null)
+    public function overview(string $container, RouteMatchInterface $route_match, $host_type_id = null)
     {
-
         $build = [];
-
         // Get the container.
         /** @var WmContentContainer $current_container */
         $current_container = $this->entityTypeManager()->getStorage('wmcontent_container')->load($container);
@@ -80,7 +75,6 @@ class WmContentController extends ControllerBase
                 $host_entity,
                 $current_container
             );
-
             $build['#title'] = $this->t(
                 '%slug for %label',
                 [
@@ -88,15 +82,12 @@ class WmContentController extends ControllerBase
                     '%label' => $host_entity->label(),
                 ]
             );
-
-
             $build['form'] = $this->formbuilder->getForm($form);
         } else {
             throw new NotFoundHttpException(
                 $this->t('Container @container does not exist.', ['@container' => $container])
             );
         }
-
         return $build;
     }
 
