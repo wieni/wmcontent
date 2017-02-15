@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent;
 
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\eck\Entity\EckEntity;
 use Drupal\Core\Entity\EntityInterface;
 
@@ -79,7 +80,7 @@ interface WmContentManagerInterface
      * @return string
      *   A small string that should help the user know what this is.
      */
-    public function getEntityTeaser(EntityInterface $entity);
+    public function getEntityTeaser(FieldableEntityInterface $entity);
     
     /**
      * Clears caches for the host, so that adding wmcontent shows always the right

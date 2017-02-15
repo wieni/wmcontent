@@ -4,6 +4,7 @@ namespace Drupal\wmcontent;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\eck\Entity\EckEntity;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -227,19 +228,9 @@ class WmContentManager implements WmContentManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getEntityTeaser(EntityInterface $entity)
+    public function getEntityTeaser(FieldableEntityInterface $entity)
     {
-        // Allow overrides through event dispatching.
-        $event = new WmContentEntityLabelEvent($entity);
-
-        $return = $entity->label() ?: "ID: $entity->id()";
-        // Event allow override.
-        $this->eventDispatcher->dispatch('wmcontent.entitylabel', $event);
-        if ($event->getLabel()) {
-            $return = $event->getLabel();
-        }
-
-        return $return;
+        return $entity->label();
     }
 
     /**
