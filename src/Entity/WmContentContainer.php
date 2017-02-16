@@ -41,6 +41,7 @@ use Drupal\Core\Entity\EntityInterface;
  *     "host_bundles",
  *     "child_entity_type",
  *     "child_bundles",
+ *     "child_bundles_default",
  *     "hide_single_option_sizes",
  *     "hide_single_option_alignments",
  *     "show_size_column",
@@ -95,6 +96,13 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
      * @var array
      */
     public $child_bundles = [];
+
+    /**
+     * The WmContent Container child entity bundles default.
+     *
+     * @var string
+     */
+    public $child_bundles_default;
 
     /**
      * If the options for sizes is is just one option do we then
@@ -186,6 +194,14 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * @return array
+     */
+    public function getChildBundlesDefault()
+    {
+        return $this->child_bundles_default;
+    }
+
+    /**
      * @param $type
      *
      * @return array
@@ -272,6 +288,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'child_entity_type' => $this->getChildEntityType(),
             'host_bundles' => $this->getHostBundles(),
             'child_bundles' => $this->getChildBundles(),
+            'child_bundles_default' => $this->getChildBundlesDefault(),
             'hide_single_option_sizes' => $this->getHideSingleOptionSizes(),
             'hide_single_option_alignments' => $this->getHideSingleOptionAlignments(),
             'show_size_column' => $this->getShowSizeColumn(),

@@ -130,6 +130,13 @@ class WmContentContainerForm extends EntityForm
             '#default_value' => $entity->getChildBundles(),
         ];
 
+        $form['wrapper']['child_bundles_default'] = [
+            '#title' => t('Default'),
+            '#type' => 'select',
+            '#options' => $entity->getChildBundlesAll(),
+            '#default_value' => $entity->getChildBundlesDefault(),
+        ];
+
         $form['hide_single_option_sizes'] = [
             '#type' => 'checkbox',
             '#default_value' => $entity->getHideSingleOptionSizes(),
