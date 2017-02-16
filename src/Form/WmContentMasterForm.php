@@ -239,8 +239,11 @@ class WmContentMasterForm extends FormBase
 
         // Put the default one on first if it is set/existing.
         if (isset($config['child_bundles'][$config['child_bundles_default']])) {
-            $config['child_bundles'] = array($config['child_bundles_default'] => $config['child_bundles'][$config['child_bundles_default']]) + $config['child_bundles'];
+            $key = $config['child_bundles_default'];
+            $element = $config['child_bundles'][$config['child_bundles_default']];
+            $config['child_bundles'] = [$key => $element] + $config['child_bundles'];
         }
+
         foreach ($config['child_bundles'] as $bundle) {
             $links[$bundle] = [
                 'title' => $this->t(
