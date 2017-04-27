@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Render\Element;
@@ -10,8 +11,9 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\wmmodel\Entity\EntityTypeBundleInfo;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class WmContentDescriptiveTitles
+class WmContentDescriptiveTitles implements ContainerInjectionInterface
 {
     use StringTranslationTrait;
 
@@ -38,6 +40,27 @@ class WmContentDescriptiveTitles
         $this->currentRouteMatch = $currentRouteMatch;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityTypeManager = $entityTypeManager;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function create(ContainerInterface $container)
+    {
+        /** @var CurrentRouteMatch $currentRouteMatch */
+        $currentRouteMatch = $container->get('current_route_match');
+
+        /** @var EntityTypeBundleInfo $entityTypeBundleInfo */
+        $entityTypeBundleInfo = $container->get('wmmodel.entity_type.bundle.info');
+
+        /** @var EntityTypeManager $entityTypeManager */
+        $entityTypeManager = $container->get('entity_type.manager');
+
+        return new static(
+            $currentRouteMatch,
+            $entityTypeBundleInfo,
+            $entityTypeManager
+        );
     }
 
     public function getTitle()
