@@ -63,22 +63,85 @@ class WmContentDescriptiveTitles implements ContainerInjectionInterface
         );
     }
 
-    public function getTitle()
+    /**
+     * More descriptive 'Add more' button when adding referenced entities to a content block
+     * @param array $form
+     * @param ContentEntityBase $entity
+     */
+    public function updateAddMoreButtonTitle(array &$form, ContentEntityBase $entity)
+    {
+        foreach ($this->getFormFields($form) as $field) {
+            if (!isset($form[$field]['widget']['add_more'])) {
+                continue;
+            }
+
+            if ($bundleLabel = $this->getBundleLabel($entity, $field)) {
+                $form[$field]['widget']['add_more']['#value'] =
+                    new TranslatableMarkup(sprintf('Add another %s', $bundleLabel));
+            }
+        }
+    }
+
+    /**
+     * More descriptive 'Create subcontent' button when adding more subcontent
+     * @param array $form
+     * @param ContentEntityBase $entity
+     */
+    public function updateAddAnotherSubContentButtonTitle(array &$form, ContentEntityBase $entity)
+    {
+        foreach ($this->getFormFields($form) as $field) {
+            if (!isset($form[$field]['widget']['actions']['ief_add'])) {
+                continue;
+            }
+
+            if ($bundleLabel = $this->getBundleLabel($entity, $field)) {
+                $form[$field]['widget']['actions']['ief_add']['#value'] =
+                    new TranslatableMarkup(sprintf('Add another %s', $bundleLabel));
+            }
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getContainer() {
+        $containers = $this
+            ->entityTypeManager
+            ->getStorage('wmcontent_container')
+            ->loadByProperties(['id' => $this->currentRouteMatch->getParameter('container')]);
+        return reset($containers);
+    }
+
+    /**
+     * @return string
+     */
+    private function getContainerType()
+    {
+        return $this->getContainer()->getChildEntityType();
+    }
+
+    /**
+     * @param array $form
+     * @return array
+     */
+    private function getFormFields($form)
+    {
+        return Element::children($form);
+    }
+
+    /**
+     * @return TranslatableMarkup
+     */
+    public function getPageTitle()
     {
         $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
-        $container = $this->currentRouteMatch->getParameter('container');
+        $container = $this->getContainerType();
         $node = $this->currentRouteMatch->getParameter('node');
 
         if ($childId = $this->currentRouteMatch->getParameter('child_id')) {
-            // Get bundle from child_id parameter
-            $currentContainer = $this
-                ->entityTypeManager
-                ->getStorage('wmcontent_container')
-                ->load($container);
-
             $child = $this
                 ->entityTypeManager
-                ->getStorage($currentContainer->getChildEntityType())
+                ->getStorage($container)
                 ->load($childId);
 
             $bundle = $child->bundle();
@@ -114,42 +177,20 @@ class WmContentDescriptiveTitles implements ContainerInjectionInterface
                 );
 
             default:
-                return '';
+                return new TranslatableMarkup('');
         }
     }
 
     /**
-     * More descriptive 'Add more' button when adding referenced entities to a content block
-     * @param array $form
-     * @param ContentEntityBase $entity
-     */
-    public function updateAddMoreButtonTitle(&$form, ContentEntityBase $entity)
-    {
-        $container = $this->currentRouteMatch->getParameter('container');
-        $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
-        $fields = Element::children($form);
-
-        foreach ($fields as $field) {
-            if (!isset($form[$field]) || !isset($form[$field]['widget']) || !isset($form[$field]['widget']['add_more'])) {
-                continue;
-            }
-
-            $title = $this->buildAddMoreButtonTitle($container, $bundleInfo, $entity->getFieldDefinitions()[$field]);
-
-            if ($title) {
-                $form[$field]['widget']['add_more']['#value'] = new TranslatableMarkup($title);
-            }
-        }
-    }
-
-    /**
-     * @param $container
-     * @param array $bundleInfo
-     * @param FieldConfig $fieldConfig
+     * @param $entity
+     * @param $field
      * @return bool|string
      */
-    private function buildAddMoreButtonTitle($container, $bundleInfo, $fieldConfig)
+    private function getBundleLabel($entity, $field)
     {
+        $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
+        $container = $this->getContainerType();
+        $fieldConfig = $entity->getFieldDefinitions()[$field];
         $settings = $fieldConfig->getSetting('handler_settings');
         $bundleNames = $settings['target_bundles'] ?? [$fieldConfig->getTargetBundle()];
         $bundleLabel = 'item';
@@ -168,6 +209,6 @@ class WmContentDescriptiveTitles implements ContainerInjectionInterface
             $bundleLabel = $bundleInfo[$targetType][array_values($bundleNames)[0]]['label'];
         }
 
-        return sprintf('Add another %s', $bundleLabel);
+        return $bundleLabel;
     }
 }
