@@ -1,0 +1,150 @@
+<?php
+
+namespace Drupal\wmcontent;
+
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\CurrentRouteMatch;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\wmmodel\Entity\EntityTypeBundleInfo;
+
+class WmContentDescriptiveTitles
+{
+    use StringTranslationTrait;
+
+    /** @var CurrentRouteMatch */
+    protected $currentRouteMatch;
+
+    /** @var EntityTypeBundleInfo */
+    protected $entityTypeBundleInfo;
+
+    /** @var EntityTypeManager */
+    protected $entityTypeManager;
+
+    /**
+     * WmContentDescriptiveTitles constructor.
+     * @param CurrentRouteMatch $currentRouteMatch
+     * @param EntityTypeBundleInfo $entityTypeBundleInfo
+     * @param EntityTypeManager $entityTypeManager
+     */
+    public function __construct(
+        CurrentRouteMatch $currentRouteMatch,
+        EntityTypeBundleInfo $entityTypeBundleInfo,
+        EntityTypeManager $entityTypeManager
+    ) {
+        $this->currentRouteMatch = $currentRouteMatch;
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
+        $this->entityTypeManager = $entityTypeManager;
+    }
+
+    public function getTitle()
+    {
+        $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
+        $container = $this->currentRouteMatch->getParameter('container');
+        $node = $this->currentRouteMatch->getParameter('node');
+
+        if ($childId = $this->currentRouteMatch->getParameter('child_id')) {
+            // Get bundle from child_id parameter
+            $currentContainer = $this
+                ->entityTypeManager
+                ->getStorage('wmcontent_container')
+                ->load($container);
+
+            $child = $this
+                ->entityTypeManager
+                ->getStorage($currentContainer->getChildEntityType())
+                ->load($childId);
+
+            $bundle = $child->bundle();
+            $label = $child->label();
+
+        } else {
+            // Get bundle from its parameter
+            $bundle = $this->currentRouteMatch->getParameter('bundle');
+        }
+
+        // Build title
+        $node = $node->title->value;
+        $type = $bundleInfo[$container][$bundle]['label'];
+        $label = empty($label) ? $type : $label;
+
+        switch ($this->currentRouteMatch->getRouteName()) {
+            case 'entity.node.wmcontent_add':
+                return $this->t(
+                    'Add new %type to %node',
+                    [
+                        '%type' => $type,
+                        '%node' => $node,
+                    ]
+                );
+
+            case 'entity.node.wmcontent_edit':
+                return $this->t(
+                    'Edit %label from %node',
+                    [
+                        '%label' => $label,
+                        '%node' => $node,
+                    ]
+                );
+
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * More descriptive 'Add more' button when adding referenced entities to a content block
+     * @param array $form
+     * @param ContentEntityBase $entity
+     */
+    public function updateAddMoreButtonTitle(&$form, ContentEntityBase $entity)
+    {
+        $container = $this->currentRouteMatch->getParameter('container');
+        $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
+        $fields = Element::children($form);
+
+        foreach ($fields as $field) {
+            if (!isset($form[$field]) || !isset($form[$field]['widget']) || !isset($form[$field]['widget']['add_more'])) {
+                continue;
+            }
+
+            $title = $this->buildAddMoreButtonTitle($container, $bundleInfo, $entity->getFieldDefinitions()[$field]);
+
+            if ($title) {
+                $form[$field]['widget']['add_more']['#value'] = new TranslatableMarkup($title);
+            }
+        }
+    }
+
+    /**
+     * @param $container
+     * @param array $bundleInfo
+     * @param FieldConfig $fieldConfig
+     * @return bool|string
+     */
+    private function buildAddMoreButtonTitle($container, $bundleInfo, $fieldConfig)
+    {
+        $settings = $fieldConfig->getSetting('handler_settings');
+        $bundleNames = $settings['target_bundles'] ?? [$fieldConfig->getTargetBundle()];
+        $bundleLabel = 'item';
+
+        if (empty($bundleNames) || !($fieldConfig instanceof FieldConfig) || $fieldConfig->get('entity_type') !== $container) {
+            return false;
+        }
+
+        if (count($bundleNames) === 1) {
+            if ($fieldConfig->getFieldStorageDefinition()->getType() === 'entity_reference') {
+                $targetType = $fieldConfig->getFieldStorageDefinition()->getSetting('target_type');
+            } else {
+                $targetType = $fieldConfig->get('entity_type');
+            }
+
+            $bundleLabel = $bundleInfo[$targetType][array_values($bundleNames)[0]]['label'];
+        }
+
+        return sprintf('Add another %s', $bundleLabel);
+    }
+}

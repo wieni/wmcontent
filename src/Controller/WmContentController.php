@@ -4,6 +4,7 @@ namespace Drupal\wmcontent\Controller;
 
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\WmContentDescriptiveTitles;
 use Drupal\wmcontent\WmContentManager;
 use Drupal\wmcontent\Form\WmContentMasterForm;
 use Drupal\Core\Controller\ControllerBase;
@@ -16,24 +17,29 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class WmContentController extends ControllerBase
 {
-
     /** @var WmContentManager */
     protected $wmContentManager;
 
     /** @var FormBuilderInterface */
-    protected $formbuilder;
+    protected $formBuilder;
 
+    /** @var WmContentDescriptiveTitles */
+    protected $descriptiveTitles;
 
     /**
      * WmContentController constructor.
-     *
-     * @param \Drupal\wmcontent\WmContentManager $wmcontent_manager
-     * @param \Drupal\Core\Form\FormBuilderInterface $formbuilder
+     * @param WmContentManager $wmContentManager
+     * @param FormBuilderInterface $formBuilder
+     * @param WmContentDescriptiveTitles $descriptiveTitles
      */
-    public function __construct(WmContentManager $wmcontent_manager, FormBuilderInterface $formbuilder)
-    {
-        $this->wmContentManager = $wmcontent_manager;
-        $this->formbuilder = $formbuilder;
+    public function __construct(
+        WmContentManager $wmContentManager,
+        FormBuilderInterface $formBuilder,
+        WmContentDescriptiveTitles $descriptiveTitles
+    ) {
+        $this->wmContentManager = $wmContentManager;
+        $this->formBuilder = $formBuilder;
+        $this->descriptiveTitles = $descriptiveTitles;
     }
 
     /**
@@ -43,12 +49,15 @@ class WmContentController extends ControllerBase
     {
         /** @var WmContentManager $wmContentManager */
         $wmContentManager = $container->get('wmcontent.manager');
-        /** @var FormBuilderInterface $formbuilder */
-        $formbuilder = $container->get('form_builder');
+        /** @var FormBuilderInterface $formBuilder */
+        $formBuilder = $container->get('form_builder');
+        /** @var WmContentDescriptiveTitles */
+        $descriptiveTitles = $container->get('wmcontent.descriptive_titles');
 
         return new static(
             $wmContentManager,
-            $formbuilder
+            $formBuilder,
+            $descriptiveTitles
         );
     }
 
@@ -82,7 +91,7 @@ class WmContentController extends ControllerBase
                     '%label' => $host_entity->label(),
                 ]
             );
-            $build['form'] = $this->formbuilder->getForm($form);
+            $build['form'] = $this->formBuilder->getForm($form);
         } else {
             throw new NotFoundHttpException(
                 $this->t('Container @container does not exist.', ['@container' => $container])
@@ -139,6 +148,9 @@ class WmContentController extends ControllerBase
         $form['wmcontent_parent_type']['#access'] = false;
         $form['wmcontent_parent']['#access'] = false;
         $form['wmcontent_weight']['#access'] = false;
+
+        // Change the 'Add another item' button label
+        $this->descriptiveTitles->updateAddMoreButtonTitle($form, $child);
 
         return $form;
     }
@@ -218,6 +230,9 @@ class WmContentController extends ControllerBase
         $form['wmcontent_parent_type']['#access'] = false;
         $form['wmcontent_parent']['#access'] = false;
         $form['wmcontent_weight']['#access'] = false;
+
+        // Change the 'Add another item' button label
+        $this->descriptiveTitles->updateAddMoreButtonTitle($form, $child);
 
         // Get the form and return it.
         return $form;
