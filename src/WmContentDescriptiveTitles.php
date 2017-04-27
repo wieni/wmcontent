@@ -104,7 +104,8 @@ class WmContentDescriptiveTitles implements ContainerInjectionInterface
     /**
      * @return mixed
      */
-    private function getContainer() {
+    private function getContainer()
+    {
         $containers = $this
             ->entityTypeManager
             ->getStorage('wmcontent_container')

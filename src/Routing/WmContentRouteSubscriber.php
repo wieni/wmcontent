@@ -58,12 +58,11 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             $route_name = 'entity.' . $config['host_entity_type'] . '.edit_form';
             $edit_route = $collection->get($route_name);
             if ($edit_route) {
-                $is_admin = (bool) $edit_route->getOption('_admin_route');
+                $is_admin = (bool)$edit_route->getOption('_admin_route');
             }
 
             // Set a base path.
             $path = $base_path . '/wmcontent/{container}';
-
 
             // Overview.
             $route = new Route(
@@ -79,12 +78,12 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                     '_wmcontent_container_view_access' => $config['host_entity_type'],
                 ],
                 [
-                  'parameters' => [
-                    $config['host_entity_type'] => [
-                      'type' => 'entity:' . $config['host_entity_type'],
+                    'parameters' => [
+                        $config['host_entity_type'] => [
+                            'type' => 'entity:' . $config['host_entity_type'],
+                        ],
                     ],
-                  ],
-                  '_admin_route' => $is_admin,
+                    '_admin_route' => $is_admin,
                 ]
             );
             $route_name = 'entity.' . $config['host_entity_type'] . '.wmcontent_overview';
@@ -95,20 +94,20 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             $route = new Route(
                 $path . '/add/{bundle}',
                 [
-                  '_controller' => '\Drupal\wmcontent\Controller\WmContentController::add',
-                  '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getTitle',
-                  'host_type_id' => $config['host_entity_type'],
+                    '_controller' => '\Drupal\wmcontent\Controller\WmContentController::add',
+                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getPageTitle',
+                    'host_type_id' => $config['host_entity_type'],
                 ],
                 [
-                  '_entity_access' => $config['host_entity_type'] . '.update',
+                    '_entity_access' => $config['host_entity_type'] . '.update',
                 ],
                 [
-                  'parameters' => [
-                    $config['host_entity_type'] => [
-                      'type' => 'entity:' . $config['host_entity_type'],
+                    'parameters' => [
+                        $config['host_entity_type'] => [
+                            'type' => 'entity:' . $config['host_entity_type'],
+                        ],
                     ],
-                  ],
-                  '_admin_route' => $is_admin,
+                    '_admin_route' => $is_admin,
                 ]
             );
             $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_add', $route);
@@ -117,20 +116,20 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             $route = new Route(
                 $path . '/{child_id}/edit',
                 [
-                  '_controller' => '\Drupal\wmcontent\Controller\WmContentController::edit',
-                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getTitle',
-                  'host_type_id' => $config['host_entity_type'],
+                    '_controller' => '\Drupal\wmcontent\Controller\WmContentController::edit',
+                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getPageTitle',
+                    'host_type_id' => $config['host_entity_type'],
                 ],
                 [
-                  '_entity_access' => $config['host_entity_type'] . '.update',
+                    '_entity_access' => $config['host_entity_type'] . '.update',
                 ],
                 [
-                  'parameters' => [
-                    $config['host_entity_type'] => [
-                      'type' => 'entity:' . $config['host_entity_type'],
+                    'parameters' => [
+                        $config['host_entity_type'] => [
+                            'type' => 'entity:' . $config['host_entity_type'],
+                        ],
                     ],
-                  ],
-                  '_admin_route' => $is_admin,
+                    '_admin_route' => $is_admin,
                 ]
             );
             $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_edit', $route);
@@ -140,19 +139,19 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                 $path . '/{child_id}/delete',
                 [
                     '_controller' => '\Drupal\wmcontent\Controller\WmContentController::delete',
-                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getTitle',
+                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getPageTitle',
                     'host_type_id' => $config['host_entity_type'],
                 ],
                 [
                     '_entity_access' => $config['host_entity_type'] . '.update',
                 ],
                 [
-                      'parameters' => [
-                            $config['host_entity_type'] => [
-                                'type' => 'entity:' . $config['host_entity_type'],
-                            ],
-                      ],
-                      '_admin_route' => $is_admin,
+                    'parameters' => [
+                        $config['host_entity_type'] => [
+                            'type' => 'entity:' . $config['host_entity_type'],
+                        ],
+                    ],
+                    '_admin_route' => $is_admin,
                 ]
             );
             $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_delete', $route);

@@ -61,7 +61,6 @@ class WmContentController extends ControllerBase
         );
     }
 
-
     /**
      * @param string $container
      * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
@@ -100,7 +99,6 @@ class WmContentController extends ControllerBase
         return $build;
     }
 
-
     /**
      * @param $container
      * @param $bundle
@@ -124,9 +122,9 @@ class WmContentController extends ControllerBase
             ->entityTypeManager()
             ->getStorage($current_container->getChildEntityType())
             ->create(
-                array(
+                [
                     'type' => $bundle,
-                )
+                ]
             );
 
         // Get the id of the parent and add it in.
@@ -155,7 +153,6 @@ class WmContentController extends ControllerBase
 
         return $form;
     }
-
 
     /**
      * @param $container
@@ -201,7 +198,6 @@ class WmContentController extends ControllerBase
             ]
         );
     }
-
 
     /**
      * @param $container
