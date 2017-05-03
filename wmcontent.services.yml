@@ -2,16 +2,16 @@ services:
   wmcontent.manager:
     class: Drupal\wmcontent\WmContentManager
     arguments:
-      - @entity_type.manager
-      - @entity_type.bundle.info
-      - @entity.query
-      - @language_manager
-      - @event_dispatcher
-      - @cache.data
+      - '@entity_type.manager'
+      - '@entity_type.bundle.info'
+      - '@entity.query'
+      - '@language_manager'
+      - '@event_dispatcher'
+      - '@cache.data'
   wmcontent.subscriber:
     class: Drupal\wmcontent\Routing\WmContentRouteSubscriber
     arguments:
-      - @entity_type.manager
+      - '@entity_type.manager'
     tags:
       - { name: event_subscriber }
   wmcontent.config_subscriber:
@@ -21,6 +21,12 @@ services:
   wmcontent.container_access:
     class: Drupal\wmcontent\Access\WmContentContainerAccessCheck
     arguments:
-      - @entity_type.manager
+      - '@entity_type.manager'
     tags:
       - { name: access_check, applies_to: _wmcontent_container_view_access }
+  wmcontent.descriptive_titles:
+    class: Drupal\wmcontent\WmContentDescriptiveTitles
+    arguments:
+      - '@current_route_match'
+      - '@wmmodel.entity_type.bundle.info'
+      - '@entity_type.manager'
