@@ -10,7 +10,7 @@ use Drupal\Core\Routing\CurrentRouteMatch;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\wmmodel\Entity\EntityTypeBundleInfo;
+use Drupal\wmcontent\Entity\EntityTypeBundleInfo;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class WmContentDescriptiveTitles implements ContainerInjectionInterface
@@ -51,7 +51,7 @@ class WmContentDescriptiveTitles implements ContainerInjectionInterface
         $currentRouteMatch = $container->get('current_route_match');
 
         /** @var EntityTypeBundleInfo $entityTypeBundleInfo */
-        $entityTypeBundleInfo = $container->get('wmmodel.entity_type.bundle.info');
+        $entityTypeBundleInfo = $container->get('wmcontent.entity_type.bundle.info');
 
         /** @var EntityTypeManager $entityTypeManager */
         $entityTypeManager = $container->get('entity_type.manager');

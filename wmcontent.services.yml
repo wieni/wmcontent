@@ -28,5 +28,8 @@ services:
     class: Drupal\wmcontent\WmContentDescriptiveTitles
     arguments:
       - '@current_route_match'
-      - '@wmmodel.entity_type.bundle.info'
+      - '@wmcontent.entity_type.bundle.info'
       - '@entity_type.manager'
+  wmcontent.entity_type.bundle.info:
+    class: Drupal\wmcontent\Entity\EntityTypeBundleInfo
+    parent: entity_type.bundle.info
