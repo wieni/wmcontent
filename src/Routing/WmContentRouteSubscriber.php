@@ -95,7 +95,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                 $path . '/add/{bundle}',
                 [
                     '_controller' => '\Drupal\wmcontent\Controller\WmContentController::add',
-                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getPageTitle',
+                    '_title_callback' => 'wmcontent.descriptive_titles:getPageTitle',
                     'host_type_id' => $config['host_entity_type'],
                 ],
                 [
@@ -117,7 +117,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                 $path . '/{child_id}/edit',
                 [
                     '_controller' => '\Drupal\wmcontent\Controller\WmContentController::edit',
-                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getPageTitle',
+                    '_title_callback' => 'wmcontent.descriptive_titles:getPageTitle',
                     'host_type_id' => $config['host_entity_type'],
                 ],
                 [
@@ -139,7 +139,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                 $path . '/{child_id}/delete',
                 [
                     '_controller' => '\Drupal\wmcontent\Controller\WmContentController::delete',
-                    '_title_callback' => '\Drupal\wmcontent\WmContentDescriptiveTitles::getPageTitle',
+                    '_title_callback' => 'wmcontent.descriptive_titles:getPageTitle',
                     'host_type_id' => $config['host_entity_type'],
                 ],
                 [
