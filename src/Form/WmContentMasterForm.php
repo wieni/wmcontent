@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal;
 use Drupal\wmcontent\WmContentManager;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class WmContentMasterForm.
@@ -307,6 +308,10 @@ class WmContentMasterForm extends FormBase
         if ($p) {
             // Clear Drupal cache for the parent entity.
             $this->wmContentManager->hostClearCache($p);
+        }
+
+        if (\Drupal::request()->isXmlHttpRequest()) {
+            $form_state->setResponse(new JsonResponse('ok'));
         }
     }
 }
