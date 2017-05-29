@@ -148,9 +148,9 @@ class WmContentDescriptiveTitles
 
             case 'entity.node.wmcontent_edit':
                 return $this->t(
-                    'Edit %label from %node',
+                    'Edit %type from %node',
                     [
-                        '%label' => $label,
+                        '%type' => $type,
                         '%node' => $node,
                     ]
                 );
