@@ -178,14 +178,14 @@ class WmContentDescriptiveTitles
         $bundleNames = $settings['target_bundles'] ?? [$fieldConfig->getTargetBundle()];
         $bundleLabel = 'item';
 
-        $event = new WmContentEntityLabelEvent($entity, $field, $settings);
+        if (empty($bundleNames) || !($fieldConfig instanceof FieldConfig) || $fieldConfig->get('entity_type') !== $container) {
+            return false;
+        }
+
+        $event = new WmContentEntityLabelEvent($entity, $field, $fieldConfig);
         $this->eventDispatcher->dispatch(WmContentEntityLabelEvent::NAME, $event);
         if ($event->getLabel()) {
             return $event->getLabel();
-        }
-
-        if (empty($bundleNames) || !($fieldConfig instanceof FieldConfig) || $fieldConfig->get('entity_type') !== $container) {
-            return false;
         }
 
         if (count($bundleNames) === 1) {

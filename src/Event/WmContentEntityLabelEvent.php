@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Event;
 
+use Drupal\field\FieldConfigInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Drupal\Core\Entity\Entity;
 
@@ -15,16 +16,16 @@ class WmContentEntityLabelEvent extends Event
     protected $entity;
     protected $fieldName;
     protected $label;
-    protected $fieldSettings;
+    protected $fieldConfig;
 
     /**
      * Constructor.
      */
-    public function __construct(Entity $entity, $fieldName, array $fieldSettings)
+    public function __construct(Entity $entity, $fieldName, FieldConfigInterface $fieldConfig)
     {
         $this->entity = $entity;
         $this->fieldName = $fieldName;
-        $this->fieldSettings = $fieldSettings;
+        $this->fieldConfig = $fieldConfig;
         $this->label = '';
     }
 
@@ -92,22 +93,22 @@ class WmContentEntityLabelEvent extends Event
     }
 
     /**
-     * Get the field settings
+     * Get the fieldconfig
      *
-     * @return array
+     * @return FieldConfigInterface
      */
-    public function getFieldSettings()
+    public function getFieldConfig()
     {
-        return $this->fieldSettings;
+        return $this->fieldConfig;
     }
 
     /**
-     * Set the field settings
+     * Set the fieldconfig
      *
-     * @param array $fieldSettings
+     * @param FieldConfigInterface $fieldConfig
      */
-    public function setFieldSettings(array $fieldSettings)
+    public function setFieldConfig(FieldConfigInterface $fieldConfig)
     {
-        $this->fieldSettings = $fieldSettings;
+        $this->fieldConfig = $fieldConfig;
     }
 }
