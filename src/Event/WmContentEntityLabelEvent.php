@@ -10,16 +10,21 @@ use Drupal\Core\Entity\Entity;
  */
 class WmContentEntityLabelEvent extends Event
 {
+    const NAME = 'wmcontent.entity.label';
 
     protected $entity;
+    protected $fieldName;
     protected $label;
+    protected $fieldSettings;
 
     /**
      * Constructor.
      */
-    public function __construct(Entity $entity)
+    public function __construct(Entity $entity, $fieldName, array $fieldSettings)
     {
         $this->entity = $entity;
+        $this->fieldName = $fieldName;
+        $this->fieldSettings = $fieldSettings;
         $this->label = '';
     }
 
@@ -35,6 +40,17 @@ class WmContentEntityLabelEvent extends Event
     }
 
     /**
+     * Setter for the fieldname.
+     *
+     * @param string $fieldName
+     *   Current fieldname.
+     */
+    public function setFieldName($fieldName)
+    {
+        $this->fieldName = $fieldName;
+    }
+
+    /**
      * Getter for the entity.
      *
      * @return entity
@@ -43,6 +59,17 @@ class WmContentEntityLabelEvent extends Event
     public function getEntity()
     {
         return $this->entity;
+    }
+
+    /**
+     * Getter for the fieldname.
+     *
+     * @return string
+     *  Current fieldname.
+     * */
+    public function getFieldName()
+    {
+        return $this->fieldName;
     }
 
     /**
@@ -62,5 +89,25 @@ class WmContentEntityLabelEvent extends Event
     public function setLabel($label)
     {
         $this->label = $label;
+    }
+
+    /**
+     * Get the field settings
+     *
+     * @return array
+     */
+    public function getFieldSettings()
+    {
+        return $this->fieldSettings;
+    }
+
+    /**
+     * Set the field settings
+     *
+     * @param array $fieldSettings
+     */
+    public function setFieldSettings(array $fieldSettings)
+    {
+        $this->fieldSettings = $fieldSettings;
     }
 }

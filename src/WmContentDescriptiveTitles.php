@@ -10,7 +10,8 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\wmcontent\Entity\EntityTypeBundleInfo;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\wmcontent\Event\WmContentEntityLabelEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class WmContentDescriptiveTitles
 {
@@ -25,20 +26,26 @@ class WmContentDescriptiveTitles
     /** @var EntityTypeManager */
     protected $entityTypeManager;
 
+    /** @var EventDispatcherInterface */
+    private $eventDispatcher;
+
     /**
      * WmContentDescriptiveTitles constructor.
      * @param CurrentRouteMatch $currentRouteMatch
      * @param EntityTypeBundleInfo $entityTypeBundleInfo
      * @param EntityTypeManager $entityTypeManager
+     * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
         CurrentRouteMatch $currentRouteMatch,
         EntityTypeBundleInfo $entityTypeBundleInfo,
-        EntityTypeManager $entityTypeManager
+        EntityTypeManager $entityTypeManager,
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->currentRouteMatch = $currentRouteMatch;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityTypeManager = $entityTypeManager;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -170,6 +177,12 @@ class WmContentDescriptiveTitles
         $settings = $fieldConfig->getSetting('handler_settings');
         $bundleNames = $settings['target_bundles'] ?? [$fieldConfig->getTargetBundle()];
         $bundleLabel = 'item';
+
+        $event = new WmContentEntityLabelEvent($entity, $field, $settings);
+        $this->eventDispatcher->dispatch(WmContentEntityLabelEvent::NAME, $event);
+        if ($event->getLabel()) {
+            return $event->getLabel();
+        }
 
         if (empty($bundleNames) || !($fieldConfig instanceof FieldConfig) || $fieldConfig->get('entity_type') !== $container) {
             return false;
