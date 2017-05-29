@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Event;
 
+use Drupal\field\FieldConfigInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Drupal\Core\Entity\Entity;
 
@@ -10,16 +11,21 @@ use Drupal\Core\Entity\Entity;
  */
 class WmContentEntityLabelEvent extends Event
 {
+    const NAME = 'wmcontent.entity.label';
 
     protected $entity;
+    protected $fieldName;
     protected $label;
+    protected $fieldConfig;
 
     /**
      * Constructor.
      */
-    public function __construct(Entity $entity)
+    public function __construct(Entity $entity, $fieldName, FieldConfigInterface $fieldConfig)
     {
         $this->entity = $entity;
+        $this->fieldName = $fieldName;
+        $this->fieldConfig = $fieldConfig;
         $this->label = '';
     }
 
@@ -35,6 +41,17 @@ class WmContentEntityLabelEvent extends Event
     }
 
     /**
+     * Setter for the fieldname.
+     *
+     * @param string $fieldName
+     *   Current fieldname.
+     */
+    public function setFieldName($fieldName)
+    {
+        $this->fieldName = $fieldName;
+    }
+
+    /**
      * Getter for the entity.
      *
      * @return entity
@@ -43,6 +60,17 @@ class WmContentEntityLabelEvent extends Event
     public function getEntity()
     {
         return $this->entity;
+    }
+
+    /**
+     * Getter for the fieldname.
+     *
+     * @return string
+     *  Current fieldname.
+     * */
+    public function getFieldName()
+    {
+        return $this->fieldName;
     }
 
     /**
@@ -62,5 +90,25 @@ class WmContentEntityLabelEvent extends Event
     public function setLabel($label)
     {
         $this->label = $label;
+    }
+
+    /**
+     * Get the fieldconfig
+     *
+     * @return FieldConfigInterface
+     */
+    public function getFieldConfig()
+    {
+        return $this->fieldConfig;
+    }
+
+    /**
+     * Set the fieldconfig
+     *
+     * @param FieldConfigInterface $fieldConfig
+     */
+    public function setFieldConfig(FieldConfigInterface $fieldConfig)
+    {
+        $this->fieldConfig = $fieldConfig;
     }
 }

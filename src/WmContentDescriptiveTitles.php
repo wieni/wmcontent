@@ -10,7 +10,8 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\wmcontent\Entity\EntityTypeBundleInfo;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\wmcontent\Event\WmContentEntityLabelEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class WmContentDescriptiveTitles
 {
@@ -25,20 +26,26 @@ class WmContentDescriptiveTitles
     /** @var EntityTypeManager */
     protected $entityTypeManager;
 
+    /** @var EventDispatcherInterface */
+    private $eventDispatcher;
+
     /**
      * WmContentDescriptiveTitles constructor.
      * @param CurrentRouteMatch $currentRouteMatch
      * @param EntityTypeBundleInfo $entityTypeBundleInfo
      * @param EntityTypeManager $entityTypeManager
+     * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
         CurrentRouteMatch $currentRouteMatch,
         EntityTypeBundleInfo $entityTypeBundleInfo,
-        EntityTypeManager $entityTypeManager
+        EntityTypeManager $entityTypeManager,
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->currentRouteMatch = $currentRouteMatch;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityTypeManager = $entityTypeManager;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -115,7 +122,8 @@ class WmContentDescriptiveTitles
     {
         $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
         $container = $this->getContainerType();
-        $node = $this->currentRouteMatch->getParameter('node');
+        $hostType = $this->currentRouteMatch->getParameter('host_type_id');
+        $host = $this->currentRouteMatch->getParameter($hostType);
 
         if ($childId = $this->currentRouteMatch->getParameter('child_id')) {
             $child = $this
@@ -124,37 +132,33 @@ class WmContentDescriptiveTitles
                 ->load($childId);
 
             $bundle = $child->bundle();
-            $label = $child->label();
-
         } else {
             // Get bundle from its parameter
             $bundle = $this->currentRouteMatch->getParameter('bundle');
         }
 
         // Build title
-        $node = $node->title->value;
+        $host = $host->label() ?: $bundleInfo[$hostType][$host->bundle()]['label'];
         $type = $bundleInfo[$container][$bundle]['label'];
-        $label = empty($label) ? $type : $label;
 
-        switch ($this->currentRouteMatch->getRouteName()) {
-            case 'entity.node.wmcontent_add':
+        $routeName = $this->currentRouteMatch->getRouteName();
+        switch (true) {
+            case strpos($routeName, 'wmcontent_add') !== false:
                 return $this->t(
-                    'Add new %type to %node',
+                    'Add new %type to %host',
                     [
                         '%type' => $type,
-                        '%node' => $node,
+                        '%host' => $host,
                     ]
                 );
-
-            case 'entity.node.wmcontent_edit':
+            case strpos($routeName, 'wmcontent_edit') !== false:
                 return $this->t(
-                    'Edit %type from %node',
+                    'Edit %type from %host',
                     [
                         '%type' => $type,
-                        '%node' => $node,
+                        '%host' => $host,
                     ]
                 );
-
             default:
                 return new TranslatableMarkup('');
         }
@@ -176,6 +180,12 @@ class WmContentDescriptiveTitles
 
         if (empty($bundleNames) || !($fieldConfig instanceof FieldConfig) || $fieldConfig->get('entity_type') !== $container) {
             return false;
+        }
+
+        $event = new WmContentEntityLabelEvent($entity, $field, $fieldConfig);
+        $this->eventDispatcher->dispatch(WmContentEntityLabelEvent::NAME, $event);
+        if ($event->getLabel()) {
+            return $event->getLabel();
         }
 
         if (count($bundleNames) === 1) {

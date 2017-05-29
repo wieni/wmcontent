@@ -30,6 +30,7 @@ services:
       - '@current_route_match'
       - '@wmcontent.entity_type.bundle.info'
       - '@entity_type.manager'
+      - '@event_dispatcher'
   wmcontent.entity_type.bundle.info:
     class: Drupal\wmcontent\Entity\EntityTypeBundleInfo
     parent: entity_type.bundle.info
