@@ -115,7 +115,8 @@ class WmContentDescriptiveTitles
     {
         $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
         $container = $this->getContainerType();
-        $node = $this->currentRouteMatch->getParameter('node');
+        $hostType = $this->currentRouteMatch->getParameter('host_type_id');
+        $host = $this->currentRouteMatch->getParameter($hostType);
 
         if ($childId = $this->currentRouteMatch->getParameter('child_id')) {
             $child = $this
@@ -124,37 +125,33 @@ class WmContentDescriptiveTitles
                 ->load($childId);
 
             $bundle = $child->bundle();
-            $label = $child->label();
-
         } else {
             // Get bundle from its parameter
             $bundle = $this->currentRouteMatch->getParameter('bundle');
         }
 
         // Build title
-        $node = $node->title->value;
+        $host = $host->label() ?: $bundleInfo[$hostType][$host->bundle()]['label'];
         $type = $bundleInfo[$container][$bundle]['label'];
-        $label = empty($label) ? $type : $label;
 
-        switch ($this->currentRouteMatch->getRouteName()) {
-            case 'entity.node.wmcontent_add':
+        $routeName = $this->currentRouteMatch->getRouteName();
+        switch (true) {
+            case strpos($routeName, 'wmcontent_add') !== false:
                 return $this->t(
-                    'Add new %type to %node',
+                    'Add new %type to %host',
                     [
                         '%type' => $type,
-                        '%node' => $node,
+                        '%host' => $host,
                     ]
                 );
-
-            case 'entity.node.wmcontent_edit':
+            case strpos($routeName, 'wmcontent_edit') !== false:
                 return $this->t(
-                    'Edit %type from %node',
+                    'Edit %type from %host',
                     [
                         '%type' => $type,
-                        '%node' => $node,
+                        '%host' => $host,
                     ]
                 );
-
             default:
                 return new TranslatableMarkup('');
         }
