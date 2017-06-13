@@ -246,6 +246,8 @@ class WmContentManager implements WmContentManagerInterface
                 ->resetCache([
                     $host_entity,
                 ]);
+            // Also update the 'changed' timestamp of the parent
+            $host_entity->save();
         }
     }
 
