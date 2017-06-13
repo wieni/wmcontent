@@ -15,6 +15,11 @@ services:
     class: Drupal\wmcontent\EventSubscriber\WmContentConfigSubscriber
     tags:
       - { name: event_subscriber }
+  wmcontent.contentblock_subscriber:
+    class: Drupal\wmcontent\EventSubscriber\ContentBlockSubscriber
+    arguments: ['@wmcontent.manager']
+    tags:
+      - { name: event_subscriber }
   wmcontent.container_access:
     class: Drupal\wmcontent\Access\WmContentContainerAccessCheck
     arguments:

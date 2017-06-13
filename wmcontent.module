@@ -112,23 +112,17 @@ function wmcontent_entity_operation(EntityInterface $entity)
 }
 
 /**
- * Implements hook_entity_insert().
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
- */
-function wmcontent_entity_insert(EntityInterface $entity)
-{
-    _wmcontent_containersave_cacheclear($entity);
-}
-
-/**
  * Implements hook_entity_update().
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  */
 function wmcontent_entity_update(EntityInterface $entity)
 {
-    _wmcontent_containersave_cacheclear($entity);
+    /** @var \Drupal\wmcontent\WmContentManager $manager */
+    $manager = \Drupal::service('wmcontent.manager');
+    if ($host = $manager->isContentBlock($entity)) {
+        $manager->emitChangedEvent($entity, $manager->getContainers($entity));
+    }
 }
 
 /**
@@ -527,34 +521,6 @@ function _wmcontent_alignments()
         'right' => t('Right'),
         'justified' => t('Justified'),
     ];
-}
-
-/**
- * Checks if a given entity's type is registered as a child entity type somewhere,
- * and clear the host cache if it is.
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
- */
-function _wmcontent_containersave_cacheclear(Drupal\Core\Entity\EntityInterface $entity)
-{
-    $clearParent = false;
-
-    // Load up our service clear cache for the host.
-    $manager = \Drupal::service('wmcontent.manager');
-    // $entities = $manager->hostClearCache($p);
-    foreach (wmContentContainer::loadMultiple() as $conf) {
-        $config = $conf->getConfig();
-        if ($config['child_entity_type'] == $entity->getEntityType()->id()) {
-            if (empty($config['child_bundles']) || in_array($entity->bundle(), $config['child_bundles'])) {
-                $clearParent = true;
-            }
-        }
-    }
-
-    if ($clearParent) {
-        // Clear Drupals cache for the parent entity.
-        $manager->hostClearCache($entity);
-    }
 }
 
 /**

@@ -5,6 +5,7 @@ namespace Drupal\wmcontent;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -124,8 +125,12 @@ class WmContentManager
         );
     }
 
+    public function emitChangedEvent(EntityInterface $contentBlock, array $containers)
     {
         $this->eventDispatcher->dispatch(
+            ContentBlockChangedEvent::NAME,
+            new ContentBlockChangedEvent($contentBlock, $containers)
+        );
     }
 
     /** @return \Drupal\wmcontent\Entity\WmContentContainer */
