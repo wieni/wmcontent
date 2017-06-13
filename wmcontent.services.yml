@@ -3,9 +3,6 @@ services:
     class: Drupal\wmcontent\WmContentManager
     arguments:
       - '@entity_type.manager'
-      - '@entity_type.bundle.info'
-      - '@entity.query'
-      - '@language_manager'
       - '@event_dispatcher'
       - '@cache.data'
   wmcontent.subscriber:

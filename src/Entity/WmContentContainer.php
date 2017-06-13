@@ -317,6 +317,24 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
+     * Check whether an entity is a ContentBlock for this container
+     */
+    public function hasContentBlock(EntityInterface $contentBlock)
+    {
+        // We consider this entity a contentblock if it has the configured
+        // entityTypeId (eg: content_block) and bundle (eg: section)
+        $childBundles = $this->getChildBundles();
+        return $this->getChildEntityType() == $contentBlock->getEntityTypeId()
+            && (
+                empty($childBundles)
+                || array_key_exists(
+                    $contentBlock->bundle(),
+                    $childBundles
+                )
+            );
+    }
+
+    /**
     * {@inheritdoc}
     */
     public function postSave(EntityStorageInterface $storage, $update = false)

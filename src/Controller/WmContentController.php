@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Controller;
 
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\WmContentDescriptiveTitles;
@@ -25,6 +26,8 @@ class WmContentController extends ControllerBase
 
     /** @var WmContentDescriptiveTitles */
     protected $descriptiveTitles;
+    /** @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface */
+    private $entityTypeBundleInfo;
 
     /**
      * WmContentController constructor.
@@ -35,11 +38,13 @@ class WmContentController extends ControllerBase
     public function __construct(
         WmContentManager $wmContentManager,
         FormBuilderInterface $formBuilder,
-        WmContentDescriptiveTitles $descriptiveTitles
+        WmContentDescriptiveTitles $descriptiveTitles,
+        EntityTypeBundleInfoInterface $entityTypeBundleInfo
     ) {
         $this->wmContentManager = $wmContentManager;
         $this->formBuilder = $formBuilder;
         $this->descriptiveTitles = $descriptiveTitles;
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     }
 
     /**
@@ -57,7 +62,8 @@ class WmContentController extends ControllerBase
         return new static(
             $wmContentManager,
             $formBuilder,
-            $descriptiveTitles
+            $descriptiveTitles,
+            $container->get('entity_type.bundle.info')
         );
     }
 
@@ -80,6 +86,7 @@ class WmContentController extends ControllerBase
             // Start a form.
             $form = new WmContentMasterForm(
                 $this->wmContentManager,
+                $this->entityTypeBundleInfo,
                 $host_entity,
                 $current_container
             );
