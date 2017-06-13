@@ -3,9 +3,6 @@ services:
     class: Drupal\wmcontent\WmContentManager
     arguments:
       - '@entity_type.manager'
-      - '@entity_type.bundle.info'
-      - '@entity.query'
-      - '@language_manager'
       - '@event_dispatcher'
       - '@cache.data'
   wmcontent.subscriber:
@@ -16,6 +13,11 @@ services:
       - { name: event_subscriber }
   wmcontent.config_subscriber:
     class: Drupal\wmcontent\EventSubscriber\WmContentConfigSubscriber
+    tags:
+      - { name: event_subscriber }
+  wmcontent.contentblock_subscriber:
+    class: Drupal\wmcontent\EventSubscriber\ContentBlockSubscriber
+    arguments: ['@wmcontent.manager']
     tags:
       - { name: event_subscriber }
   wmcontent.container_access:

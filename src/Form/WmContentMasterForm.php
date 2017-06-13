@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Form;
 
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -31,6 +32,10 @@ class WmContentMasterForm extends FormBase
      */
     protected $container;
 
+    /**
+     * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+     */
+    protected $entityTypeBundleInfo;
 
     /**
      * WmContentMasterForm constructor.
@@ -41,12 +46,14 @@ class WmContentMasterForm extends FormBase
      */
     public function __construct(
         WmContentManager $wmContentManager,
+        EntityTypeBundleInfoInterface $entityTypeBundleInfo,
         EntityInterface $host,
         $container
     ) {
         $this->wmContentManager = $wmContentManager;
         $this->host = $host;
         $this->container = $container;
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     }
 
     /**
@@ -199,7 +206,7 @@ class WmContentMasterForm extends FormBase
             // Teaser.
             $row['content'] = [
                 '#type' => 'container',
-                '#markup' => $this->wmContentManager->getEntityTeaser($child),
+                '#markup' => $child->label(),
             ];
 
             if ($this->container->getShowSizeColumn()) {
@@ -250,7 +257,7 @@ class WmContentMasterForm extends FormBase
                 'title' => $this->t(
                     'Add %label',
                     [
-                        '%label' => $this->wmContentManager->getLabel($config['child_entity_type'], $bundle)
+                        '%label' => $this->getLabel($config['child_entity_type'], $bundle)
                     ]
                 ),
                 'url' => Url::fromRoute(
@@ -313,5 +320,18 @@ class WmContentMasterForm extends FormBase
         if (\Drupal::request()->isXmlHttpRequest()) {
             $form_state->setResponse(new JsonResponse('ok'));
         }
+    }
+
+    private function getLabel($entityType, $bundle)
+    {
+        $labels = &drupal_static(__FUNCTION__);
+        if (!isset($labels[$entityType])) {
+            $labels[$entityType] = $this->entityTypeBundleInfo->getBundleInfo($entityType);
+        }
+
+        if (!empty($labels[$entityType][$bundle]['label'])) {
+            return $labels[$entityType][$bundle]['label'];
+        }
+        return ucwords(str_replace("_", " ", $bundle));
     }
 }
