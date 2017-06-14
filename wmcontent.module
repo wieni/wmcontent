@@ -118,6 +118,9 @@ function wmcontent_entity_operation(EntityInterface $entity)
  */
 function wmcontent_entity_update(EntityInterface $entity)
 {
+    if (!$entity instanceof \Drupal\Core\Entity\ContentEntityInterface) {
+        return;
+    }
     /** @var \Drupal\wmcontent\WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
     if ($host = $manager->isContentBlock($entity)) {
