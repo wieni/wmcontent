@@ -299,22 +299,15 @@ class WmContentMasterForm extends FormBase
      */
     public function submitForm(array &$form, FormStateInterface $form_state)
     {
-
         // Get the values from the form.
         $values = $form_state->getValues();
 
         // Go through each row and update the weight.
-        $p = false;
         foreach ($values['rows'] as $row) {
             /** @var Drupal\eck\Entity\EckEntity $p */
             $p = Drupal::entityTypeManager()->getStorage($row['hiddens']['type'])->load($row['hiddens']['id']);
             $p->set('wmcontent_weight', $row['wmcontent_weight']);
             $p->save();
-        }
-
-        if ($p) {
-            // Clear Drupal cache for the parent entity.
-            $this->wmContentManager->hostClearCache($p);
         }
 
         if (\Drupal::request()->isXmlHttpRequest()) {
