@@ -124,6 +124,20 @@ class WmContentController extends ControllerBase
 
         $host = $route->getParameter($host_type_id);
 
+        $weight = 0;
+        $blocks = $host->getContentBlocks();
+        foreach ($blocks as $block) {
+            /* @var \Drupal\Core\Entity\ContentEntityInterface $block */
+            if (!$block->hasField('wmcontent_weight')) {
+                continue;
+            }
+
+            $blockWeight = $block->get('wmcontent_weight')->getString();
+
+            $weight = $blockWeight > $weight ? $blockWeight : $weight;
+        }
+
+
         // Create an empty entity of the chosen entity type and the bundle.
         $child = $this
             ->entityTypeManager()
@@ -139,7 +153,7 @@ class WmContentController extends ControllerBase
         $child->set('wmcontent_parent_type', $host_type_id);
         $child->set('wmcontent_size', 'full');
         $child->set('wmcontent_alignment', 'left');
-        $child->set('wmcontent_weight', 50);
+        $child->set('wmcontent_weight', $weight + 1);
         $child->set('wmcontent_container', $current_container->getId());
 
         // In the correct language.
