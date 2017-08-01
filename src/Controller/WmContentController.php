@@ -117,6 +117,7 @@ class WmContentController extends ControllerBase
     public function add($container, $bundle, RouteMatchInterface $route, $host_type_id)
     {
         // Get the container.
+        /** @var WmContentContainer $current_container */
         $current_container = $this
             ->entityTypeManager()
             ->getStorage('wmcontent_container')
@@ -125,7 +126,7 @@ class WmContentController extends ControllerBase
         $host = $route->getParameter($host_type_id);
 
         $weight = 0;
-        $blocks = $host->getContentBlocks();
+        $blocks = $this->wmContentManager->getContent($host, $current_container->id());
         foreach ($blocks as $block) {
             /* @var \Drupal\Core\Entity\ContentEntityInterface $block */
             if (!$block->hasField('wmcontent_weight')) {
