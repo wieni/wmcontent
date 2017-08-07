@@ -301,9 +301,10 @@ class WmContentMasterForm extends FormBase
     {
         // Get the values from the form.
         $values = $form_state->getValues();
+        $rows = $values['rows'] ?: [];
 
         // Go through each row and update the weight.
-        foreach ($values['rows'] as $row) {
+        foreach ($rows as $row) {
             /** @var Drupal\eck\Entity\EckEntity $p */
             $p = Drupal::entityTypeManager()->getStorage($row['hiddens']['type'])->load($row['hiddens']['id']);
             $p->set('wmcontent_weight', $row['wmcontent_weight']);

@@ -11,6 +11,8 @@ class ContentBlockSubscriber implements EventSubscriberInterface
     /** @var \Drupal\wmcontent\WmContentManager */
     private $manager;
 
+    private $updatedHosts = [];
+
     public function __construct(WmContentManager $manager)
     {
         $this->manager = $manager;
@@ -27,8 +29,11 @@ class ContentBlockSubscriber implements EventSubscriberInterface
      */
     public function updateHostEntity(ContentBlockChangedEvent $event)
     {
-        if ($host = $this->manager->getHost($event->getContentBlock())) {
+        $host = $this->manager->getHost($event->getContentBlock());
+        $cid = sprintf('%s:%s', $host->getEntityTypeId(), $host->id());
+        if ($host && !array_key_exists($cid, $this->updatedHosts)) {
             $host->save();
+            $this->updatedHosts[$cid] = true;
         }
     }
 }
