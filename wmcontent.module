@@ -123,7 +123,7 @@ function wmcontent_entity_update(EntityInterface $entity)
     }
     /** @var \Drupal\wmcontent\WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
-    if ($host = $manager->isContentBlock($entity)) {
+    if ($manager->isContentBlock($entity)) {
         $manager->emitChangedEvent($entity, $manager->getContainers($entity));
     }
 }
@@ -135,7 +135,7 @@ function wmcontent_entity_insert(EntityInterface $entity)
     }
     /** @var \Drupal\wmcontent\WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
-    if ($host = $manager->isContentBlock($entity)) {
+    if ($manager->isContentBlock($entity)) {
         $manager->emitChangedEvent($entity, $manager->getContainers($entity));
     }
 }
