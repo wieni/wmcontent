@@ -9,12 +9,11 @@
  * @package Wieni
  */
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Url;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 
@@ -84,6 +83,9 @@ function wmcontent_entity_type_alter(array &$entity_types)
  */
 function wmcontent_entity_operation(EntityInterface $entity)
 {
+    if (!$entity instanceof ContentEntityInterface) {
+        return [];
+    }
     $operations = [];
 
     /** @var \Drupal\wmcontent\WmContentManager $manager */
@@ -108,7 +110,7 @@ function wmcontent_entity_operation(EntityInterface $entity)
  */
 function wmcontent_entity_update(EntityInterface $entity)
 {
-    if (!$entity instanceof \Drupal\Core\Entity\ContentEntityInterface) {
+    if (!$entity instanceof ContentEntityInterface) {
         return;
     }
     /** @var \Drupal\wmcontent\WmContentManager $manager */
@@ -120,7 +122,7 @@ function wmcontent_entity_update(EntityInterface $entity)
 
 function wmcontent_entity_insert(EntityInterface $entity)
 {
-    if (!$entity instanceof \Drupal\Core\Entity\ContentEntityInterface) {
+    if (!$entity instanceof ContentEntityInterface) {
         return;
     }
     /** @var \Drupal\wmcontent\WmContentManager $manager */
