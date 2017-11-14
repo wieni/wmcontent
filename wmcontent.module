@@ -283,7 +283,7 @@ function wmcontent_theme($existing, $type, $theme, $path)
 function wmcontent_theme_suggestions_eck_entity(array $variables)
 {
     $suggestions = [];
-    
+
     // Add theme suggestiongs for the type and the the type__bundle.
     if (!empty($variables['entity']) && isset($variables['entity']['#entity_type'])) {
         $suggestions = [
@@ -336,7 +336,7 @@ function wmcontent_preprocess_paragraph(&$variables)
     foreach (Element::children($variables['entity']) as $key) {
         if (!empty($variables['entity'][$key]['#field_name'])
             && !in_array($variables['entity'][$key]['#field_name'], $strip)
-            ) {
+        ) {
             $variables['content'][] = $variables['entity'][$key];
         }
     }
@@ -370,10 +370,10 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                     array(
                         'type' => 'options_select',
                         'settings' => array(
-                           'display_label' => true,
-                            ),
+                            'display_label' => true,
+                        ),
                         'weight' => 20,
-                        )
+                    )
                 )
                 ->setDisplayOptions(
                     'view',
@@ -423,7 +423,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                         'settings' => array(
                             'display_label' => true,
                         ),
-                    'weight' => 20,
+                        'weight' => 20,
                     )
                 )
                 ->setDisplayOptions(
@@ -490,11 +490,11 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setDisplayOptions(
                     'form',
                     array(
-                    'type' => 'hidden',
-                    'settings' => array(
-                        'display_label' => true,
-                    ),
-                      'weight' => 20,
+                        'type' => 'hidden',
+                        'settings' => array(
+                            'display_label' => true,
+                        ),
+                        'weight' => 20,
                     )
                 );
         }
@@ -555,18 +555,28 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
             if ($test == $form_id) {
                 // What do other modules have to say about the sizes.
                 $sizes = \Drupal::moduleHandler()->invokeAll('wmcontent_sizes_alter', [$type, $bundle]);
+                $defaultSize = \Drupal::moduleHandler()->invokeAll('wmcontent_default_size_alter', [$type, $bundle]);
                 $alignments = \Drupal::moduleHandler()->invokeAll('wmcontent_alignments_alter', [$type, $bundle]);
+                $defaultAlignment = \Drupal::moduleHandler()->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
 
                 // Ok did we have some sizes?
                 if (count($sizes) > 0) {
                     // Alter the form.
                     $form['wmcontent_size']['widget']['#options'] = $sizes;
                 }
+                if (count($defaultSize) > 0) {
+                    // Alter the form.
+                    $form['wmcontent_size']['widget']['#default_value'] = current($defaultSize);
+                }
 
                 // Did we have some alignments.
                 if (count($alignments) > 0) {
                     // Alter the form.
                     $form['wmcontent_alignment']['widget']['#options'] = $alignments;
+                }
+                if (count($defaultAlignment) > 0) {
+                    // Alter the form.
+                    $form['wmcontent_alignment']['widget']['#default_value'] = current($defaultAlignment);
                 }
 
                 // Did we get 1 size?
