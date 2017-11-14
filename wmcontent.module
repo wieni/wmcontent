@@ -88,22 +88,12 @@ function wmcontent_entity_operation(EntityInterface $entity)
 
     /** @var \Drupal\wmcontent\WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
-    foreach ($manager->getContainers() as $container) {
-        if (!$container->isHost($entity)) {
-            continue;
-        }
 
-        $url = Url::fromRoute(
-            'entity.' . $entity->getEntityTypeId() . '.wmcontent_overview',
-            [
-                $entity->getEntityType()->id() => $entity->id(),
-                'container' => $container->id(),
-            ]
-        );
-
+    // Get the containers this entity hosts
+    foreach ($manager->getHostContainers($entity) as $container) {
         $operations[$container->id()] = [
             'title' => $container->label(),
-            'url' => $url,
+            'url' => $entity->toUrl('drupal:wmcontent-overview'),
             'weight' => 50,
         ];
     }
