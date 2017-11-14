@@ -15,6 +15,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Url;
 use Drupal\wmcontent\Entity\WmContentContainer;
 
 /**
@@ -91,11 +92,21 @@ function wmcontent_entity_operation(EntityInterface $entity)
     /** @var \Drupal\wmcontent\WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
 
+    $routeName = 'entity.' . $entity->getEntityTypeId() . '.wmcontent_overview';
     // Get the containers this entity hosts
     foreach ($manager->getHostContainers($entity) as $container) {
         $operations[$container->id()] = [
             'title' => $container->label(),
-            'url' => $entity->toUrl('drupal:wmcontent-overview'),
+            'url' => Url::fromRoute(
+                $routeName,
+                [
+                    $entity->getEntityTypeId() => $entity->id(),
+                    'container' => $container->id(),
+                ],
+                [
+                    'language' => $entity->language(),
+                ]
+            ),
             'weight' => 50,
         ];
     }
