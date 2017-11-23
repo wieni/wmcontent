@@ -564,32 +564,31 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
             // Build up what the form id for this child would be.
             $test = $config['child_entity_type'] . "_" . $bundle . "_form";
 
-            // Sweet baby jesus we got a child entity form.
-            if ($test == $form_id) {
-                // What do other modules have to say about the sizes.
-                $sizes = \Drupal::moduleHandler()->invokeAll('wmcontent_sizes_alter', [$type, $bundle]);
-                $defaultSize = \Drupal::moduleHandler()->invokeAll('wmcontent_default_size_alter', [$type, $bundle]);
-                $alignments = \Drupal::moduleHandler()->invokeAll('wmcontent_alignments_alter', [$type, $bundle]);
-                $defaultAlignment = \Drupal::moduleHandler()->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
+            if ($test !== $form_id) {
+                continue;
+            }
 
-                // Ok did we have some sizes?
+            // Sweet baby jesus we got a child entity form.
+            // What do other modules have to say about the sizes.
+            $sizes = \Drupal::moduleHandler()->invokeAll('wmcontent_sizes_alter', [$type, $bundle]);
+            $defaultSize = \Drupal::moduleHandler()->invokeAll('wmcontent_default_size_alter', [$type, $bundle]);
+            $alignments = \Drupal::moduleHandler()->invokeAll('wmcontent_alignments_alter', [$type, $bundle]);
+            $defaultAlignment = \Drupal::moduleHandler()->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
+
+            // Ok did we have some sizes?
+            if (isset($form['wmcontent_size'])) {
                 if (count($sizes) > 0) {
                     // Alter the form.
                     $form['wmcontent_size']['widget']['#options'] = $sizes;
                 }
-                if (count($defaultSize) > 0) {
+
+                if (
+                    count($defaultSize) > 0
+                    && ($form['wmcontent_size']['widget']['#default_value'] === 'full'
+                        || !in_array($form['wmcontent_size']['widget']['#default_value'], array_keys($form['wmcontent_size']['widget']['#options'])))
+                ) {
                     // Alter the form.
                     $form['wmcontent_size']['widget']['#default_value'] = current($defaultSize);
-                }
-
-                // Did we have some alignments.
-                if (count($alignments) > 0) {
-                    // Alter the form.
-                    $form['wmcontent_alignment']['widget']['#options'] = $alignments;
-                }
-                if (count($defaultAlignment) > 0) {
-                    // Alter the form.
-                    $form['wmcontent_alignment']['widget']['#default_value'] = current($defaultAlignment);
                 }
 
                 // Did we get 1 size?
@@ -598,6 +597,23 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                     // Alter the form.
                     $form['wmcontent_size']['#type'] = "hidden";
                     $form['wmcontent_size']['#value'] = [array_keys($sizes)[0]];
+                }
+            }
+
+            // Did we have some alignments.
+            if (isset($form['wmcontent_alignment'])) {
+                if (count($alignments) > 0) {
+                    // Alter the form.
+                    $form['wmcontent_alignment']['widget']['#options'] = $alignments;
+                }
+
+                if (
+                    count($defaultAlignment) > 0
+                    && ($form['wmcontent_alignment']['widget']['#default_value'] === 'full'
+                        || !in_array($form['wmcontent_alignment']['widget']['#default_value'], array_keys($form['wmcontent_alignment']['widget']['#options'])))
+                ) {
+                    // Alter the form.
+                    $form['wmcontent_alignment']['widget']['#default_value'] = current($defaultAlignment);
                 }
 
                 // Did we have 1 alignment?
