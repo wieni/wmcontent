@@ -576,7 +576,7 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
             $defaultAlignment = \Drupal::moduleHandler()->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
 
             // Ok did we have some sizes?
-            if (isset($form['wmcontent_size'])) {
+            if (isset($form['wmcontent_size']['widget'])) {
                 if (count($sizes) > 0) {
                     // Alter the form.
                     $form['wmcontent_size']['widget']['#options'] = $sizes;
@@ -601,7 +601,7 @@ function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
             }
 
             // Did we have some alignments.
-            if (isset($form['wmcontent_alignment'])) {
+            if (isset($form['wmcontent_alignment']['widget'])) {
                 if (count($alignments) > 0) {
                     // Alter the form.
                     $form['wmcontent_alignment']['widget']['#options'] = $alignments;
