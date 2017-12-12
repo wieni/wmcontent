@@ -283,6 +283,7 @@ class WmContentMasterForm extends FormBase
             '#type' => 'submit',
             '#value' => t('Save the order'),
             '#weight' => 0,
+            '#access' => !empty(Element::children($form['rows'])),
         ];
 
         $form['actions']['add_new'] = [
