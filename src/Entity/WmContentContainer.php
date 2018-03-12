@@ -252,7 +252,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     /**
      * @return \Drupal\Core\Entity\EntityTypeBundleInfo|object
      */
-    private function entityTypeBundleInfo()
+    protected function entityTypeBundleInfo()
     {
         if (!$this->entityTypeBundleInfo) {
             $this->entityTypeBundleInfo = $this->container()->get('entity_type.bundle.info');
