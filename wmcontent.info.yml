@@ -6,3 +6,4 @@ dependencies:
   - eck
   - node
   - options
+  - wmmodel
