@@ -169,10 +169,6 @@ class WmContentController extends ControllerBase
         $form['wmcontent_parent']['#access'] = false;
         $form['wmcontent_weight']['#access'] = false;
 
-        // Change the 'Add another item' button label
-        $this->descriptiveTitles->updateAddMoreButtonTitle($form, $child);
-        $this->descriptiveTitles->updateAddAnotherSubContentButtonTitle($form, $child);
-
         return $form;
     }
 
@@ -249,10 +245,6 @@ class WmContentController extends ControllerBase
         $form['wmcontent_parent_type']['#access'] = false;
         $form['wmcontent_parent']['#access'] = false;
         $form['wmcontent_weight']['#access'] = false;
-
-        // Change the 'Add another item' button label
-        $this->descriptiveTitles->updateAddMoreButtonTitle($form, $child);
-        $this->descriptiveTitles->updateAddAnotherSubContentButtonTitle($form, $child);
 
         // Get the form and return it.
         return $form;
