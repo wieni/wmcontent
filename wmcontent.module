@@ -87,6 +87,11 @@ function wmcontent_entity_operation(EntityInterface $entity)
     if (!$entity instanceof ContentEntityInterface) {
         return [];
     }
+
+    if (!$entity->access('update')) {
+        return [];
+    }
+
     $operations = [];
 
     /** @var \Drupal\wmcontent\WmContentManager $manager */
