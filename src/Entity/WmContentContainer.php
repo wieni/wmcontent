@@ -313,7 +313,10 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     public function isHost(EntityInterface $host)
     {
         return $host->getEntityTypeId() == $this->getHostEntityType()
-            && in_array($host->bundle(), $this->getHostBundles());
+            && (
+                empty($this->getHostBundles())
+                || in_array($host->bundle(), $this->getHostBundles())
+            );
     }
 
     /**
