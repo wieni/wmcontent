@@ -3,12 +3,14 @@
 namespace Drupal\wmcontent\Form;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal;
+use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\WmContentManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -19,42 +21,30 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  */
 class WmContentMasterForm extends FormBase
 {
-
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
+    /** @var EntityTypeBundleInfoInterface */
+    protected $entityTypeBundleInfo;
     /** @var WmContentManager */
     protected $wmContentManager;
-
-    /**
-     * The main entity that we are adding and managing paragraphs for.
-     */
-    protected $host;
-
-    /**
-     * @var Drupal\wmcontent\Entity\WmContentContainer $container
-     */
+    /** @var WmContentContainer $container */
     protected $container;
 
-    /**
-     * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
-     */
-    protected $entityTypeBundleInfo;
+    /** The main entity that we are adding and managing paragraphs for. */
+    protected $host;
 
-    /**
-     * WmContentMasterForm constructor.
-     *
-     * @param \Drupal\wmcontent\WmContentManager $wmContentManager
-     * @param \Drupal\Core\Entity\EntityInterface $host
-     * @param $container
-     */
     public function __construct(
-        WmContentManager $wmContentManager,
+        EntityTypeManagerInterface $entityTypeManager,
         EntityTypeBundleInfoInterface $entityTypeBundleInfo,
+        WmContentManager $wmContentManager,
         EntityInterface $host,
         $container
     ) {
+        $this->entityTypeManager = $entityTypeManager;
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->wmContentManager = $wmContentManager;
         $this->host = $host;
         $this->container = $container;
-        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     }
 
     /**
@@ -135,44 +125,47 @@ class WmContentMasterForm extends FormBase
 
         /** @var Drupal\eck\Entity\EckEntity $child */
         foreach ($children as $child) {
-            // Edit and delete operations.
-            $operations = [
-                'data' => [
-                    '#type' => 'operations',
-                    '#links' => [
-                        'edit' => [
-                            'url' => Url::fromRoute(
-                                "entity." . $this->container->getHostEntityType() . ".wmcontent_edit",
-                                [
-                                    'container' => $this->container->getId(),
-                                    'type' => $child->getEntityTypeId(),
-                                    'child_id' => $child->id(),
-                                    $this->container->getHostEntityType() => $this->host->id(),
-                                ],
-                                [
-                                    'query' => $query,
-                                ]
-                            ),
-                            'title' => $this->t('Edit'),
+            if (!$child->access('view')) {
+                continue;
+            }
+
+            $operations = [];
+
+            if ($child->access('update')) {
+                $operations['edit'] = [
+                    'url' => Url::fromRoute(
+                        "entity." . $this->container->getHostEntityType() . ".wmcontent_edit",
+                        [
+                            'container' => $this->container->getId(),
+                            'type' => $child->getEntityTypeId(),
+                            'child_id' => $child->id(),
+                            $this->container->getHostEntityType() => $this->host->id(),
                         ],
-                        'delete' => [
-                            'url' => Url::fromRoute(
-                                "entity." . $this->container->getHostEntityType() . ".wmcontent_delete",
-                                [
-                                    'container' => $this->container->getId(),
-                                    'type' => $child->getEntityTypeId(),
-                                    'child_id' => $child->id(),
-                                    $this->container->getHostEntityType() => $this->host->id(),
-                                ],
-                                [
-                                    'query' => $query,
-                                ]
-                            ),
-                            'title' => $this->t('Delete'),
+                        [
+                            'query' => $query,
+                        ]
+                    ),
+                    'title' => $this->t('Edit'),
+                ];
+            }
+
+            if ($child->access('delete')) {
+                $operations['delete'] = [
+                    'url' => Url::fromRoute(
+                        "entity." . $this->container->getHostEntityType() . ".wmcontent_delete",
+                        [
+                            'container' => $this->container->getId(),
+                            'type' => $child->getEntityTypeId(),
+                            'child_id' => $child->id(),
+                            $this->container->getHostEntityType() => $this->host->id(),
                         ],
-                    ],
-                ],
-            ];
+                        [
+                            'query' => $query,
+                        ]
+                    ),
+                    'title' => $this->t('Delete'),
+                ];
+            }
 
             // Start the row.
             $row = [
@@ -237,7 +230,12 @@ class WmContentMasterForm extends FormBase
             ];
 
             // Add the operations.
-            $row['operations'] = $operations;
+            $row['operations'] = [
+                'data' => [
+                    '#type' => 'operations',
+                    '#links' => $operations,
+                ],
+            ];
 
             // Add the row to the rows.
             $form['rows'][] = $row;
@@ -254,6 +252,14 @@ class WmContentMasterForm extends FormBase
         }
 
         foreach ($config['child_bundles'] as $bundle) {
+            $access = $this->entityTypeManager
+                ->getAccessControlHandler($config['child_entity_type'])
+                ->createAccess($bundle);
+
+            if (!$access) {
+                continue;
+            }
+
             $links[$bundle] = [
                 'title' => $this->t(
                     'Add %label',
