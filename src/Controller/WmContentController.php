@@ -3,6 +3,7 @@
 namespace Drupal\wmcontent\Controller;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\WmContentDescriptiveTitles;
@@ -20,14 +21,14 @@ class WmContentController extends ControllerBase
 {
     /** @var WmContentManager */
     protected $wmContentManager;
-
     /** @var FormBuilderInterface */
     protected $formBuilder;
-
     /** @var WmContentDescriptiveTitles */
     protected $descriptiveTitles;
-    /** @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface */
-    private $entityTypeBundleInfo;
+    /** @var EntityTypeBundleInfoInterface */
+    protected $entityTypeBundleInfo;
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
 
     /**
      * WmContentController constructor.
@@ -39,12 +40,14 @@ class WmContentController extends ControllerBase
         WmContentManager $wmContentManager,
         FormBuilderInterface $formBuilder,
         WmContentDescriptiveTitles $descriptiveTitles,
-        EntityTypeBundleInfoInterface $entityTypeBundleInfo
+        EntityTypeBundleInfoInterface $entityTypeBundleInfo,
+        EntityTypeManagerInterface $entityTypeManager
     ) {
         $this->wmContentManager = $wmContentManager;
         $this->formBuilder = $formBuilder;
         $this->descriptiveTitles = $descriptiveTitles;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
+        $this->entityTypeManager = $entityTypeManager;
     }
 
     /**
@@ -63,7 +66,8 @@ class WmContentController extends ControllerBase
             $wmContentManager,
             $formBuilder,
             $descriptiveTitles,
-            $container->get('entity_type.bundle.info')
+            $container->get('entity_type.bundle.info'),
+            $container->get('entity_type.manager')
         );
     }
 
@@ -85,8 +89,9 @@ class WmContentController extends ControllerBase
         if ($current_container->getId()) {
             // Start a form.
             $form = new WmContentMasterForm(
-                $this->wmContentManager,
+                $this->entityTypeManager,
                 $this->entityTypeBundleInfo,
+                $this->wmContentManager,
                 $host_entity,
                 $current_container
             );
