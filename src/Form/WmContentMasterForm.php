@@ -125,13 +125,13 @@ class WmContentMasterForm extends FormBase
 
         /** @var Drupal\eck\Entity\EckEntity $child */
         foreach ($children as $child) {
-            if (!$child->access('view')) {
+            if ($child->access('view', null, true)->isForbidden()) {
                 continue;
             }
 
             $operations = [];
 
-            if ($child->access('update')) {
+            if (!$child->access('update', null, true)->isForbidden()) {
                 $operations['edit'] = [
                     'url' => Url::fromRoute(
                         "entity." . $this->container->getHostEntityType() . ".wmcontent_edit",
@@ -149,7 +149,7 @@ class WmContentMasterForm extends FormBase
                 ];
             }
 
-            if ($child->access('delete')) {
+            if (!$child->access('delete', null, true)->isForbidden()) {
                 $operations['delete'] = [
                     'url' => Url::fromRoute(
                         "entity." . $this->container->getHostEntityType() . ".wmcontent_delete",
