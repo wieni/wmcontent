@@ -2,13 +2,14 @@
 
 namespace Drupal\wmcontent\EventSubscriber;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Drupal\wmcontent\WmContentManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ContentBlockSubscriber implements EventSubscriberInterface
 {
-    /** @var \Drupal\wmcontent\WmContentManager */
+    /** @var WmContentManager */
     private $manager;
 
     private $updatedHosts = [];
@@ -30,10 +31,18 @@ class ContentBlockSubscriber implements EventSubscriberInterface
     public function updateHostEntity(ContentBlockChangedEvent $event)
     {
         $host = $this->manager->getHost($event->getContentBlock());
-        $cid = sprintf('%s:%s', $host->getEntityTypeId(), $host->id());
-        if ($host && !array_key_exists($cid, $this->updatedHosts)) {
-            $host->save();
-            $this->updatedHosts[$cid] = true;
+
+        if (!$host instanceof EntityInterface) {
+            return;
         }
+
+        $cid = sprintf('%s:%s', $host->getEntityTypeId(), $host->id());
+
+        if (array_key_exists($cid, $this->updatedHosts)) {
+            return;
+        }
+
+        $host->save();
+        $this->updatedHosts[$cid] = true;
     }
 }
