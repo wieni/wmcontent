@@ -157,8 +157,6 @@ class WmContentController extends ControllerBase
         // Get the id of the parent and add it in.
         $child->set('wmcontent_parent', $host->id());
         $child->set('wmcontent_parent_type', $host_type_id);
-        $child->set('wmcontent_size', 'full');
-        $child->set('wmcontent_alignment', 'left');
         $child->set('wmcontent_weight', $weight + 1);
         $child->set('wmcontent_container', $current_container->getId());
 

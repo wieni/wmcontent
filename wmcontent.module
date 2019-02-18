@@ -12,7 +12,10 @@
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Url;
@@ -375,13 +378,13 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
     foreach (wmContentContainer::loadMultiple() as $conf) {
         // Match. This is kind of wrong because we're going to overload all
         // the bundles of the entity type with our fields.
-        if ($entity_type->id() == $conf->getChildEntityType()) {
+        if ($entity_type->id() === $conf->getChildEntityType()) {
             $fields['wmcontent_size'] = BaseFieldDefinition::create('list_string')
                 ->setLabel(t('Size'))
                 ->setDescription(t('Select the size.'))
                 ->setRequired(true)
-                ->setSetting('allowed_values', _wmcontent_sizes())
-                ->setSetting('default_value', 'full')
+                ->setSetting('allowed_values_function', '_wmcontent_sizes')
+                ->setDefaultValueCallback('_wmcontent_default_size')
                 ->setDisplayConfigurable('form', true)
                 ->setDisplayOptions(
                     'form',
@@ -406,8 +409,8 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                 ->setLabel(t('Alignment'))
                 ->setDescription(t('Select the Alignment.'))
                 ->setRequired(true)
-                ->setSetting('allowed_values', _wmcontent_alignments())
-                ->setSetting('default_value', 'left')
+                ->setSetting('allowed_values_function', '_wmcontent_alignments')
+                ->setDefaultValueCallback('_wmcontent_default_alignment')
                 ->setDisplayConfigurable('form', true)
                 ->setDisplayOptions(
                     'form',
@@ -521,113 +524,119 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
     return $fields;
 }
 
-/**
- * Default list of available sizes.
- */
-function _wmcontent_sizes()
+function _wmcontent_sizes(FieldStorageDefinitionInterface $definition = null, FieldableEntityInterface $entity = null)
 {
-    return [
+    $bundle = null;
+    $type = null;
+
+    $defaults = [
         'small' => t('Small'),
         'medium' => t('Medium'),
         'large' => t('Large'),
         'full' => t('Full'),
     ];
+
+    if ($entity instanceof FieldableEntityInterface) {
+        $bundle = $entity->bundle();
+        $type = $entity->getEntityTypeId();
+    }
+
+    $sizes = \Drupal::moduleHandler()
+        ->invokeAll('wmcontent_sizes_alter', [$type, $bundle, $defaults]);
+
+    if (empty($sizes)) {
+        return $defaults;
+    }
+
+    return $sizes;
 }
 
-/**
- * Default list of available sizes.
- */
-function _wmcontent_alignments()
+function _wmcontent_default_size(FieldableEntityInterface $entity = null)
 {
-    return [
+    $bundle = null;
+    $type = null;
+
+    if ($entity instanceof FieldableEntityInterface) {
+        $bundle = $entity->bundle();
+        $type = $entity->getEntityTypeId();
+    }
+
+    return \Drupal::moduleHandler()
+        ->invokeAll('wmcontent_default_size_alter', [$type, $bundle]);
+}
+
+function _wmcontent_alignments(FieldStorageDefinitionInterface $definition = null, FieldableEntityInterface $entity = null)
+{
+    $bundle = null;
+    $type = null;
+
+    $defaults = [
         'left' => t('Left'),
         'right' => t('Right'),
         'justified' => t('Justified'),
     ];
+
+    if ($entity instanceof FieldableEntityInterface) {
+        $bundle = $entity->bundle();
+        $type = $entity->getEntityTypeId();
+    }
+
+    $alignments = \Drupal::moduleHandler()
+        ->invokeAll('wmcontent_alignments_alter', [$type, $bundle, $defaults]);
+
+    if (empty($alignments)) {
+        return $defaults;
+    }
+
+    return $alignments;
 }
 
-/**
- * Implements hook_form_alter().
- *
- * @param $form
- * @param \Drupal\Core\Form\FormStateInterface $form_state
- * @param $form_id
- */
-function wmcontent_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
+function _wmcontent_default_alignment(FieldableEntityInterface $entity = null)
 {
-    // Go through all the containers.
-    /** @var WmContentContainer $conf */
-    foreach (wmContentContainer::loadMultiple() as $conf) {
-        // Get the config.
-        $config = $conf->getConfig();
+    $bundle = null;
+    $type = null;
 
-        // Establish entity type.
-        $type = $config['child_entity_type'];
+    if ($entity instanceof FieldableEntityInterface) {
+        $bundle = $entity->bundle();
+        $type = $entity->getEntityTypeId();
+    }
 
-        // Go through the bundles.
+    return \Drupal::moduleHandler()
+        ->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
+}
+
+function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+    /** @var WmContentContainer $entity */
+    foreach (wmContentContainer::loadMultiple() as $entity) {
+        $config = $entity->getConfig();
+
         foreach ($config['child_bundles'] as $bundle) {
             // Build up what the form id for this child would be.
-            $test = $config['child_entity_type'] . "_" . $bundle . "_form";
+            $test = $config['child_entity_type'] . '_' . $bundle . '_form';
 
             if ($test !== $form_id) {
                 continue;
             }
 
-            // Sweet baby jesus we got a child entity form.
-            // What do other modules have to say about the sizes.
-            $sizes = \Drupal::moduleHandler()->invokeAll('wmcontent_sizes_alter', [$type, $bundle]);
-            $defaultSize = \Drupal::moduleHandler()->invokeAll('wmcontent_default_size_alter', [$type, $bundle]);
-            $alignments = \Drupal::moduleHandler()->invokeAll('wmcontent_alignments_alter', [$type, $bundle]);
-            $defaultAlignment = \Drupal::moduleHandler()->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
-
-            // Ok did we have some sizes?
-            if (isset($form['wmcontent_size']['widget'])) {
-                if (count($sizes) > 0) {
-                    // Alter the form.
-                    $form['wmcontent_size']['widget']['#options'] = $sizes;
-                }
-
-                if (
-                    count($defaultSize) > 0
-                    && ($form['wmcontent_size']['widget']['#default_value'] === 'full'
-                        || !in_array($form['wmcontent_size']['widget']['#default_value'], array_keys($form['wmcontent_size']['widget']['#options'])))
-                ) {
-                    // Alter the form.
-                    $form['wmcontent_size']['widget']['#default_value'] = current($defaultSize);
-                }
-
-                // Did we get 1 size?
-                if (count($sizes) == 1 && $config['hide_single_option_sizes']) {
-                    unset($form['wmcontent_size']);
-                    // Alter the form.
-                    $form['wmcontent_size']['#type'] = "hidden";
-                    $form['wmcontent_size']['#value'] = [array_keys($sizes)[0]];
-                }
+            if (
+                $config['hide_single_option_sizes']
+                && isset($form['wmcontent_size']['widget']['#options'])
+                && count($form['wmcontent_size']['widget']['#options']) === 1
+            ) {
+                unset($form['wmcontent_size']);
+                $form['wmcontent_size']['#type'] = "hidden";
+                $form['wmcontent_size']['#value'] = $form['wmcontent_size']['#default_value'];
             }
 
-            // Did we have some alignments.
-            if (isset($form['wmcontent_alignment']['widget'])) {
-                if (count($alignments) > 0) {
-                    // Alter the form.
-                    $form['wmcontent_alignment']['widget']['#options'] = $alignments;
-                }
-
-                if (
-                    count($defaultAlignment) > 0
-                    && ($form['wmcontent_alignment']['widget']['#default_value'] === 'full'
-                        || !in_array($form['wmcontent_alignment']['widget']['#default_value'], array_keys($form['wmcontent_alignment']['widget']['#options'])))
-                ) {
-                    // Alter the form.
-                    $form['wmcontent_alignment']['widget']['#default_value'] = current($defaultAlignment);
-                }
-
-                // Did we have 1 alignment?
-                if (count($alignments) == 1 && $config['hide_single_option_alignments']) {
-                    unset($form['wmcontent_alignment']);
-                    // Alter the form.
-                    $form['wmcontent_alignment']['#type'] = "hidden";
-                    $form['wmcontent_alignment']['#value'] = [array_keys($alignments)[0]];
-                }
+            if (
+                $config['hide_single_option_alignments']
+                && isset($form['wmcontent_alignment']['widget']['#options'])
+                && count($form['wmcontent_alignment']['widget']['#options']) === 1
+            ) {
+                unset($form['wmcontent_alignment']);
+                $form['wmcontent_alignment']['#type'] = 'hidden';
+                $form['wmcontent_alignment']['#value'] = $form['wmcontent_size']['#default_value'];
             }
         }
     }
