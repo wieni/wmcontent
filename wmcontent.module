@@ -626,7 +626,10 @@ function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
             ) {
                 unset($form['wmcontent_size']);
                 $form['wmcontent_size']['#type'] = "hidden";
-                $form['wmcontent_size']['#value'] = $form['wmcontent_size']['#default_value'];
+
+                if (isset($form['wmcontent_size']['#default_value'])) {
+                    $form['wmcontent_size']['#value'] = $form['wmcontent_size']['#default_value'];
+                }
             }
 
             if (
@@ -636,7 +639,10 @@ function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
             ) {
                 unset($form['wmcontent_alignment']);
                 $form['wmcontent_alignment']['#type'] = 'hidden';
-                $form['wmcontent_alignment']['#value'] = $form['wmcontent_size']['#default_value'];
+
+                if (isset($form['wmcontent_alignment']['#default_value'])) {
+                    $form['wmcontent_alignment']['#value'] = $form['wmcontent_alignment']['#default_value'];
+                }
             }
         }
     }
