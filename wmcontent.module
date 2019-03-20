@@ -608,7 +608,7 @@ function _wmcontent_default_alignment(FieldableEntityInterface $entity = null)
 function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
     /** @var WmContentContainer $entity */
-    foreach (wmContentContainer::loadMultiple() as $entity) {
+    foreach (WmContentContainer::loadMultiple() as $entity) {
         $config = $entity->getConfig();
 
         foreach ($config['child_bundles'] as $bundle) {
@@ -624,12 +624,7 @@ function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
                 && isset($form['wmcontent_size']['widget']['#options'])
                 && count($form['wmcontent_size']['widget']['#options']) === 1
             ) {
-                unset($form['wmcontent_size']);
-                $form['wmcontent_size']['#type'] = "hidden";
-
-                if (isset($form['wmcontent_size']['#default_value'])) {
-                    $form['wmcontent_size']['#value'] = $form['wmcontent_size']['#default_value'];
-                }
+                $form['wmcontent_size']['#access'] = false;
             }
 
             if (
@@ -637,12 +632,7 @@ function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
                 && isset($form['wmcontent_alignment']['widget']['#options'])
                 && count($form['wmcontent_alignment']['widget']['#options']) === 1
             ) {
-                unset($form['wmcontent_alignment']);
-                $form['wmcontent_alignment']['#type'] = 'hidden';
-
-                if (isset($form['wmcontent_alignment']['#default_value'])) {
-                    $form['wmcontent_alignment']['#value'] = $form['wmcontent_alignment']['#default_value'];
-                }
+                $form['wmcontent_alignment']['#access'] = false;
             }
         }
     }
