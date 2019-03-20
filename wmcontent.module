@@ -561,8 +561,12 @@ function _wmcontent_default_size(FieldableEntityInterface $entity = null)
         $type = $entity->getEntityTypeId();
     }
 
-    return \Drupal::moduleHandler()
+    $default = \Drupal::moduleHandler()
         ->invokeAll('wmcontent_default_size_alter', [$type, $bundle]);
+
+    $first = array_keys(_wmcontent_sizes(null, $entity))[0] ?? null;
+
+    return $default ?? $first;
 }
 
 function _wmcontent_alignments(FieldStorageDefinitionInterface $definition = null, FieldableEntityInterface $entity = null)
@@ -601,8 +605,12 @@ function _wmcontent_default_alignment(FieldableEntityInterface $entity = null)
         $type = $entity->getEntityTypeId();
     }
 
-    return \Drupal::moduleHandler()
+    $default = \Drupal::moduleHandler()
         ->invokeAll('wmcontent_default_alignment_alter', [$type, $bundle]);
+
+    $first = array_keys(_wmcontent_alignments(null, $entity))[0] ?? null;
+
+    return $default ?? $first;
 }
 
 function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
