@@ -83,10 +83,22 @@ class WmContentManager
             return null;
         }
 
-        return $this
+        $entityType = $contentBlock->get('wmcontent_parent_type')->value;
+        $entityTypeDefinition = $this->entityTypeManager->getDefinition($entityType);
+
+        $entities = $this
             ->entityTypeManager
             ->getStorage($contentBlock->get('wmcontent_parent_type')->value)
-            ->load($contentBlock->get('wmcontent_parent')->value);
+            ->loadByProperties([
+                $entityTypeDefinition->getKey('id') => $contentBlock->get('wmcontent_parent')->value,
+                'langcode' => $contentBlock->language()->getId(),
+            ]);
+
+        if (empty($entities)) {
+            return null;
+        }
+
+        return reset($entities);
     }
 
     public function isContentBlock(ContentEntityInterface $contentBlock)
