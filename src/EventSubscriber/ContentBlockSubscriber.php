@@ -42,6 +42,7 @@ class ContentBlockSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $host->set('changed', time());
         $host->save();
         $this->updatedHosts[$cid] = true;
     }
