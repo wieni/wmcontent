@@ -4,6 +4,7 @@ namespace Drupal\wmcontent;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
