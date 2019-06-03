@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Controller;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
@@ -199,6 +200,10 @@ class WmContentController extends ControllerBase
             ->getStorage($current_container->getChildEntityType())
             ->load($child_id);
 
+        if (!$child instanceof EntityInterface) {
+            throw new NotFoundHttpException;
+        }
+
         $child->delete();
 
         drupal_set_message(
@@ -239,6 +244,10 @@ class WmContentController extends ControllerBase
             ->entityTypeManager()
             ->getStorage($current_container->getChildEntityType())
             ->load($child_id);
+
+        if (!$child instanceof EntityInterface) {
+            throw new NotFoundHttpException;
+        }
 
         // Get the form.
         $form = $this->entityFormBuilder()->getForm($child);
