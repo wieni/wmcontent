@@ -89,6 +89,10 @@ class WmContentManager
             ->getStorage($contentBlock->get('wmcontent_parent_type')->value)
             ->load($contentBlock->get('wmcontent_parent')->value);
 
+        if (!$entity instanceof EntityInterface) {
+            return null;
+        }
+
         if ($entity->language()->getId() === $langcode) {
             return $entity;
         }
