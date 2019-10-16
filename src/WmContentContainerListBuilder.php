@@ -9,7 +9,10 @@ namespace Drupal\wmcontent;
 
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a class to build a listing of user ball entities.
@@ -18,6 +21,18 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class WmContentContainerListBuilder extends DraggableListBuilder
 {
+    /** @var MessengerInterface */
+    protected $messenger;
+
+    public static function createInstance(
+        ContainerInterface $container,
+        EntityTypeInterface $entityType
+    ) {
+        $instance = parent::createInstance($container, $entityType);
+        $instance->messenger = $container->get('messenger');
+
+        return $instance;
+    }
 
     /**
      * {@inheritdoc}
@@ -85,7 +100,7 @@ class WmContentContainerListBuilder extends DraggableListBuilder
             $operations['edit'] = array(
                 'title' => t('Edit container'),
                 'weight' => 20,
-                'url' => $entity->urlInfo('edit-form'),
+                'url' => $entity->toUrl('edit-form'),
             );
         }
 
@@ -99,6 +114,6 @@ class WmContentContainerListBuilder extends DraggableListBuilder
     {
         parent::submitForm($form, $form_state);
 
-        drupal_set_message(t('The container settings have been updated.'));
+        $this->messenger->addStatus(t('The container settings have been updated.'));
     }
 }

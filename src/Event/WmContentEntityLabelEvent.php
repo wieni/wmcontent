@@ -2,9 +2,9 @@
 
 namespace Drupal\wmcontent\Event;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\FieldConfigInterface;
 use Symfony\Component\EventDispatcher\Event;
-use Drupal\Core\Entity\Entity;
 
 /**
  * The Event that fires when looking for entity labels on wmcontent tabs
@@ -21,7 +21,7 @@ class WmContentEntityLabelEvent extends Event
     /**
      * Constructor.
      */
-    public function __construct(Entity $entity, $fieldName, FieldConfigInterface $fieldConfig)
+    public function __construct(EntityInterface $entity, $fieldName, FieldConfigInterface $fieldConfig)
     {
         $this->entity = $entity;
         $this->fieldName = $fieldName;
@@ -32,10 +32,10 @@ class WmContentEntityLabelEvent extends Event
     /**
      * Setter for the entity.
      *
-     * @param Entity $entity
+     * @param EntityInterface $entity
      *   Current entity.
      */
-    public function setEntity(Entity $entity)
+    public function setEntity(EntityInterface $entity)
     {
         $this->entity = $entity;
     }

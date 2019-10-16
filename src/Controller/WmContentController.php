@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\WmContentDescriptiveTitles;
 use Drupal\wmcontent\WmContentManager;
@@ -20,6 +21,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class WmContentController extends ControllerBase
 {
+    /** @var MessengerInterface */
+    protected $messenger;
     /** @var WmContentManager */
     protected $wmContentManager;
     /** @var FormBuilderInterface */
@@ -33,17 +36,20 @@ class WmContentController extends ControllerBase
 
     /**
      * WmContentController constructor.
+     * @param MessengerInterface $messenger
      * @param WmContentManager $wmContentManager
      * @param FormBuilderInterface $formBuilder
      * @param WmContentDescriptiveTitles $descriptiveTitles
      */
     public function __construct(
+        MessengerInterface $messenger,
         WmContentManager $wmContentManager,
         FormBuilderInterface $formBuilder,
         WmContentDescriptiveTitles $descriptiveTitles,
         EntityTypeBundleInfoInterface $entityTypeBundleInfo,
         EntityTypeManagerInterface $entityTypeManager
     ) {
+        $this->messenger = $messenger;
         $this->wmContentManager = $wmContentManager;
         $this->formBuilder = $formBuilder;
         $this->descriptiveTitles = $descriptiveTitles;
@@ -64,6 +70,7 @@ class WmContentController extends ControllerBase
         $descriptiveTitles = $container->get('wmcontent.descriptive_titles');
 
         return new static(
+            $container->get('messenger'),
             $wmContentManager,
             $formBuilder,
             $descriptiveTitles,
@@ -206,7 +213,7 @@ class WmContentController extends ControllerBase
 
         $child->delete();
 
-        drupal_set_message(
+        $this->messenger->addStatus(
             $this->t(
                 '%container_label %name has been deleted.',
                 [

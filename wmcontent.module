@@ -217,7 +217,11 @@ function wmcontent_entity_view(
                         $paragraph_type_count = 1;
                         $paragraph_type_last = $content->bundle();
                     }
-                    $item = entity_view($content, 'full');
+
+                    $viewBuilder = \Drupal::entityTypeManager()
+                        ->getViewBuilder($entity->getEntityTypeId());
+
+                    $item = $viewBuilder->view($content);
                     $item['#weight'] = $content->get('wmcontent_weight')->getString();
                     $item['#size'] = $content->get('wmcontent_size')->getString();
                     $item['#alignment'] = $content->get('wmcontent_alignment')->getString();

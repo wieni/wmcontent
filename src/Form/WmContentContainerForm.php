@@ -10,14 +10,26 @@ namespace Drupal\wmcontent\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\eck\Entity\EckEntityType;
 use Drupal\wmcontent\Entity\WmContentContainer;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the container entity type edit form.
  */
 class WmContentContainerForm extends EntityForm
 {
+    /** @var MessengerInterface */
+    protected $messenger;
+
+    public static function create(ContainerInterface $container)
+    {
+        $instance = parent::create($container);
+        $instance->messenger = $container->get('messenger');
+
+        return $instance;
+    }
 
     /**
      * {@inheritdoc}
@@ -189,7 +201,7 @@ class WmContentContainerForm extends EntityForm
         $action = $status == SAVED_UPDATED ? 'updated' : 'added';
 
         // Tell the user we've updated their container.
-        drupal_set_message($this->t(
+        $this->messenger->addStatus($this->t(
             'Container %label has been %action.',
             [
                 '%label' => $entity->label(),
