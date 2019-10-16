@@ -9,6 +9,10 @@
             "email": "info@wieni.be"
         }
     ],
+    "require": {
+        "php": ">=7.0.0",
+        "drupal/core": "^8.5"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true
 }
