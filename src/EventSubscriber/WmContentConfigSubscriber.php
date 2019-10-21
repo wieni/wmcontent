@@ -4,6 +4,9 @@ namespace Drupal\wmcontent\EventSubscriber;
 
 use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigImporterEvent;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\EntityUpdateService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -11,6 +14,18 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class WmContentConfigSubscriber implements EventSubscriberInterface
 {
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
+    /** @var EntityUpdateService */
+    protected $entityUpdates;
+
+    public function __construct(
+        EntityTypeManagerInterface $entityTypeManager,
+        EntityUpdateService $entityUpdates
+    ) {
+        $this->entityUpdates = $entityUpdates;
+        $this->entityTypeManager = $entityTypeManager;
+    }
 
     /**
      * Checks that the Configuration module is not being uninstalled.
@@ -21,7 +36,14 @@ class WmContentConfigSubscriber implements EventSubscriberInterface
     public function onConfigImportInitFields(ConfigImporterEvent $event)
     {
         // TODO Does not seem to kick in..
-        \Drupal::service('entity.definition_update_manager')->applyUpdates();
+        /** @var WmContentContainer[] $containers */
+        $containers = $this->entityTypeManager
+            ->getStorage('wmcontent_container')
+            ->loadMultiple();
+
+        foreach ($containers as $container) {
+            $this->entityUpdates->applyUpdates($container->getChildEntityType());
+        }
     }
 
     /**

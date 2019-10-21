@@ -345,7 +345,8 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         parent::postSave($storage, $update);
 
         // Add our base fields to the schema.
-        \Drupal::service('entity.definition_update_manager')->applyUpdates();
+        \Drupal::service('wmcontent.entity_updates')
+            ->applyUpdates($this->getChildEntityType());
         drupal_flush_all_caches();
     }
 
@@ -357,7 +358,10 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         parent::postDelete($storage, $entities);
 
         // Add our base fields to the schema.
-        \Drupal::service('entity.definition_update_manager')->applyUpdates();
+        foreach ($entities as $entity) {
+            \Drupal::service('wmcontent.entity_updates')
+                ->applyUpdates($entity->getChildEntityType());
+        }
         drupal_flush_all_caches();
     }
 

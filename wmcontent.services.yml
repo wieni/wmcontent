@@ -13,6 +13,9 @@ services:
       - { name: event_subscriber }
   wmcontent.config_subscriber:
     class: Drupal\wmcontent\EventSubscriber\WmContentConfigSubscriber
+    arguments:
+      - '@entity_type.manager'
+      - '@wmcontent.entity_updates'
     tags:
       - { name: event_subscriber }
   wmcontent.contentblock_subscriber:
@@ -35,3 +38,12 @@ services:
   wmcontent.entity_type.bundle.info:
     class: Drupal\wmcontent\Entity\EntityTypeBundleInfo
     parent: entity_type.bundle.info
+  wmcontent.entity_updates:
+    class: Drupal\wmcontent\EntityUpdateService
+    arguments:
+      - '@entity.definition_update_manager'
+      - '@entity.last_installed_schema.repository'
+      - '@entity_type.manager'
+      - '@entity_type.listener'
+      - '@entity_field.manager'
+      - '@field_storage_definition.listener'
