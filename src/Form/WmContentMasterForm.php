@@ -281,6 +281,8 @@ class WmContentMasterForm extends FormBase
             ];
         }
 
+        uasort($links, [SortArray::class, 'sortByTitleElement']);
+
         // Submit or add.
         $form['actions'] = [
             '#type' => 'actions',
