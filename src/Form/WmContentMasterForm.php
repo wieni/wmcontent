@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Form;
 
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
