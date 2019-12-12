@@ -20,6 +20,7 @@ use Drupal\Core\Render\Element;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Url;
 use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
 
 /**
  * Implements hook_entity_extra_field_info().
@@ -435,7 +436,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                     )
                 );
 
-            $fields['wmcontent_weight'] = BaseFieldDefinition::create('integer')
+            $fields['wmcontent_weight'] = IndexableBaseFieldDefinition::create('integer')
                 ->setLabel(t('Weight'))
                 ->setRequired(true)
                 ->setSetting('default_value', 0)
@@ -458,12 +459,13 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                         'type' => 'string',
                         'weight' => -5,
                     )
-                );
+                )
+                ->addIndex('value');
 
             // The parent is an entity reference to the parent entity, which allows
             // to access the parent id with $entity->parent->target_id and the parent
             // entity with $entity->parent->entity.
-            $fields['wmcontent_parent'] = BaseFieldDefinition::create('integer')
+            $fields['wmcontent_parent'] = IndexableBaseFieldDefinition::create('integer')
                 ->setLabel(t('Host'))
                 ->setDescription(t('The entity id of the host.'))
                 ->setRequired(true)
@@ -486,9 +488,10 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                         'type' => 'string',
                         'weight' => -5,
                     )
-                );
+                )
+                ->addIndex('value');
 
-            $fields['wmcontent_parent_type'] = BaseFieldDefinition::create('string')
+            $fields['wmcontent_parent_type'] = IndexableBaseFieldDefinition::create('string')
                 ->setLabel(t('Host Type'))
                 ->setDescription(t('The entity type of the host.'))
                 ->setRequired(true)
@@ -503,9 +506,10 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                         ),
                         'weight' => 20,
                     )
-                );
+                )
+                ->addIndex('value');
 
-            $fields['wmcontent_container'] = BaseFieldDefinition::create('string')
+            $fields['wmcontent_container'] = IndexableBaseFieldDefinition::create('string')
                 ->setLabel(t('Container'))
                 ->setDescription(t('The container in the host.'))
                 ->setRequired(true)
@@ -521,7 +525,8 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
                         ),
                         'weight' => 20,
                     )
-                );
+                )
+                ->addIndex('value');
         }
     }
 
