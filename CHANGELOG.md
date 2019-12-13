@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2019-12-13
+### Added
+- Add CHANGELOG.md
+
+### Fixed
+- Add missing IndexableBaseFieldDefinition class
+
 ## [0.6.0] - 2019-12-12
 ### Added
 - Add indexes to the following base fields
