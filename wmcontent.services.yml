@@ -11,13 +11,6 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: event_subscriber }
-  wmcontent.config_subscriber:
-    class: Drupal\wmcontent\EventSubscriber\WmContentConfigSubscriber
-    arguments:
-      - '@entity_type.manager'
-      - '@wmcontent.entity_updates'
-    tags:
-      - { name: event_subscriber }
   wmcontent.contentblock_subscriber:
     class: Drupal\wmcontent\EventSubscriber\ContentBlockSubscriber
     arguments: ['@wmcontent.manager']
