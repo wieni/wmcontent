@@ -5,6 +5,7 @@ namespace Drupal\wmcontent\Controller;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -21,6 +22,8 @@ class WmContentController implements ContainerInjectionInterface
 {
     use StringTranslationTrait;
 
+    /** @var EntityTypeBundleInfoInterface */
+    protected $entityTypeBundleInfo;
     /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
     /** @var EntityFormBuilderInterface */
@@ -33,12 +36,14 @@ class WmContentController implements ContainerInjectionInterface
     protected $wmContentManager;
 
     public function __construct(
+        EntityTypeBundleInfoInterface $entityTypeBundleInfo,
         EntityTypeManagerInterface $entityTypeManager,
         EntityFormBuilderInterface $entityFormBuilder,
         FormBuilderInterface $formBuilder,
         MessengerInterface $messenger,
         WmContentManager $wmContentManager
     ) {
+        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityTypeManager = $entityTypeManager;
         $this->entityFormBuilder = $entityFormBuilder;
         $this->formBuilder = $formBuilder;
@@ -49,6 +54,7 @@ class WmContentController implements ContainerInjectionInterface
     public static function create(ContainerInterface $container)
     {
         return new static(
+            $container->get('entity_type.bundle.info'),
             $container->get('entity_type.manager'),
             $container->get('entity.form_builder'),
             $container->get('form_builder'),
@@ -109,6 +115,22 @@ class WmContentController implements ContainerInjectionInterface
         return $form;
     }
 
+    public function addTitle(RouteMatchInterface $routeMatch, WmContentContainerInterface $container, string $bundle)
+    {
+        $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
+
+        $type = $bundleInfo[$container->getChildEntityType()][$bundle]['label'];
+        $host = $routeMatch->getParameter($container->getHostEntityType())->label();
+
+        return $this->t(
+            'Add new %type to %host',
+            [
+                '%type' => $type,
+                '%host' => $host,
+            ]
+        );
+    }
+
     public function delete(WmContentContainerInterface $container, EntityInterface $child, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
     {
         $host = $routeMatch->getParameter($host_type_id);
@@ -145,5 +167,21 @@ class WmContentController implements ContainerInjectionInterface
         $form['wmcontent_weight']['#access'] = false;
 
         return $form;
+    }
+
+    public function editTitle(RouteMatchInterface $routeMatch, WmContentContainerInterface $container, EntityInterface $child)
+    {
+        $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
+
+        $type = $bundleInfo[$container->getChildEntityType()][$child->bundle()]['label'];
+        $host = $routeMatch->getParameter($container->getHostEntityType())->label();
+
+        return $this->t(
+            'Edit %type from %host',
+            [
+                '%type' => $type,
+                '%host' => $host,
+            ]
+        );
     }
 }
