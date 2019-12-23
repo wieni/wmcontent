@@ -75,24 +75,26 @@ class WmContentContainerForm extends EntityForm
                 'wrapper' => 'wholewrapper',
                 'progress' => [
                     'type' => 'throbber',
-                    'message' => 'searching',
+                    'message' => $this->t('Updating bundles...'),
                 ],
             ],
         ];
 
-        $form['wrapper']['host_bundles_fieldset'] = [
-            '#title' => t('Host Bundles'),
-            '#prefix' => '<div id="host-checkboxes-div">',
-            '#suffix' => '</div>',
-            '#type' => 'fieldset',
-            '#description' => t('Allowed bundles in this type.'),
-        ];
+        if ($hostBundles = $this->entity->getHostBundlesAll()) {
+            $form['wrapper']['host_bundles_fieldset'] = [
+                '#title' => t('Host Bundles'),
+                '#prefix' => '<div id="host-checkboxes-div">',
+                '#suffix' => '</div>',
+                '#type' => 'fieldset',
+                '#description' => t('Allowed bundles in this type.'),
+            ];
 
-        $form['wrapper']['host_bundles_fieldset']['host_bundles'] = [
-            '#type' => 'checkboxes',
-            '#options' => $this->entity->getHostBundlesAll(),
-            '#default_value' => $this->entity->getHostBundles(),
-        ];
+            $form['wrapper']['host_bundles_fieldset']['host_bundles'] = [
+                '#type' => 'checkboxes',
+                '#options' => $this->entity->getHostBundlesAll(),
+                '#default_value' => $this->entity->getHostBundles(),
+            ];
+        }
 
         $form['wrapper']['child_entity_type'] = [
             '#type' => 'select',
@@ -108,31 +110,33 @@ class WmContentContainerForm extends EntityForm
                 'wrapper' => 'wholewrapper',
                 'progress' => [
                     'type' => 'throbber',
-                    'message' => 'searching',
+                    'message' => $this->t('Updating bundles...'),
                 ],
             ],
         ];
 
-        $form['wrapper']['child_bundles_fieldset'] = [
-            '#title' => t('Child Bundles'),
-            '#prefix' => '<div id="child-checkboxes-div">',
-            '#suffix' => '</div>',
-            '#type' => 'fieldset',
-            '#description' => t('Allowed bundles in this type.'),
-        ];
+        if ($childBundles = $this->entity->getChildBundlesAll()) {
+            $form['wrapper']['child_bundles_fieldset'] = [
+                '#title' => t('Child Bundles'),
+                '#prefix' => '<div id="child-checkboxes-div">',
+                '#suffix' => '</div>',
+                '#type' => 'fieldset',
+                '#description' => t('Allowed bundles in this type.'),
+            ];
 
-        $form['wrapper']['child_bundles_fieldset']['child_bundles'] = [
-            '#type' => 'checkboxes',
-            '#options' => $this->entity->getChildBundlesAll(),
-            '#default_value' => $this->entity->getChildBundles(),
-        ];
+            $form['wrapper']['child_bundles_fieldset']['child_bundles'] = [
+                '#type' => 'checkboxes',
+                '#options' => $this->entity->getChildBundlesAll(),
+                '#default_value' => $this->entity->getChildBundles(),
+            ];
 
-        $form['wrapper']['child_bundles_default'] = [
-            '#title' => t('Default'),
-            '#type' => 'select',
-            '#options' => $this->entity->getChildBundlesAll(),
-            '#default_value' => $this->entity->getChildBundlesDefault(),
-        ];
+            $form['wrapper']['child_bundles_default'] = [
+                '#title' => t('Default'),
+                '#type' => 'select',
+                '#options' => $this->entity->getChildBundlesAll(),
+                '#default_value' => $this->entity->getChildBundlesDefault(),
+            ];
+        }
 
         $form['hide_single_option_sizes'] = [
             '#type' => 'checkbox',
