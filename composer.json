@@ -13,12 +13,12 @@
         "php": ">=7.0.0",
         "drupal/core": "^8.5"
     },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.0",
+        "wieni/wmcodestyle": "^1.0"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "require-dev": {
-        "wieni/wmcodestyle": "^1.0",
-        "ergebnis/composer-normalize": "^2.0"
-    },
     "scripts": {
         "coding-standards": [
             "@composer normalize",
