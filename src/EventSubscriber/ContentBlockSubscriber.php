@@ -5,29 +5,30 @@ namespace Drupal\wmcontent\EventSubscriber;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Drupal\wmcontent\WmContentManager;
+use Drupal\wmcontent\WmContentManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ContentBlockSubscriber implements EventSubscriberInterface
 {
     /** @var WmContentManager */
-    private $manager;
+    protected $manager;
+    /** @var array */
+    protected $updatedHosts = [];
 
-    private $updatedHosts = [];
-
-    public function __construct(WmContentManager $manager)
-    {
+    public function __construct(
+        WmContentManagerInterface $manager
+    ) {
         $this->manager = $manager;
     }
 
     public static function getSubscribedEvents()
     {
         $events[ContentBlockChangedEvent::NAME][] = ['updateHostEntity'];
+
         return $events;
     }
 
-    /**
-     * Trigger an update of the contentblock's host entity
-     */
+    /** Trigger an update of the contentblock's host entity */
     public function updateHostEntity(ContentBlockChangedEvent $event)
     {
         $host = $this->manager->getHost($event->getContentBlock());

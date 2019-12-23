@@ -11,103 +11,63 @@ use Symfony\Component\EventDispatcher\Event;
  */
 class WmContentEntityLabelEvent extends Event
 {
-    const NAME = 'wmcontent.entity.label';
+    public const NAME = 'wmcontent.entity.label';
 
+    /** @var EntityInterface */
     protected $entity;
+    /** @var string */
     protected $fieldName;
-    protected $label;
+    /** @var FieldConfigInterface */
     protected $fieldConfig;
+    /** @var string|null */
+    protected $label;
 
-    /**
-     * Constructor.
-     */
-    public function __construct(EntityInterface $entity, $fieldName, FieldConfigInterface $fieldConfig)
-    {
+    public function __construct(
+        EntityInterface $entity,
+        string $fieldName,
+        FieldConfigInterface $fieldConfig
+    ) {
         $this->entity = $entity;
         $this->fieldName = $fieldName;
         $this->fieldConfig = $fieldConfig;
-        $this->label = '';
     }
 
-    /**
-     * Setter for the entity.
-     *
-     * @param EntityInterface $entity
-     *   Current entity.
-     */
-    public function setEntity(EntityInterface $entity)
+    public function setEntity(EntityInterface $entity): void
     {
         $this->entity = $entity;
     }
 
-    /**
-     * Setter for the fieldname.
-     *
-     * @param string $fieldName
-     *   Current fieldname.
-     */
-    public function setFieldName($fieldName)
+    public function setFieldName(string $fieldName): void
     {
         $this->fieldName = $fieldName;
     }
 
-    /**
-     * Getter for the entity.
-     *
-     * @return entity
-     *   Current entity.
-     */
-    public function getEntity()
+    public function getEntity(): EntityInterface
     {
         return $this->entity;
     }
 
-    /**
-     * Getter for the fieldname.
-     *
-     * @return string
-     *  Current fieldname.
-     * */
-    public function getFieldName()
+    public function getFieldName(): string
     {
         return $this->fieldName;
     }
 
-    /**
-     * Get the label.
-     */
-    public function getLabel()
+    public function getLabel(): ?string
     {
         return $this->label;
     }
 
-    /**
-     * Set the label.
-     *
-     * @param string $label
-     *   New label.
-     */
-    public function setLabel($label)
+    public function setLabel(string $label): void
     {
         $this->label = $label;
     }
 
-    /**
-     * Get the fieldconfig
-     *
-     * @return FieldConfigInterface
-     */
-    public function getFieldConfig()
+    public function getFieldConfig(): FieldConfigInterface
     {
         return $this->fieldConfig;
     }
 
-    /**
-     * Set the fieldconfig
-     *
-     * @param FieldConfigInterface $fieldConfig
-     */
-    public function setFieldConfig(FieldConfigInterface $fieldConfig)
+    public function setFieldConfig(FieldConfigInterface $fieldConfig): void
     {
         $this->fieldConfig = $fieldConfig;
     }

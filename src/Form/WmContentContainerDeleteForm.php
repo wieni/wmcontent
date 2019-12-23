@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\wmcontent\Form\WmContentContainerDeleteForm.
- */
-
 namespace Drupal\wmcontent\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
@@ -13,9 +8,6 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * Provides a deletion confirmation form for wmcontent container entity.
- */
 class WmContentContainerDeleteForm extends EntityConfirmFormBase
 {
     /** @var MessengerInterface */
@@ -29,39 +21,26 @@ class WmContentContainerDeleteForm extends EntityConfirmFormBase
         return $instance;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getQuestion()
     {
-        return $this->t('Are you sure you want to delete the container %name?', array('%name' => $this->entity->label()));
+        return $this->t('Are you sure you want to delete the container %name?', ['%name' => $this->entity->label()]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCancelUrl()
     {
-        return new Url('wmcontent.collection');
+        return Url::fromRoute('wmcontent.collection');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getConfirmText()
     {
         return $this->t('Delete');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function submitForm(array &$form, FormStateInterface $form_state)
     {
         $this->entity->delete();
-        $this->logger('wmcontent_container_entity')->notice('Container %name has been deleted.', array('%name' => $this->entity->label()));
-        $this->messenger->addStatus($this->t('Container %name has been deleted.', array('%name' => $this->entity->label())));
+        $this->logger('wmcontent_container_entity')->notice('Container %name has been deleted.', ['%name' => $this->entity->label()]);
+        $this->messenger->addStatus($this->t('Container %name has been deleted.', ['%name' => $this->entity->label()]));
         $form_state->setRedirectUrl($this->getCancelUrl());
     }
-
 }

@@ -77,8 +77,8 @@ class EntityUpdateService
                 $originalStorageDefinitions = $this->entityLastInstalledSchemaRepository->getLastInstalledFieldStorageDefinitions($entityTypeId);
 
                 foreach ($entityTypeChanges['field_storage_definitions'] as $fieldName => $change) {
-                    $storageDefinition = $storageDefinitions[$fieldName] ?? NULL;
-                    $originalStorageDefinition = $originalStorageDefinitions[$fieldName] ?? NULL;
+                    $storageDefinition = $storageDefinitions[$fieldName] ?? null;
+                    $originalStorageDefinition = $originalStorageDefinitions[$fieldName] ?? null;
                     $this->doFieldUpdate($change, $storageDefinition, $originalStorageDefinition);
                 }
             }
@@ -93,7 +93,6 @@ class EntityUpdateService
             case EntityDefinitionUpdateManagerInterface::DEFINITION_CREATED:
                 $this->entityTypeListener->onEntityTypeCreate($entityType);
                 break;
-
             case EntityDefinitionUpdateManagerInterface::DEFINITION_UPDATED:
                 $original = $this->entityLastInstalledSchemaRepository->getLastInstalledDefinition($entityTypeId);
                 $storage = $this->entityTypeManager->getStorage($entityType->id());
@@ -107,19 +106,17 @@ class EntityUpdateService
         }
     }
 
-    private function doFieldUpdate(string $op, FieldStorageDefinitionInterface $storageDefinition = null, FieldStorageDefinitionInterface $originalStorageDefinition = null): void
+    private function doFieldUpdate(string $op, ?FieldStorageDefinitionInterface $storageDefinition = null, ?FieldStorageDefinitionInterface $originalStorageDefinition = null): void
     {
         switch ($op) {
             case EntityDefinitionUpdateManagerInterface::DEFINITION_CREATED:
                 $this->fieldStorageDefinitionListener->onFieldStorageDefinitionCreate($storageDefinition);
                 break;
-
             case EntityDefinitionUpdateManagerInterface::DEFINITION_UPDATED:
                 if ($storageDefinition && $originalStorageDefinition) {
                     $this->fieldStorageDefinitionListener->onFieldStorageDefinitionUpdate($storageDefinition, $originalStorageDefinition);
                 }
                 break;
-
             case EntityDefinitionUpdateManagerInterface::DEFINITION_DELETED:
                 if ($originalStorageDefinition) {
                     $this->fieldStorageDefinitionListener->onFieldStorageDefinitionDelete($originalStorageDefinition);

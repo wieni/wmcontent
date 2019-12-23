@@ -5,52 +5,33 @@ namespace Drupal\wmcontent\Plugin\Derivative;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * Provides dynamic contextual links for wmcontent.
- *
- * @see \Drupal\wmcontent\Plugin\Menu\ContextualLink\WmContentContextualLinks
- */
 class WmContentContextualLinks extends DeriverBase implements ContainerDeriverInterface
 {
-
-    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface */
+    /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
 
-
-    /**
-     * WmContentContextualLinks constructor.
-     *
-     * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-     */
-    public function __construct(EntityTypeManagerInterface $entityTypeManager)
-    {
+    public function __construct(
+        EntityTypeManagerInterface $entityTypeManager
+    ) {
         $this->entityTypeManager = $entityTypeManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(ContainerInterface $container, $base_plugin_id)
     {
-        /** @var EntityTypeManagerInterface $entityTypeManager */
-        $entityTypeManager = $container->get('entity_type.manager');
         return new static(
-            $entityTypeManager
+            $container->get('entity_type.manager')
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDerivativeDefinitions($base_plugin_definition)
     {
-        // Load all config.
-        $storage = $this->entityTypeManager->getStorage('wmcontent_container');
+        $storage = $this->entityTypeManager
+            ->getStorage('wmcontent_container');
 
-        /** @var WmContentContainer $container */
+        /** @var WmContentContainerInterface $container */
         foreach ($storage->loadMultiple() as $container) {
             $config = $container->getConfig();
 

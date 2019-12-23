@@ -2,179 +2,122 @@
 
 namespace Drupal\wmcontent\Controller;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\wmcontent\Entity\WmContentContainer;
-use Drupal\wmcontent\WmContentDescriptiveTitles;
-use Drupal\wmcontent\WmContentManager;
-use Drupal\wmcontent\Form\WmContentMasterForm;
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
+use Drupal\wmcontent\Form\WmContentMasterForm;
+use Drupal\wmcontent\WmContentContainerInterface;
+use Drupal\wmcontent\WmContentManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * Base class for wmcontent controllers.
- */
-class WmContentController extends ControllerBase
+class WmContentController implements ContainerInjectionInterface
 {
+    use StringTranslationTrait;
+
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
+    /** @var EntityFormBuilderInterface */
+    protected $entityFormBuilder;
+    /** @var FormBuilderInterface */
+    protected $formBuilder;
     /** @var MessengerInterface */
     protected $messenger;
     /** @var WmContentManager */
     protected $wmContentManager;
-    /** @var FormBuilderInterface */
-    protected $formBuilder;
-    /** @var WmContentDescriptiveTitles */
-    protected $descriptiveTitles;
-    /** @var EntityTypeBundleInfoInterface */
-    protected $entityTypeBundleInfo;
-    /** @var EntityTypeManagerInterface */
-    protected $entityTypeManager;
 
-    /**
-     * WmContentController constructor.
-     * @param MessengerInterface $messenger
-     * @param WmContentManager $wmContentManager
-     * @param FormBuilderInterface $formBuilder
-     * @param WmContentDescriptiveTitles $descriptiveTitles
-     */
     public function __construct(
-        MessengerInterface $messenger,
-        WmContentManager $wmContentManager,
+        EntityTypeManagerInterface $entityTypeManager,
+        EntityFormBuilderInterface $entityFormBuilder,
         FormBuilderInterface $formBuilder,
-        WmContentDescriptiveTitles $descriptiveTitles,
-        EntityTypeBundleInfoInterface $entityTypeBundleInfo,
-        EntityTypeManagerInterface $entityTypeManager
+        MessengerInterface $messenger,
+        WmContentManager $wmContentManager
     ) {
+        $this->entityTypeManager = $entityTypeManager;
+        $this->entityFormBuilder = $entityFormBuilder;
+        $this->formBuilder = $formBuilder;
         $this->messenger = $messenger;
         $this->wmContentManager = $wmContentManager;
-        $this->formBuilder = $formBuilder;
-        $this->descriptiveTitles = $descriptiveTitles;
-        $this->entityTypeBundleInfo = $entityTypeBundleInfo;
-        $this->entityTypeManager = $entityTypeManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(ContainerInterface $container)
     {
-        /** @var WmContentManager $wmContentManager */
-        $wmContentManager = $container->get('wmcontent.manager');
-        /** @var FormBuilderInterface $formBuilder */
-        $formBuilder = $container->get('form_builder');
-        /** @var WmContentDescriptiveTitles */
-        $descriptiveTitles = $container->get('wmcontent.descriptive_titles');
-
         return new static(
+            $container->get('entity_type.manager'),
+            $container->get('entity.form_builder'),
+            $container->get('form_builder'),
             $container->get('messenger'),
-            $wmContentManager,
-            $formBuilder,
-            $descriptiveTitles,
-            $container->get('entity_type.bundle.info'),
-            $container->get('entity_type.manager')
+            $container->get('wmcontent.manager'),
         );
     }
 
-    /**
-     * @param string $container
-     * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-     * @param null $host_type_id
-     *
-     * @return array
-     */
-    public function overview(string $container, RouteMatchInterface $route_match, $host_type_id = null)
+    public function overview(string $container, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
     {
-        $build = [];
-        // Get the container.
-        /** @var WmContentContainer $current_container */
-        $current_container = $this->entityTypeManager()->getStorage('wmcontent_container')->load($container);
-        $host_entity = $route_match->getParameter($host_type_id);
+        $contentContainer = $this->entityTypeManager
+            ->getStorage('wmcontent_container')
+            ->load($container);
 
-        if ($current_container->getId()) {
-            // Start a form.
-            $form = new WmContentMasterForm(
-                $this->entityTypeManager,
-                $this->entityTypeBundleInfo,
-                $this->wmContentManager,
-                $host_entity,
-                $current_container
-            );
-            $build['#title'] = $this->t(
-                '%slug for %label',
-                [
-                    '%slug' => $current_container->getLabel(),
-                    '%label' => $host_entity->label(),
-                ]
-            );
-            $build['form'] = $this->formBuilder->getForm($form);
-        } else {
+        if (!$contentContainer instanceof WmContentContainerInterface) {
             throw new NotFoundHttpException(
                 $this->t('Container @container does not exist.', ['@container' => $container])
             );
         }
-        return $build;
+
+        $hostEntity = $routeMatch->getParameter($host_type_id);
+
+        return [
+            'form' => $this->formBuilder->getForm(WmContentMasterForm::class, $hostEntity, $contentContainer),
+            '#title' => $this->t(
+                '%slug for %label',
+                [
+                    '%slug' => $contentContainer->getLabel(),
+                    '%label' => $hostEntity->label(),
+                ],
+            ),
+        ];
     }
 
-    /**
-     * @param $container
-     * @param $bundle
-     * @param \Drupal\Core\Routing\RouteMatchInterface $route
-     * @param $host_type_id
-     *
-     * @return array
-     */
-    public function add($container, $bundle, RouteMatchInterface $route, $host_type_id)
+    public function add(string $container, string $bundle, RouteMatchInterface $route, string $host_type_id)
     {
-        // Get the container.
-        /** @var WmContentContainer $current_container */
-        $current_container = $this
-            ->entityTypeManager()
+        /** @var WmContentContainerInterface $currentContainer */
+        $currentContainer = $this
+            ->entityTypeManager
             ->getStorage('wmcontent_container')
             ->load($container);
-
         $host = $route->getParameter($host_type_id);
 
+        $blocks = $this->wmContentManager
+            ->getContent($host, $currentContainer->id());
         $weight = 0;
-        $blocks = $this->wmContentManager->getContent($host, $current_container->id());
+
         foreach ($blocks as $block) {
-            /* @var \Drupal\Core\Entity\ContentEntityInterface $block */
             if (!$block->hasField('wmcontent_weight')) {
                 continue;
             }
 
             $blockWeight = $block->get('wmcontent_weight')->getString();
-
             $weight = $blockWeight > $weight ? $blockWeight : $weight;
         }
 
+        $child = $this->entityTypeManager
+            ->getStorage($currentContainer->getChildEntityType())
+            ->create([
+                'type' => $bundle,
+                'langcode' => $host->get('langcode')->value,
+                'wmcontent_parent' => $host->id(),
+                'wmcontent_parent_type' => $host_type_id,
+                'wmcontent_weight' => $weight + 1,
+                'wmcontent_container' => $currentContainer->getId(),
+            ]);
 
-        // Create an empty entity of the chosen entity type and the bundle.
-        $child = $this
-            ->entityTypeManager()
-            ->getStorage($current_container->getChildEntityType())
-            ->create(
-                [
-                    'type' => $bundle,
-                ]
-            );
-
-        // Get the id of the parent and add it in.
-        $child->set('wmcontent_parent', $host->id());
-        $child->set('wmcontent_parent_type', $host_type_id);
-        $child->set('wmcontent_weight', $weight + 1);
-        $child->set('wmcontent_container', $current_container->getId());
-
-        // In the correct language.
-        $child->set('langcode', $host->get('langcode')->value);
-
-        // Get the form.
-        $form = $this->entityFormBuilder()->getForm($child);
-
-        // Hide some stuff.
+        $form = $this->entityFormBuilder->getForm($child);
         $form['wmcontent_container']['#access'] = false;
         $form['wmcontent_parent_type']['#access'] = false;
         $form['wmcontent_parent']['#access'] = false;
@@ -183,29 +126,17 @@ class WmContentController extends ControllerBase
         return $form;
     }
 
-    /**
-     * @param $container
-     * @param $child_id
-     * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-     * @param null $host_type_id
-     *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function delete($container, $child_id, RouteMatchInterface $route_match, $host_type_id = null)
+    public function delete(string $container, string $childId, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
     {
-        // Get the container.
-        $current_container = $this
-            ->entityTypeManager()
+        $current_container = $this->entityTypeManager
             ->getStorage('wmcontent_container')
             ->load($container);
 
-        $host = $route_match->getParameter($host_type_id);
+        $host = $routeMatch->getParameter($host_type_id);
 
-        // Load up the child.
-        $child = $this
-            ->entityTypeManager()
+        $child = $this->entityTypeManager
             ->getStorage($current_container->getChildEntityType())
-            ->load($child_id);
+            ->load($childId);
 
         if (!$child instanceof EntityInterface) {
             throw new NotFoundHttpException;
@@ -223,32 +154,24 @@ class WmContentController extends ControllerBase
             )
         );
 
-        return $this->redirect(
-            'entity.' . $current_container->getHostEntityType() . '.wmcontent_overview',
-            [
-                $current_container->getHostEntityType() => $host->id(),
-                'container' => $current_container->id(),
-            ]
+        return new RedirectResponse(
+            Url::fromRoute(
+                'entity.' . $current_container->getHostEntityType() . '.wmcontent_overview',
+                [
+                    $current_container->getHostEntityType() => $host->id(),
+                    'container' => $current_container->id(),
+                ]
+            )->toString()
         );
     }
 
-    /**
-     * @param $container
-     * @param $child_id
-     *
-     * @return array
-     */
-    public function edit($container, $child_id)
+    public function edit(string $container, string $child_id)
     {
-        // Get the container.
-        $current_container = $this
-            ->entityTypeManager()
+        $current_container = $this->entityTypeManager
             ->getStorage('wmcontent_container')
             ->load($container);
 
-        // Load up the child.
-        $child = $this
-            ->entityTypeManager()
+        $child = $this->entityTypeManager
             ->getStorage($current_container->getChildEntityType())
             ->load($child_id);
 
@@ -256,16 +179,12 @@ class WmContentController extends ControllerBase
             throw new NotFoundHttpException;
         }
 
-        // Get the form.
-        $form = $this->entityFormBuilder()->getForm($child);
-
-        // Hide some stuff.
+        $form = $this->entityFormBuilder->getForm($child);
         $form['wmcontent_container']['#access'] = false;
         $form['wmcontent_parent_type']['#access'] = false;
         $form['wmcontent_parent']['#access'] = false;
         $form['wmcontent_weight']['#access'] = false;
 
-        // Get the form and return it.
         return $form;
     }
 }

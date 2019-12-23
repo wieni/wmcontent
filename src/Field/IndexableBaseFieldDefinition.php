@@ -6,7 +6,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 
 class IndexableBaseFieldDefinition extends BaseFieldDefinition
 {
-    public function addIndex(string $propertyName, int $length = null, string $key = null): self
+    public function addIndex(string $propertyName, ?int $length = null, ?string $key = null): self
     {
         unset($this->schema);
 

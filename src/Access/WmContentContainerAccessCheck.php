@@ -3,73 +3,44 @@
 namespace Drupal\wmcontent\Access;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\WmContentContainerInterface;
 
-/**
- * Access check for wmcontent container overview.
- */
 class WmContentContainerAccessCheck implements AccessInterface
 {
-
-    /**
-     * The entity type manager.
-     *
-     * @var EntityTypeManagerInterface
-     */
+    /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
 
-
-    /**
-     * WmContentContainerAccessCheck constructor.
-     *
-     * @param EntityTypeManagerInterface $entityTypeManager
-     */
-    public function __construct(EntityTypeManagerInterface $entityTypeManager)
-    {
+    public function __construct(
+        EntityTypeManagerInterface $entityTypeManager
+    ) {
         $this->entityTypeManager = $entityTypeManager;
     }
 
-    /**
-     * Checks access to the current container overview for the entity and bundle.
-     *
-     * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-     *   The parametrized route.
-     * @param \Drupal\Core\Session\AccountInterface $account
-     *   The currently logged in account.
-     * @param string $host_type_id
-     *   The entity type ID.
-     *
-     * @return \Drupal\Core\Access\AccessResultInterface
-     *   The access result.
-     */
-    public function access(RouteMatchInterface $route_match, AccountInterface $account, $host_type_id)
+    public function access(RouteMatchInterface $routeMatch, AccountInterface $account, ?string $host_type_id = null): AccessResultInterface
     {
-        /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-        $entity = $route_match->getParameter($host_type_id);
+        /* @var EntityInterface $entity */
+        $entity = $routeMatch->getParameter($host_type_id);
 
-        /** @var WmContentContainer $container */
-        $container = $this
-            ->entityTypeManager
+        /** @var WmContentContainerInterface $container */
+        $container = $this->entityTypeManager
             ->getStorage('wmcontent_container')
-            ->load($route_match->getParameter('container'));
+            ->load($routeMatch->getParameter('container'));
 
-        if ($entity && $container && $container->getId()) {
-            // Get entity base info.
-            $bundle = $entity->bundle();
-
-            // If this bundle is in the list of host bundles, then allow.
-            if (empty($container->getHostBundles())
+        if ($entity && $container) {
+            if (
+                empty($container->getHostBundles())
                 || array_key_exists($entity->bundle(), $container->getHostBundles())
             ) {
                 return AccessResult::allowed();
             }
         }
 
-        // No opinion.
         return AccessResult::neutral();
     }
 }

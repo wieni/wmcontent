@@ -1,15 +1,7 @@
 <?php
 
-/**
- * @file
- * Defines the Wieni Content module.
- *
- * @category module
- *
- * @package Wieni
- */
-
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -17,20 +9,20 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Url;
 use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
+use Drupal\wmcontent\WmContentContainerInterface;
+use Drupal\wmcontent\WmContentManager;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-/**
- * Implements hook_entity_extra_field_info().
- */
-function wmcontent_entity_extra_field_info()
+function wmcontent_entity_extra_field_info(): array
 {
     $extra = [];
-
-    /** @var \Drupal\wmcontent\WmContentManager $manager */
+    /** @var WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
+
     foreach ($manager->getContainers() as $container) {
         foreach ($container->getHostBundles() as $bundle) {
             $extra[$container->getHostEntityType()][$bundle]['display']['wmc_' . $container->id()] = [
@@ -46,47 +38,38 @@ function wmcontent_entity_extra_field_info()
 }
 
 /**
- * Implements hook_entity_type_alter().
- *
- * This is very necesarry to provide us with the correct content translation
+ * This is very necessary to provide us with the correct content translation
  * language (adds the language_content_entity query string when needed.
  *
  * TODO: Ideally we only add this on the enabled entity types/bundles
  * but if we load wmContentContainer::loadMultiple() then we end up looping.
  *
- * @see \Drupal\Core\Entity\Annotation\EntityType
- *
- * @param array $entity_types
+ * @param array EntityTypeInterface[] $entityTypes
  */
-function wmcontent_entity_type_alter(array &$entity_types)
+function wmcontent_entity_type_alter(array &$entityTypes): void
 {
-    // Provide defaults for translation info.
-    /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
-    foreach ($entity_types as $entity_type) {
-        if ($entity_type->hasLinkTemplate('canonical')) {
-            // Provide default route names for the wmcontent paths.
-            if (!$entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
-                // This breaks on taxonomy terms.
-                if ($entity_type->id() == 'node') {
-                    $wmcontent_path = $entity_type->getLinkTemplate('canonical') . '/wmcontent/{container}';
-                    $entity_type->setLinkTemplate(
-                        'drupal:wmcontent-overview',
-                        $wmcontent_path
-                    );
-                }
-            }
+    foreach ($entityTypes as $entity_type) {
+        if (!$entity_type->hasLinkTemplate('canonical')) {
+            continue;
         }
+
+        if ($entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
+            continue;
+        }
+
+        // This breaks on taxonomy terms.
+        if ($entity_type->id() !== 'node') {
+            continue;
+        }
+
+        $entity_type->setLinkTemplate(
+            'drupal:wmcontent-overview',
+            $entity_type->getLinkTemplate('canonical') . '/wmcontent/{container}'
+        );
     }
 }
 
-/**
- * Implements hook_entity_operation().
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
- *
- * @return array
- */
-function wmcontent_entity_operation(EntityInterface $entity)
+function wmcontent_entity_operation(EntityInterface $entity): array
 {
     if (!$entity instanceof ContentEntityInterface) {
         return [];
@@ -97,13 +80,11 @@ function wmcontent_entity_operation(EntityInterface $entity)
     }
 
     $operations = [];
-
-    /** @var \Drupal\wmcontent\WmContentManager $manager */
-    $manager = \Drupal::service('wmcontent.manager');
-
+    $containers = \Drupal::service('wmcontent.manager')->getHostContainers($entity);
     $routeName = 'entity.' . $entity->getEntityTypeId() . '.wmcontent_overview';
-    // Get the containers this entity hosts
-    foreach ($manager->getHostContainers($entity) as $container) {
+
+    /** @var WmContentContainerInterface $container */
+    foreach ($containers as $container) {
         $operations[$container->id()] = [
             'title' => $container->label(),
             'url' => Url::fromRoute(
@@ -123,147 +104,128 @@ function wmcontent_entity_operation(EntityInterface $entity)
     return $operations;
 }
 
-/**
- * Implements hook_entity_update().
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
- */
-function wmcontent_entity_update(EntityInterface $entity)
+function wmcontent_entity_update(EntityInterface $entity): void
 {
     if (!$entity instanceof ContentEntityInterface) {
         return;
     }
-    /** @var \Drupal\wmcontent\WmContentManager $manager */
+
+    /** @var EventDispatcherInterface $dispatcher */
+    $dispatcher = \Drupal::service('event_dispatcher');
+    /** @var WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
-    if ($manager->isContentBlock($entity)) {
-        $manager->emitChangedEvent($entity, $manager->getContainers($entity));
+
+    if ($manager->isChild($entity)) {
+        $dispatcher->dispatch(
+            ContentBlockChangedEvent::NAME,
+            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity))
+        );
     }
 }
 
-function wmcontent_entity_insert(EntityInterface $entity)
+function wmcontent_entity_insert(EntityInterface $entity): void
 {
     if (!$entity instanceof ContentEntityInterface) {
         return;
     }
-    /** @var \Drupal\wmcontent\WmContentManager $manager */
+
+    /** @var EventDispatcherInterface $dispatcher */
+    $dispatcher = \Drupal::service('event_dispatcher');
+    /** @var WmContentManager $manager */
     $manager = \Drupal::service('wmcontent.manager');
-    if ($manager->isContentBlock($entity)) {
-        $manager->emitChangedEvent($entity, $manager->getContainers($entity));
+
+    if ($manager->isChild($entity)) {
+        $dispatcher->dispatch(
+            ContentBlockChangedEvent::NAME,
+            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity))
+        );
     }
 }
 
-/**
- * Implements hook_entity_view().
- *
- * @param array $build
- * @param \Drupal\Core\Entity\EntityInterface $entity
- * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
- * @param $view_mode
- */
-function wmcontent_entity_view(
-    array &$build,
-    EntityInterface $entity,
-    EntityViewDisplayInterface $display,
-    $view_mode
-) {
-
-    // Loadup our config.
-    foreach (wmContentContainer::loadMultiple() as $container) {
+function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display): void
+{
+    foreach (WmContentContainer::loadMultiple() as $container) {
         // Only load if our container is enabled in the display.
-        if ($display->getComponent('wmc_' . $container->getId())) {
-            // Load up our service and get the content, ordered by weight.
-            $manager = \Drupal::service('wmcontent.manager');
-            $entities = $manager->getContent(
-                $entity,
-                $container->getId()
-            );
+        if (!$display->getComponent('wmc_' . $container->getId())) {
+            continue;
+        }
 
-            $delta = 0;
-            $paragraph_type_count = 1;
-            $paragraph_type_last = false;
-            $sections = [
-                $delta => [
+        $manager = \Drupal::service('wmcontent.manager');
+        $entities = $manager->getContent($entity, $container->getId());
+
+        $delta = 0;
+        $paragraphTypeCount = 1;
+        $paragraphTypeLast = false;
+        $sections = [
+            $delta => [
+                '#theme' => 'wmcontent_section',
+                '#background' => '',
+                '#items' => [],
+                '#delta' => $delta,
+                '#container' => $container->getId(),
+            ],
+        ];
+
+        foreach ($entities as $content) {
+            // If this is a 'break' then add it to the higher level break and switch.
+            if ($content->bundle() === 'break') {
+                $background = '';
+                if ($content->get('break_background')->value) {
+                    $background = $content->get('break_background')->value;
+                }
+
+                $delta++;
+                $sections[$delta] = [
                     '#theme' => 'wmcontent_section',
-                    '#background' => '',
+                    '#background' => $background,
                     '#items' => [],
                     '#delta' => $delta,
-                    '#container' => $container->getId(),
-                ],
-            ];
+                ];
 
-            foreach ($entities as $content) {
-                // If this is a 'break' then add it to the higher level break and switch.
-                if ($content->bundle() == 'break') {
-                    $background = '';
-                    if ($content->get('break_background')->value) {
-                        $background = $content->get('break_background')->value;
-                    }
-
-                    $delta++;
-                    $sections[$delta] = [
-                        '#theme' => 'wmcontent_section',
-                        '#background' => $background,
-                        '#items' => [],
-                        '#delta' => $delta,
-                    ];
-
-                    // Reset the paragraph type count coz we're starting a new
-                    // section.
-                    $paragraph_type_count = 1;
-                    $paragraph_type_last = false;
-                } else {
-                    // If it's not a break, just add this paragraph.
-                    // Do look at the type tough.
-                    if ($content->bundle() != $paragraph_type_last) {
-                        $paragraph_type_count = 1;
-                        $paragraph_type_last = $content->bundle();
-                    }
-
-                    $viewBuilder = \Drupal::entityTypeManager()
-                        ->getViewBuilder($entity->getEntityTypeId());
-
-                    $item = $viewBuilder->view($content);
-                    $item['#weight'] = $content->get('wmcontent_weight')->getString();
-                    $item['#size'] = $content->get('wmcontent_size')->getString();
-                    $item['#alignment'] = $content->get('wmcontent_alignment')->getString();
-                    $item['#delta'] = $paragraph_type_count;
-                    $item['#type'] = $content->getEntityTypeId();
-                    $item['#bundle'] = $content->bundle();
-
-
-                    $sections[$delta]['#items'][] = $item;
-                    $paragraph_type_count++;
+                // Reset the paragraph type count coz we're starting a new
+                // section.
+                $paragraphTypeCount = 1;
+                $paragraphTypeLast = false;
+            } else {
+                // If it's not a break, just add this paragraph.
+                // Do look at the type tough.
+                if ($content->bundle() != $paragraphTypeLast) {
+                    $paragraphTypeCount = 1;
+                    $paragraphTypeLast = $content->bundle();
                 }
+
+                $viewBuilder = \Drupal::entityTypeManager()
+                    ->getViewBuilder($entity->getEntityTypeId());
+
+                $item = $viewBuilder->view($content);
+                $item['#weight'] = $content->get('wmcontent_weight')->getString();
+                $item['#size'] = $content->get('wmcontent_size')->getString();
+                $item['#alignment'] = $content->get('wmcontent_alignment')->getString();
+                $item['#delta'] = $paragraphTypeCount;
+                $item['#type'] = $content->getEntityTypeId();
+                $item['#bundle'] = $content->bundle();
+
+                $sections[$delta]['#items'][] = $item;
+                $paragraphTypeCount++;
             }
-
-
-            // Fetch empty ones (mainly, the first one).
-            foreach ($sections as $delta => $section) {
-                if (empty($section['#items'])) {
-                    unset($sections[$delta]);
-                }
-            }
-
-            $build['wmc_' . $container->getId()] = array(
-                '#sections' => $sections,
-                '#theme' => 'wmcontent',
-                '#container' => $container->getId(),
-            );
         }
+
+        // Fetch empty ones (mainly, the first one).
+        foreach ($sections as $delta => $section) {
+            if (empty($section['#items'])) {
+                unset($sections[$delta]);
+            }
+        }
+
+        $build['wmc_' . $container->getId()] = [
+            '#sections' => $sections,
+            '#theme' => 'wmcontent',
+            '#container' => $container->getId(),
+        ];
     }
 }
 
-/**
- * Implements hook_theme().
- *
- * @param $existing
- * @param $type
- * @param $theme
- * @param $path
- *
- * @return array
- */
-function wmcontent_theme($existing, $type, $theme, $path)
+function wmcontent_theme(): array
 {
     return [
         'wmcontent' => [
@@ -287,7 +249,7 @@ function wmcontent_theme($existing, $type, $theme, $path)
             'render element' => 'elements',
         ],
         // Cards is used to explode 1 paragraph into multiple 'fake'
-        // paragraphs on the frontend. Bv voor autofill paragraph types.
+        // paragraphs on the frontend, e.g. for autofill paragraph types.
         'paragraph_cards' => [
             'variables' => [
                 'cards' => null,
@@ -299,18 +261,10 @@ function wmcontent_theme($existing, $type, $theme, $path)
     ];
 }
 
-/**
- * Implements hook_theme_suggestions_HOOK().
- *
- * @param array $variables
- *
- * @return array
- */
-function wmcontent_theme_suggestions_eck_entity(array $variables)
+function wmcontent_theme_suggestions_eck_entity(array $variables): array
 {
     $suggestions = [];
 
-    // Add theme suggestiongs for the type and the the type__bundle.
     if (!empty($variables['entity']) && isset($variables['entity']['#entity_type'])) {
         $suggestions = [
             $variables['entity']['#entity_type'],
@@ -321,29 +275,20 @@ function wmcontent_theme_suggestions_eck_entity(array $variables)
     return $suggestions;
 }
 
-/**
- * Prepares variables for paragraph templates.
- *
- * @param $variables
- */
-function wmcontent_preprocess_paragraph(&$variables)
+function wmcontent_preprocess_paragraph(array &$variables): void
 {
     $paragraph = $variables['entity']['#entity'];
 
     $variables['bundle'] = $paragraph->bundle();
 
-    // Add size.
-    $size = $paragraph->get('wmcontent_size')->value;
-    if (strlen($size) > 0) {
+    if ($size = $paragraph->get('wmcontent_size')->value) {
         $variables['wmcontent_size'] = $size;
     }
 
-    $alignment = $paragraph->get('wmcontent_alignment')->value;
-    if (strlen($size) > 0) {
+    if ($alignment = $paragraph->get('wmcontent_alignment')->value) {
         $variables['wmcontent_alignment'] = $alignment;
     }
 
-    // Add delta.
     $variables['wmcontent_delta'] = 0;
     if (isset($variables['entity']['#delta'])) {
         $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
@@ -357,10 +302,11 @@ function wmcontent_preprocess_paragraph(&$variables)
         'wmcontent_parent',
     ];
 
-    // Add to render array except size.
     $variables['content'] = [];
+
     foreach (Element::children($variables['entity']) as $key) {
-        if (!empty($variables['entity'][$key]['#field_name'])
+        if (
+            !empty($variables['entity'][$key]['#field_name'])
             && !in_array($variables['entity'][$key]['#field_name'], $strip)
         ) {
             $variables['content'][] = $variables['entity'][$key];
@@ -368,172 +314,166 @@ function wmcontent_preprocess_paragraph(&$variables)
     }
 }
 
-/**
- * Implements hook_entity_base_field_info().
- *
- * More intel at https://www.drupal.org/node/1879542
- *
- * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
- *
- * @return array
- */
-function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type)
+function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): array
 {
-    $fields = array();
-    foreach (wmContentContainer::loadMultiple() as $conf) {
+    $fields = [];
+
+    foreach (WmContentContainer::loadMultiple() as $conf) {
         // Match. This is kind of wrong because we're going to overload all
         // the bundles of the entity type with our fields.
-        if ($entity_type->id() === $conf->getChildEntityType()) {
-            $fields['wmcontent_size'] = BaseFieldDefinition::create('list_string')
-                ->setLabel(t('Size'))
-                ->setDescription(t('Select the size.'))
-                ->setRequired(true)
-                ->setSetting('allowed_values_function', '_wmcontent_sizes')
-                ->setDefaultValueCallback('_wmcontent_default_size')
-                ->setDisplayConfigurable('form', true)
-                ->setDisplayOptions(
-                    'form',
-                    array(
-                        'type' => 'options_select',
-                        'settings' => array(
-                            'display_label' => true,
-                        ),
-                        'weight' => 20,
-                    )
-                )
-                ->setDisplayOptions(
-                    'view',
-                    array(
-                        'label' => 'hidden',
-                        'type' => 'string',
-                        'weight' => -5,
-                    )
-                );
-
-            $fields['wmcontent_alignment'] = BaseFieldDefinition::create('list_string')
-                ->setLabel(t('Alignment'))
-                ->setDescription(t('Select the Alignment.'))
-                ->setRequired(true)
-                ->setSetting('allowed_values_function', '_wmcontent_alignments')
-                ->setDefaultValueCallback('_wmcontent_default_alignment')
-                ->setDisplayConfigurable('form', true)
-                ->setDisplayOptions(
-                    'form',
-                    array(
-                        'type' => 'options_select',
-                        'settings' => array(
-                            'display_label' => true,
-                        ),
-                        'weight' => 20,
-                    )
-                )
-                ->setDisplayOptions(
-                    'view',
-                    array(
-                        'label' => 'hidden',
-                        'type' => 'string',
-                        'weight' => -5,
-                    )
-                );
-
-            $fields['wmcontent_weight'] = IndexableBaseFieldDefinition::create('integer')
-                ->setLabel(t('Weight'))
-                ->setRequired(true)
-                ->setSetting('default_value', 0)
-                ->setDescription(t('The weight of this child.'))
-                ->setDisplayConfigurable('form', true)
-                ->setDisplayOptions(
-                    'form',
-                    array(
-                        'type' => 'hidden',
-                        'settings' => array(
-                            'display_label' => true,
-                        ),
-                        'weight' => 20,
-                    )
-                )
-                ->setDisplayOptions(
-                    'view',
-                    array(
-                        'label' => 'hidden',
-                        'type' => 'string',
-                        'weight' => -5,
-                    )
-                )
-                ->addIndex('value');
-
-            // The parent is an entity reference to the parent entity, which allows
-            // to access the parent id with $entity->parent->target_id and the parent
-            // entity with $entity->parent->entity.
-            $fields['wmcontent_parent'] = IndexableBaseFieldDefinition::create('integer')
-                ->setLabel(t('Host'))
-                ->setDescription(t('The entity id of the host.'))
-                ->setRequired(true)
-                ->setReadOnly(true)
-                ->setDisplayConfigurable('form', true)
-                ->setDisplayOptions(
-                    'form',
-                    array(
-                        'type' => 'hidden',
-                        'settings' => array(
-                            'display_label' => true,
-                        ),
-                        'weight' => 20,
-                    )
-                )
-                ->setDisplayOptions(
-                    'view',
-                    array(
-                        'label' => 'hidden',
-                        'type' => 'string',
-                        'weight' => -5,
-                    )
-                )
-                ->addIndex('value');
-
-            $fields['wmcontent_parent_type'] = IndexableBaseFieldDefinition::create('string')
-                ->setLabel(t('Host Type'))
-                ->setDescription(t('The entity type of the host.'))
-                ->setRequired(true)
-                ->setReadOnly(true)
-                ->setDisplayConfigurable('form', true)
-                ->setDisplayOptions(
-                    'form',
-                    array(
-                        'type' => 'hidden',
-                        'settings' => array(
-                            'display_label' => true,
-                        ),
-                        'weight' => 20,
-                    )
-                )
-                ->addIndex('value');
-
-            $fields['wmcontent_container'] = IndexableBaseFieldDefinition::create('string')
-                ->setLabel(t('Container'))
-                ->setDescription(t('The container in the host.'))
-                ->setRequired(true)
-                ->setReadOnly(true)
-                ->setSetting('default_value', 'content')
-                ->setDisplayConfigurable('form', true)
-                ->setDisplayOptions(
-                    'form',
-                    array(
-                        'type' => 'hidden',
-                        'settings' => array(
-                            'display_label' => true,
-                        ),
-                        'weight' => 20,
-                    )
-                )
-                ->addIndex('value');
+        if ($entity_type->id() !== $conf->getChildEntityType()) {
+            continue;
         }
+
+        $fields['wmcontent_size'] = BaseFieldDefinition::create('list_string')
+            ->setLabel(t('Size'))
+            ->setDescription(t('Select the size.'))
+            ->setRequired(true)
+            ->setSetting('allowed_values_function', '_wmcontent_sizes')
+            ->setDefaultValueCallback('_wmcontent_default_size')
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayOptions(
+                'form',
+                [
+                    'type' => 'options_select',
+                    'settings' => [
+                        'display_label' => true,
+                    ],
+                    'weight' => 20,
+                ]
+            )
+            ->setDisplayOptions(
+                'view',
+                [
+                    'label' => 'hidden',
+                    'type' => 'string',
+                    'weight' => -5,
+                ]
+            );
+
+        $fields['wmcontent_alignment'] = BaseFieldDefinition::create('list_string')
+            ->setLabel(t('Alignment'))
+            ->setDescription(t('Select the Alignment.'))
+            ->setRequired(true)
+            ->setSetting('allowed_values_function', '_wmcontent_alignments')
+            ->setDefaultValueCallback('_wmcontent_default_alignment')
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayOptions(
+                'form',
+                [
+                    'type' => 'options_select',
+                    'settings' => [
+                        'display_label' => true,
+                    ],
+                    'weight' => 20,
+                ]
+            )
+            ->setDisplayOptions(
+                'view',
+                [
+                    'label' => 'hidden',
+                    'type' => 'string',
+                    'weight' => -5,
+                ]
+            );
+
+        $fields['wmcontent_weight'] = IndexableBaseFieldDefinition::create('integer')
+            ->setLabel(t('Weight'))
+            ->setRequired(true)
+            ->setSetting('default_value', 0)
+            ->setDescription(t('The weight of this child.'))
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayOptions(
+                'form',
+                [
+                    'type' => 'hidden',
+                    'settings' => [
+                        'display_label' => true,
+                    ],
+                    'weight' => 20,
+                ]
+            )
+            ->setDisplayOptions(
+                'view',
+                [
+                    'label' => 'hidden',
+                    'type' => 'string',
+                    'weight' => -5,
+                ]
+            )
+            ->addIndex('value');
+
+        // The parent is an entity reference to the parent entity, which allows
+        // to access the parent id with $entity->parent->target_id and the parent
+        // entity with $entity->parent->entity.
+        $fields['wmcontent_parent'] = IndexableBaseFieldDefinition::create('integer')
+            ->setLabel(t('Host'))
+            ->setDescription(t('The entity id of the host.'))
+            ->setRequired(true)
+            ->setReadOnly(true)
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayOptions(
+                'form',
+                [
+                    'type' => 'hidden',
+                    'settings' => [
+                        'display_label' => true,
+                    ],
+                    'weight' => 20,
+                ]
+            )
+            ->setDisplayOptions(
+                'view',
+                [
+                    'label' => 'hidden',
+                    'type' => 'string',
+                    'weight' => -5,
+                ]
+            )
+            ->addIndex('value');
+
+        $fields['wmcontent_parent_type'] = IndexableBaseFieldDefinition::create('string')
+            ->setLabel(t('Host Type'))
+            ->setDescription(t('The entity type of the host.'))
+            ->setRequired(true)
+            ->setReadOnly(true)
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayOptions(
+                'form',
+                [
+                    'type' => 'hidden',
+                    'settings' => [
+                        'display_label' => true,
+                    ],
+                    'weight' => 20,
+                ]
+            )
+            ->addIndex('value');
+
+        $fields['wmcontent_container'] = IndexableBaseFieldDefinition::create('string')
+            ->setLabel(t('Container'))
+            ->setDescription(t('The container in the host.'))
+            ->setRequired(true)
+            ->setReadOnly(true)
+            ->setSetting('default_value', 'content')
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayOptions(
+                'form',
+                [
+                    'type' => 'hidden',
+                    'settings' => [
+                        'display_label' => true,
+                    ],
+                    'weight' => 20,
+                ]
+            )
+            ->addIndex('value');
     }
 
     return $fields;
 }
 
-function _wmcontent_sizes(FieldStorageDefinitionInterface $definition = null, FieldableEntityInterface $entity = null)
+function _wmcontent_sizes(?FieldStorageDefinitionInterface $definition = null, ?FieldableEntityInterface $entity = null)
 {
     $bundle = null;
     $type = null;
@@ -560,7 +500,7 @@ function _wmcontent_sizes(FieldStorageDefinitionInterface $definition = null, Fi
     return $sizes;
 }
 
-function _wmcontent_default_size(FieldableEntityInterface $entity = null)
+function _wmcontent_default_size(?FieldableEntityInterface $entity = null)
 {
     $bundle = null;
     $type = null;
@@ -578,7 +518,7 @@ function _wmcontent_default_size(FieldableEntityInterface $entity = null)
     return $default ?? $first;
 }
 
-function _wmcontent_alignments(FieldStorageDefinitionInterface $definition = null, FieldableEntityInterface $entity = null)
+function _wmcontent_alignments(?FieldStorageDefinitionInterface $definition = null, ?FieldableEntityInterface $entity = null)
 {
     $bundle = null;
     $type = null;
@@ -604,7 +544,7 @@ function _wmcontent_alignments(FieldStorageDefinitionInterface $definition = nul
     return $alignments;
 }
 
-function _wmcontent_default_alignment(FieldableEntityInterface $entity = null)
+function _wmcontent_default_alignment(?FieldableEntityInterface $entity = null)
 {
     $bundle = null;
     $type = null;
@@ -622,17 +562,14 @@ function _wmcontent_default_alignment(FieldableEntityInterface $entity = null)
     return $default ?? $first;
 }
 
-function wmcontent_form_alter(&$form, FormStateInterface $form_state, $form_id)
+function wmcontent_form_alter(array &$form, FormStateInterface $formState, string $formId)
 {
-    /** @var WmContentContainer $entity */
+    /** @var WmContentContainerInterface $entity */
     foreach (WmContentContainer::loadMultiple() as $entity) {
         $config = $entity->getConfig();
 
         foreach ($config['child_bundles'] as $bundle) {
-            // Build up what the form id for this child would be.
-            $test = $config['child_entity_type'] . '_' . $bundle . '_form';
-
-            if ($test !== $form_id) {
+            if ($formId !== $config['child_entity_type'] . '_' . $bundle . '_form') {
                 continue;
             }
 

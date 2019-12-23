@@ -7,9 +7,6 @@ use Drupal\Core\Entity\EntityTypeBundleInfo as CoreBundleInfo;
 
 class EntityTypeBundleInfo extends CoreBundleInfo
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getAllBundleInfo()
     {
         if (!empty($this->bundleInfo)) {

@@ -5,24 +5,37 @@ namespace Drupal\wmcontent;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 
-/**
- * Provides an interface defining a Example entity.
- */
 interface WmContentContainerInterface extends ConfigEntityInterface
 {
-    public function getLabel();
-    public function getId();
-    public function getHostEntityType();
-    public function getHostBundles();
-    public function getHostBundlesAll();
-    public function getChildEntityType();
-    public function getChildBundles();
-    public function getChildBundlesDefault();
-    public function getChildBundlesAll();
-    public function getConfig();
-    public function getHideSingleOptionSizes();
-    public function getHideSingleOptionAlignments();
-    public function isHost(EntityInterface $host);
-    public function getShowSizeColumn();
-    public function getShowAlignmentColumn();
+    public function getLabel(): string;
+
+    public function getId(): string;
+
+    public function getHostEntityType(): string;
+
+    public function getHostBundles(): array;
+
+    public function getHostBundlesAll(): array;
+
+    public function getChildEntityType(): string;
+
+    public function getChildBundles(): array;
+
+    public function getChildBundlesDefault(): string;
+
+    public function getChildBundlesAll(): array;
+
+    public function getConfig(): array;
+
+    public function getHideSingleOptionSizes(): bool;
+
+    public function getHideSingleOptionAlignments(): bool;
+
+    public function getShowSizeColumn(): bool;
+
+    public function getShowAlignmentColumn(): bool;
+
+    public function isHost(EntityInterface $host): bool;
+
+    public function hasChild(EntityInterface $child): bool;
 }

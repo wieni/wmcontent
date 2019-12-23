@@ -3,6 +3,7 @@
 namespace Drupal\wmcontent\Event;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -10,11 +11,12 @@ use Symfony\Component\EventDispatcher\Event;
  */
 class ContentBlockChangedEvent extends Event
 {
-    const NAME = 'wmcontent.contentblock.changed';
-    /** @var \Drupal\Core\Entity\ContentEntityInterface */
-    private $contentBlock;
-    /** @var \Drupal\wmcontent\Entity\WmContentContainer[] */
-    private $containers;
+    public const NAME = 'wmcontent.contentblock.changed';
+
+    /** @var EntityInterface */
+    protected $contentBlock;
+    /** @var WmContentContainerInterface[] */
+    protected $containers;
 
     public function __construct(EntityInterface $contentBlock, array $containers)
     {
@@ -22,16 +24,12 @@ class ContentBlockChangedEvent extends Event
         $this->containers = $containers;
     }
 
-    /** @return \Drupal\Core\Entity\ContentEntityInterface */
-    public function getContentBlock()
+    public function getContentBlock(): EntityInterface
     {
         return $this->contentBlock;
     }
 
-    /**
-     * @return \Drupal\wmcontent\Entity\WmContentContainer[]
-     */
-    public function getContainers()
+    public function getContainers(): array
     {
         return $this->containers;
     }

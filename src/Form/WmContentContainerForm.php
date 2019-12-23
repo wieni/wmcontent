@@ -1,22 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\wmcontent\Form\WmContentContainerForm.
- */
-
 namespace Drupal\wmcontent\Form;
 
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\eck\Entity\EckEntityType;
-use Drupal\wmcontent\Entity\WmContentContainer;
+use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form controller for the container entity type edit form.
+ * @property WmContentContainerInterface $entity
  */
 class WmContentContainerForm extends EntityForm
 {
@@ -31,22 +25,10 @@ class WmContentContainerForm extends EntityForm
         return $instance;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function form(array $form, FormStateInterface $form_state)
     {
-        // Get the values.
-        $values = $form_state->getValues();
-        $types = $this->getContentEntityTypes();
-        $firsttype = array_keys($types)[0];
-
-        /** @var WmContentContainer $entity */
-        $entity = $this->entity;
-
-        // Change page title for the edit operation.
-        if ($this->operation == 'edit') {
-            $form['#title'] = $this->t('Edit container: @name', array('@name' => $entity->getLabel()));
+        if ($this->operation === 'edit') {
+            $form['#title'] = $this->t('Edit container: @name', ['@name' => $this->entity->getLabel()]);
         }
 
         $form['wrapper'] = [
@@ -54,32 +36,32 @@ class WmContentContainerForm extends EntityForm
             '#suffix' => '</div>',
         ];
 
-        $form['wrapper']['label'] = array(
+        $form['wrapper']['label'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Container name'),
-            '#default_value' => $entity->label(),
+            '#default_value' => $this->entity->label(),
             '#size' => 30,
             '#required' => true,
             '#maxlength' => 64,
             '#description' => $this->t('The name for this container.'),
-        );
+        ];
 
-        $form['wrapper']['id'] = array(
+        $form['wrapper']['id'] = [
             '#type' => 'machine_name',
-            '#default_value' => $entity->id(),
+            '#default_value' => $this->entity->id(),
             '#required' => true,
-            '#disabled' => !$entity->isNew(),
+            '#disabled' => !$this->entity->isNew(),
             '#size' => 30,
             '#maxlength' => 64,
             '#machine_name' => [
                 'exists' => '\Drupal\wmcontent\Entity\WmContentContainer::load',
             ],
-        );
+        ];
 
-        $form['wrapper']['host_entity_type'] = array(
+        $form['wrapper']['host_entity_type'] = [
             '#type' => 'select',
             '#title' => $this->t('Host entity type'),
-            '#default_value' => $entity->getHostEntityType(),
+            '#default_value' => $this->entity->getHostEntityType(),
             '#options' => $this->getContentEntityTypes(),
             '#validated' => true,
             '#required' => true,
@@ -89,10 +71,10 @@ class WmContentContainerForm extends EntityForm
                 'wrapper' => 'wholewrapper',
                 'progress' => [
                     'type' => 'throbber',
-                    'message' => "searching",
+                    'message' => 'searching',
                 ],
             ],
-        );
+        ];
 
         $form['wrapper']['host_bundles_fieldset'] = [
             '#title' => t('Host Bundles'),
@@ -102,18 +84,16 @@ class WmContentContainerForm extends EntityForm
             '#description' => t('Allowed bundles in this type.'),
         ];
 
-
         $form['wrapper']['host_bundles_fieldset']['host_bundles'] = [
             '#type' => 'checkboxes',
-            '#options' => $entity->getHostBundlesAll(),
-            '#default_value' => $entity->getHostBundles(),
+            '#options' => $this->entity->getHostBundlesAll(),
+            '#default_value' => $this->entity->getHostBundles(),
         ];
 
-
-        $form['wrapper']['child_entity_type'] = array(
+        $form['wrapper']['child_entity_type'] = [
             '#type' => 'select',
             '#title' => $this->t('Child entity type'),
-            '#default_value' => $entity->getChildEntityType(),
+            '#default_value' => $this->entity->getChildEntityType(),
             '#options' => $this->getContentEntityTypes(),
             '#validated' => true,
             '#required' => true,
@@ -123,10 +103,10 @@ class WmContentContainerForm extends EntityForm
                 'wrapper' => 'wholewrapper',
                 'progress' => [
                     'type' => 'throbber',
-                    'message' => "searching",
+                    'message' => 'searching',
                 ],
             ],
-        );
+        ];
 
         $form['wrapper']['child_bundles_fieldset'] = [
             '#title' => t('Child Bundles'),
@@ -138,106 +118,105 @@ class WmContentContainerForm extends EntityForm
 
         $form['wrapper']['child_bundles_fieldset']['child_bundles'] = [
             '#type' => 'checkboxes',
-            '#options' => $entity->getChildBundlesAll(),
-            '#default_value' => $entity->getChildBundles(),
+            '#options' => $this->entity->getChildBundlesAll(),
+            '#default_value' => $this->entity->getChildBundles(),
         ];
 
         $form['wrapper']['child_bundles_default'] = [
             '#title' => t('Default'),
             '#type' => 'select',
-            '#options' => $entity->getChildBundlesAll(),
-            '#default_value' => $entity->getChildBundlesDefault(),
+            '#options' => $this->entity->getChildBundlesAll(),
+            '#default_value' => $this->entity->getChildBundlesDefault(),
         ];
 
         $form['hide_single_option_sizes'] = [
             '#type' => 'checkbox',
-            '#default_value' => $entity->getHideSingleOptionSizes(),
+            '#default_value' => $this->entity->getHideSingleOptionSizes(),
             '#title' => $this->t('Hide single option sizes'),
         ];
 
         $form['hide_single_option_alignments'] = [
             '#type' => 'checkbox',
-            '#default_value' => $entity->getHideSingleOptionAlignments(),
+            '#default_value' => $this->entity->getHideSingleOptionAlignments(),
             '#title' => $this->t('Hide single option alignments'),
         ];
 
-
         $form['show_size_column'] = [
             '#type' => 'checkbox',
-            '#default_value' => $entity->getShowSizeColumn(),
+            '#default_value' => $this->entity->getShowSizeColumn(),
             '#title' => $this->t('Show the size column'),
         ];
 
         $form['show_alignment_column'] = [
             '#type' => 'checkbox',
-            '#default_value' => $entity->getShowAlignmentColumn(),
+            '#default_value' => $this->entity->getShowAlignmentColumn(),
             '#title' => $this->t('Show the alignment column'),
         ];
 
-        return parent::form($form, $form_state, $entity);
+        return parent::form($form, $form_state);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function save(array $form, FormStateInterface $form_state)
     {
-        /** @var WmContentContainer $entity */
-        $entity = $this->entity;
-
         // Prevent leading and trailing spaces.
-        $entity->set('label', trim($entity->label()));
+        $this->entity->set('label', trim($this->entity->label()));
 
-        $host_bundles = $entity->get('host_bundles');
+        $host_bundles = $this->entity->get('host_bundles');
         $host_bundles = array_filter($host_bundles);
-        $entity->set('host_bundles', $host_bundles);
+        $this->entity->set('host_bundles', $host_bundles);
 
-        $child_bundles = $entity->get('child_bundles');
+        $child_bundles = $this->entity->get('child_bundles');
         $child_bundles = array_filter($child_bundles);
-        $entity->set('child_bundles', $child_bundles);
+        $this->entity->set('child_bundles', $child_bundles);
 
-        $status = $entity->save();
+        $status = $this->entity->save();
 
-        $action = $status == SAVED_UPDATED ? 'updated' : 'added';
+        $action = $status === SAVED_UPDATED ? 'updated' : 'added';
 
-        // Tell the user we've updated their container.
         $this->messenger->addStatus($this->t(
             'Container %label has been %action.',
             [
-                '%label' => $entity->label(),
-                '%action' => $action
+                '%label' => $this->entity->label(),
+                '%action' => $action,
             ]
         ));
         $this->logger('wmcontent')->notice(
             'Container %label has been %action.',
             [
-                '%label' => $entity->label(),
-                '%action' => $action
+                '%label' => $this->entity->label(),
+                '%action' => $action,
             ]
         );
 
-        // Redirect back to the list view.
         $form_state->setRedirect('wmcontent.collection');
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public function updateForm($form, FormStateInterface $form_state)
+    {
+        $form_state->setRebuild(true);
+
+        return $form['wrapper'];
+    }
+
     protected function actions(array $form, FormStateInterface $form_state)
     {
         $actions = parent::actions($form, $form_state);
         $actions['submit']['#value'] = $this->t('Update container');
+
         if ($this->entity->isNew()) {
             $actions['submit']['#value'] = $this->t('Add container');
         }
+
         return $actions;
     }
 
     /**
      * Ideally filter out only content entity types here. ECK seems to be
      * a config type so however, so bollocks.
+     *
+     * TODO: Generalize this
      */
-    private function getContentEntityTypes()
+    protected function getContentEntityTypes(): array
     {
         $types = [];
 
@@ -252,17 +231,5 @@ class WmContentContainerForm extends EntityForm
         ksort($types);
 
         return $types;
-    }
-
-    /**
-     * @param $form
-     * @param \Drupal\Core\Form\FormStateInterface $form_state
-     *
-     * @return mixed
-     */
-    public function updateForm($form, FormStateInterface $form_state)
-    {
-        $form_state->setRebuild(true);
-        return $form['wrapper'];
     }
 }

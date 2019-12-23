@@ -1,42 +1,28 @@
 <?php
 
-/**
- * @file
- * Installation file for wmcontent module.
- */
-
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
 
-/**
- * Implements hook_install().
- */
-function wmcontent_install() {
-  // Add our base fields to the schema.
-    /** @var WmContentContainer $container */
+function wmcontent_install()
+{
+    // Add our base fields to the schema.
     foreach (WmContentContainer::loadMultiple() as $container) {
         \Drupal::service('wmcontent.entity_updates')
             ->applyUpdates($container->getChildEntityType());
     }
 }
 
-/**
- * Implements hook_uninstall().
- */
-function wmcontent_uninstall() {
-  // Remove our base fields from the schema.
-    /** @var WmContentContainer $container */
+function wmcontent_uninstall()
+{
+    // Remove our base fields from the schema.
     foreach (WmContentContainer::loadMultiple() as $container) {
         \Drupal::service('wmcontent.entity_updates')
             ->applyUpdates($container->getChildEntityType());
     }
 }
 
-/**
- * Implements hook_update().
- */
-function wmcontent_update_8001() {
-    /** @var WmContentContainer $container */
+function wmcontent_update_8001()
+{
     foreach (WmContentContainer::loadMultiple() as $container) {
         \Drupal::service('wmcontent.entity_updates')
             ->applyUpdates($container->getChildEntityType());
@@ -49,7 +35,6 @@ function wmcontent_update_8001() {
  */
 function wmcontent_update_8002()
 {
-    /** @var WmContentContainer $container */
     $containers = WmContentContainer::loadMultiple();
     $updateManager = \Drupal::entityDefinitionUpdateManager();
     $fieldNames = [

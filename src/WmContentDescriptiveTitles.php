@@ -8,6 +8,9 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\wmcontent\Entity\EntityTypeBundleInfo;
 
+/**
+ * TODO: Simplify this & maybe move to controller?
+ */
 class WmContentDescriptiveTitles
 {
     use StringTranslationTrait;
@@ -27,20 +30,6 @@ class WmContentDescriptiveTitles
         $this->currentRouteMatch = $currentRouteMatch;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->entityTypeManager = $entityTypeManager;
-    }
-
-    private function getContainer()
-    {
-        $containers = $this
-            ->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->loadByProperties(['id' => $this->currentRouteMatch->getParameter('container')]);
-        return reset($containers);
-    }
-
-    private function getContainerType()
-    {
-        return $this->getContainer()->getChildEntityType();
     }
 
     /** @return TranslatableMarkup */
@@ -88,5 +77,19 @@ class WmContentDescriptiveTitles
             default:
                 return $this->t('');
         }
+    }
+
+    private function getContainer()
+    {
+        $containers = $this
+            ->entityTypeManager
+            ->getStorage('wmcontent_container')
+            ->loadByProperties(['id' => $this->currentRouteMatch->getParameter('container')]);
+        return reset($containers);
+    }
+
+    private function getContainerType()
+    {
+        return $this->getContainer()->getChildEntityType();
     }
 }

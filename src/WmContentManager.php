@@ -2,20 +2,17 @@
 
 namespace Drupal\wmcontent;
 
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\TranslatableInterface;
-use Drupal\wmcontent\Entity\WmContentContainer;
-use Drupal\wmcontent\Event\ContentBlockChangedEvent;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\TranslatableInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class WmContentManager
+class WmContentManager implements WmContentManagerInterface
 {
-    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface */
+    /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
-    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+    /** @var EventDispatcherInterface */
     protected $eventDispatcher;
     /** @var CacheBackendInterface */
     protected $cacheBackend;
@@ -30,19 +27,12 @@ class WmContentManager
         $this->cacheBackend = $cacheBackend;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getContent(ContentEntityInterface $host, $container)
+    public function getContent(EntityInterface $host, string $containerId): array
     {
         $data = &drupal_static(__FUNCTION__);
-
-        if (!$container instanceof WmContentContainer) {
-            $container = $this->getContainer($container);
-        }
+        $container = $this->getContainer($containerId);
 
         $storage = $this->entityTypeManager->getStorage($container->getChildEntityType());
-
         $key = 'wmcontent:' . $container->id() . ':' . $host->getEntityTypeId() . ':' . $host->id() . ':' . $host->get('langcode')->value;
 
         // Return statically cached data
@@ -56,9 +46,7 @@ class WmContentManager
             return $storage->loadMultiple($data[$key]);
         }
 
-        // Query database
-        $data[$key] = $storage
-            ->getQuery()
+        $data[$key] = $storage->getQuery()
             ->condition('wmcontent_parent', $host->id())
             ->condition('wmcontent_parent_type', $host->getEntityTypeId())
             ->condition('langcode', $host->language()->getId())
@@ -78,16 +66,16 @@ class WmContentManager
         return $storage->loadMultiple($data[$key]);
     }
 
-    public function getHost(ContentEntityInterface $contentBlock)
+    public function getHost(EntityInterface $child): EntityInterface
     {
-        if (!$this->isContentBlock($contentBlock)) {
+        if (!$this->isChild($child)) {
             return null;
         }
 
-        $langcode = $contentBlock->language()->getId();
+        $langcode = $child->language()->getId();
         $entity = $this->entityTypeManager
-            ->getStorage($contentBlock->get('wmcontent_parent_type')->value)
-            ->load($contentBlock->get('wmcontent_parent')->value);
+            ->getStorage($child->get('wmcontent_parent_type')->value)
+            ->load($child->get('wmcontent_parent')->value);
 
         if (!$entity instanceof EntityInterface) {
             return null;
@@ -104,62 +92,49 @@ class WmContentManager
         return null;
     }
 
-    public function isContentBlock(ContentEntityInterface $contentBlock)
+    public function isChild(EntityInterface $child): bool
     {
-        return $contentBlock->hasField('wmcontent_parent') && !$contentBlock->get('wmcontent_parent')->isEmpty();
+        return $child->hasField('wmcontent_parent')
+            && !$child->get('wmcontent_parent')->isEmpty();
     }
 
-    /** @return WmContentContainer[] */
-    public function getHostContainers(ContentEntityInterface $host)
+    public function getContainers(): array
+    {
+        return $this->entityTypeManager
+            ->getStorage('wmcontent_container')
+            ->loadMultiple();
+    }
+
+    public function getHostContainers(EntityInterface $host): array
     {
         return array_filter(
             $this->getContainers(),
-            function (WmContentContainer $container) use ($host) {
+            static function (WmContentContainerInterface $container) use ($host) {
                 return $container->isHost($host);
             }
         );
     }
 
-    /** @return WmContentContainer[] */
-    public function getContainers(ContentEntityInterface $contentBlock = null)
+    public function getChildContainers(EntityInterface $child): array
     {
-        $containers = $this
-            ->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->loadMultiple();
-
-        if (!$contentBlock) {
-            return $containers;
-        }
-
         return array_filter(
-            $containers,
-            function (WmContentContainer $container) use ($contentBlock) {
-                return $container->hasContentBlock($contentBlock);
+            $this->getContainers(),
+            static function (WmContentContainerInterface $container) use ($child) {
+                return $container->hasChild($child);
             }
         );
     }
 
-    public function emitChangedEvent(EntityInterface $contentBlock, array $containers)
+    protected function getContainer(string $id): WmContentContainerInterface
     {
-        $this->eventDispatcher->dispatch(
-            ContentBlockChangedEvent::NAME,
-            new ContentBlockChangedEvent($contentBlock, $containers)
-        );
-    }
-
-    /** @return \Drupal\wmcontent\Entity\WmContentContainer */
-    private function getContainer($containerName)
-    {
-        $container = $this
-            ->entityTypeManager
+        $container = $this->entityTypeManager
             ->getStorage('wmcontent_container')
-            ->load($containerName);
+            ->load($id);
 
         if (!$container) {
-            throw new \Exception(sprintf(
+            throw new \RuntimeException(sprintf(
                 'Could not find wmcontent container `%s`',
-                $containerName
+                $id
             ));
         }
 

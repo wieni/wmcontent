@@ -3,283 +3,142 @@
 namespace Drupal\wmcontent\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\EntityTypeBundleInfo;
-use Drupal\wmcontent\WmContentContainerInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\wmcontent\WmContentContainerInterface;
 
 /**
  * Defines the wmcontent_container entity.
  *
  * @ConfigEntityType(
- *   id = "wmcontent_container",
- *   label = @Translation("WmContent Container"),
- *   handlers = {
- *     "list_builder" = "Drupal\wmcontent\WmContentContainerListBuilder",
- *     "form" = {
- *       "add" = "Drupal\wmcontent\Form\WmContentContainerForm",
- *       "edit" = "Drupal\wmcontent\Form\WmContentContainerForm",
- *       "delete" = "Drupal\wmcontent\Form\WmContentContainerDeleteForm",
+ *     id = "wmcontent_container",
+ *     label = @Translation("WmContent Container"),
+ *     handlers = {
+ *         "list_builder" : "Drupal\wmcontent\WmContentContainerListBuilder",
+ *         "form" : {
+ *             "add" : "Drupal\wmcontent\Form\WmContentContainerForm",
+ *             "edit" : "Drupal\wmcontent\Form\WmContentContainerForm",
+ *             "delete" : "Drupal\wmcontent\Form\WmContentContainerDeleteForm",
+ *         }
+ *     },
+ *     config_prefix = "wmcontent_container",
+ *     admin_permission = "administer wmcontent",
+ *     entity_keys = {
+ *         "id" : "id",
+ *         "label" : "label",
+ *     },
+ *     links = {
+ *         "collection" : "/admin/config/wmcontent/containers",
+ *         "add-form" : "/admin/config/wmcontent/containers/add",
+ *         "edit-form" : "/admin/config/wmcontent/containers/{wmcontent_container}",
+ *         "delete-form" : "/admin/config/wmcontent/containers/{wmcontent_container}/delete",
+ *     },
+ *     config_export = {
+ *         "id",
+ *         "label",
+ *         "host_entity_type",
+ *         "host_bundles",
+ *         "child_entity_type",
+ *         "child_bundles",
+ *         "child_bundles_default",
+ *         "hide_single_option_sizes",
+ *         "hide_single_option_alignments",
+ *         "show_size_column",
+ *         "show_alignment_column"
  *     }
- *   },
- *   config_prefix = "wmcontent_container",
- *   admin_permission = "administer wmcontent",
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *   },
- *   links = {
- *     "collection" = "/admin/config/wmcontent/containers",
- *     "add-form" = "/admin/config/wmcontent/containers/add",
- *     "edit-form" = "/admin/config/wmcontent/containers/{wmcontent_container}",
- *     "delete-form" = "/admin/config/wmcontent/containers/{wmcontent_container}/delete",
- *   },
- *   config_export = {
- *     "id",
- *     "label",
- *     "host_entity_type",
- *     "host_bundles",
- *     "child_entity_type",
- *     "child_bundles",
- *     "child_bundles_default",
- *     "hide_single_option_sizes",
- *     "hide_single_option_alignments",
- *     "show_size_column",
- *     "show_alignment_column"
- *   }
  * )
  */
 class WmContentContainer extends ConfigEntityBase implements WmContentContainerInterface
 {
-
-    /** @var EntityTypeBundleInfo */
-    private $entityTypeBundleInfo;
-
-    /**
-     * The WmContent Container ID.
-     *
-     * @var string
-     */
+    /** @var string */
     public $id;
-
-    /**
-     * The WmContent Container label.
-     *
-     * @var string
-     */
+    /** @var string */
     public $label;
-
-    /**
-     * The WmContent Container host entity type.
-     *
-     * @var string
-     */
+    /** @var string */
     public $host_entity_type = '';
-
-    /**
-     * The WmContent Container host entity bundles.
-     *
-     * @var array
-     */
+    /** @var array */
     public $host_bundles = [];
-
-    /**
-     * The WmContent Container child entity types.
-     *
-     * @var string
-     */
+    /** @var string */
     public $child_entity_type = '';
-
-    /**
-     * The WmContent Container child entity bundles.
-     *
-     * @var array
-     */
+    /** @var array */
     public $child_bundles = [];
-
-    /**
-     * The WmContent Container child entity bundles default.
-     *
-     * @var string
-     */
+    /** @var string */
     public $child_bundles_default;
-
-    /**
-     * If the options for sizes is is just one option do we then
-     * hide the field in the form?
-     * @var bool
-     */
+    /** @var bool */
     public $hide_single_option_sizes = false;
-
-    /**
-     * If the options for the alignments is just one option
-     * then do we hide the field in the form.
-     * @var bool
-     */
+    /** @var bool */
     public $hide_single_option_alignments = false;
-
-    /*
-     * If this is turned on then we show the column in the master container table.
-     */
+    /** @var bool */
     public $show_size_column = true;
-
-    /*
-     * If this is turn then we will show the column in the master container table.
-     */
+    /** @var bool */
     public $show_alignment_column = true;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getLabel()
+    public function getLabel(): string
     {
         return $this->label;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getHostEntityType()
+    public function getHostEntityType(): string
     {
         return $this->host_entity_type;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getHostBundles()
+    public function getHostBundles(): array
     {
         return $this->host_bundles;
     }
 
-    /**
-     * @return array
-     */
-    public function getHostBundlesAll()
+    public function getHostBundlesAll(): array
     {
-        return $this->allBundles($this->getHostEntityType());
+        return $this->getAllBundles($this->getHostEntityType());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getChildEntityType()
+    public function getChildEntityType(): string
     {
         return $this->child_entity_type;
     }
 
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getChildBundles()
+    public function getChildBundles(): array
     {
         return $this->child_bundles;
     }
 
-    /**
-     * @return array
-     */
-    public function getChildBundlesAll()
+    public function getChildBundlesAll(): array
     {
-        return $this->allBundles($this->getChildEntityType());
+        return $this->getAllBundles($this->getChildEntityType());
     }
 
-    /**
-     * @return array
-     */
-    public function getChildBundlesDefault()
+    public function getChildBundlesDefault(): string
     {
         return $this->child_bundles_default;
     }
 
-    /**
-     * @param $type
-     *
-     * @return array
-     */
-    private function allBundles($type)
-    {
-        $bundles = array_keys($this->entityTypeBundleInfo()->getBundleInfo($type));
-        sort($bundles);
-        $return = [];
-        foreach ($bundles as $bundle) {
-            $return[$bundle] = $bundle;
-        }
-        return $return;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getHideSingleOptionSizes()
+    public function getHideSingleOptionSizes(): bool
     {
         return $this->hide_single_option_sizes;
     }
 
-    /**
-     * @return bool
-     */
-    public function getHideSingleOptionAlignments()
+    public function getHideSingleOptionAlignments(): bool
     {
         return $this->hide_single_option_alignments;
     }
 
-    /**
-     * @return bool
-     */
-    public function getShowSizeColumn()
+    public function getShowSizeColumn(): bool
     {
         return $this->show_size_column;
     }
 
-    /**
-     * @return bool
-     */
-    public function getShowAlignmentColumn()
+    public function getShowAlignmentColumn(): bool
     {
         return $this->show_alignment_column;
     }
 
-    /**
-     * @return \Drupal\Core\Entity\EntityTypeBundleInfo|object
-     */
-    protected function entityTypeBundleInfo()
-    {
-        if (!$this->entityTypeBundleInfo) {
-            $this->entityTypeBundleInfo = $this->container()->get('entity_type.bundle.info');
-        }
-        return $this->entityTypeBundleInfo;
-    }
-
-    /**
-     * Returns the service container.
-     *
-     * This method is marked private to prevent sub-classes from retrieving
-     * services from the container through it. Instead,
-     * \Drupal\Core\DependencyInjection\ContainerInjectionInterface should be used
-     * for injecting services.
-     *
-     * @return \Symfony\Component\DependencyInjection\ContainerInterface $container
-     *   The service container.
-     */
-    private function container()
-    {
-        return \Drupal::getContainer();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfig()
+    public function getConfig(): array
     {
         $config = [
             'id' => $this->getId(),
@@ -292,54 +151,42 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'hide_single_option_sizes' => $this->getHideSingleOptionSizes(),
             'hide_single_option_alignments' => $this->getHideSingleOptionAlignments(),
             'show_size_column' => $this->getShowSizeColumn(),
-            'show_alignment_column' => $this->getShowAlignmentColumn()
+            'show_alignment_column' => $this->getShowAlignmentColumn(),
         ];
 
         if (empty($config['host_bundles'])) {
-            // Load them all.
             $config['host_bundles'] = $this->getHostBundlesAll();
         }
+
         if (empty($config['child_bundles'])) {
-            // Load them all.
             $config['child_bundles'] = $this->getChildBundlesAll();
         }
 
         return $config;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isHost(EntityInterface $host)
+    public function isHost(EntityInterface $host): bool
     {
-        return $host->getEntityTypeId() == $this->getHostEntityType()
+        return $host->getEntityTypeId() === $this->getHostEntityType()
             && (
                 empty($this->getHostBundles())
                 || in_array($host->bundle(), $this->getHostBundles())
             );
     }
 
-    /**
-     * Check whether an entity is a ContentBlock for this container
-     */
-    public function hasContentBlock(EntityInterface $contentBlock)
+    public function hasChild(EntityInterface $child): bool
     {
-        // We consider this entity a contentblock if it has the configured
-        // entityTypeId (eg: content_block) and bundle (eg: section)
         $childBundles = $this->getChildBundles();
-        return $this->getChildEntityType() == $contentBlock->getEntityTypeId()
+        return $this->getChildEntityType() === $child->getEntityTypeId()
             && (
                 empty($childBundles)
-                || array_key_exists(
-                    $contentBlock->bundle(),
-                    $childBundles
-                )
+                || array_key_exists($child->bundle(), $childBundles)
             );
     }
 
     /**
-    * {@inheritdoc}
-    */
+     * TODO: Move this to an event subscriber
+     */
     public function postSave(EntityStorageInterface $storage, $update = false)
     {
         parent::postSave($storage, $update);
@@ -351,8 +198,8 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     }
 
     /**
-    * {@inheritdoc}
-    */
+     * TODO: Move this to an event subscriber
+     */
     public static function postDelete(EntityStorageInterface $storage, array $entities)
     {
         parent::postDelete($storage, $entities);
@@ -365,4 +212,14 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         drupal_flush_all_caches();
     }
 
+    protected function getAllBundles(string $entityTypeId): array
+    {
+        $bundles = $this->entityTypeBundleInfo()
+            ->getBundleInfo($entityTypeId);
+        $bundles = array_keys($bundles);
+
+        sort($bundles);
+
+        return array_combine($bundles, $bundles);
+    }
 }
