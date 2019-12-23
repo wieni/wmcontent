@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -48,23 +49,22 @@ function wmcontent_entity_extra_field_info(): array
  */
 function wmcontent_entity_type_alter(array &$entityTypes): void
 {
-    foreach ($entityTypes as $entity_type) {
-        if (!$entity_type->hasLinkTemplate('canonical')) {
+    foreach ($entityTypes as $entityType) {
+        if (!$entityType instanceof ContentEntityTypeInterface) {
             continue;
         }
 
-        if ($entity_type->hasLinkTemplate('drupal:wmcontent-overview')) {
+        if (!$entityType->hasLinkTemplate('canonical')) {
             continue;
         }
 
-        // This breaks on taxonomy terms.
-        if ($entity_type->id() !== 'node') {
+        if ($entityType->hasLinkTemplate('drupal:wmcontent-overview')) {
             continue;
         }
 
-        $entity_type->setLinkTemplate(
+        $entityType->setLinkTemplate(
             'drupal:wmcontent-overview',
-            $entity_type->getLinkTemplate('canonical') . '/wmcontent/{container}'
+            $entityType->getLinkTemplate('canonical') . '/wmcontent/{container}'
         );
     }
 }
