@@ -4,7 +4,4 @@ description: Adds configurable entity containers to entity types (for e.g. parag
 core: 8.x
 package: Wieni
 dependencies:
-    - eck
-    - node
     - options
-    - wmmodel

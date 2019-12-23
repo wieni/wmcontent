@@ -55,7 +55,7 @@ class WmContentManager implements WmContentManagerInterface
             ->execute();
 
         // Put in cache. Mind the invalidating array that should invalidate
-        // this cache when the node gets cleared.
+        // this cache when the entity gets cleared.
         $this->cacheBackend->set(
             $key,
             $data[$key],
