@@ -41,8 +41,8 @@ function wmcontent_entity_extra_field_info(): array
  * This is very necessary to provide us with the correct content translation
  * language (adds the language_content_entity query string when needed.
  *
- * TODO: Ideally we only add this on the enabled entity types/bundles
- * but if we load wmContentContainer::loadMultiple() then we end up looping.
+ * Ideally we only add this on the enabled entity types/bundles
+ * but if we call WmContentContainer::loadMultiple() then we end up looping.
  *
  * @param array EntityTypeInterface[] $entityTypes
  */
