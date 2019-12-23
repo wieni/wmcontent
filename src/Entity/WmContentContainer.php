@@ -63,7 +63,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     /** @var array */
     public $child_bundles = [];
     /** @var string */
-    public $child_bundles_default;
+    public $child_bundles_default = '';
     /** @var bool */
     public $hide_single_option_sizes = false;
     /** @var bool */
