@@ -1,5 +1,5 @@
 wmcontent.container.add_form:
-  route_name: 'entity.wmcontent_container.add_form'
-  title: 'Add container'
-  appears_on:
-    - wmcontent.collection
+    route_name: 'entity.wmcontent_container.add_form'
+    title: 'Add container'
+    appears_on:
+        - wmcontent.collection

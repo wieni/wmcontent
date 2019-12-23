@@ -1,13 +1,13 @@
 wmcontent:
-  title: 'WmContent'
-  route_name: wmcontent.collection
-  description: 'Create and manage containers'
-  parent: system.admin_structure
-  weight: 99
+    title: 'WmContent'
+    route_name: wmcontent.collection
+    description: 'Create and manage containers'
+    parent: system.admin_structure
+    weight: 99
 
 wmcontent.wmcontent_settings_form:
-  title: 'WmContent Containers'
-  route_name: wmcontent.collection
-  description: 'Create and manage containers'
-  parent: wmcontent
-  weight: 99
+    title: 'WmContent Containers'
+    route_name: wmcontent.collection
+    description: 'Create and manage containers'
+    parent: wmcontent
+    weight: 99
