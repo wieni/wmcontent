@@ -16,7 +16,6 @@ use Drupal\wmcontent\WmContentContainerInterface;
 use Drupal\wmcontent\WmContentManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class WmContentController implements ContainerInjectionInterface
 {
@@ -110,17 +109,9 @@ class WmContentController implements ContainerInjectionInterface
         return $form;
     }
 
-    public function delete(WmContentContainerInterface $container, string $childId, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
+    public function delete(WmContentContainerInterface $container, EntityInterface $child, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
     {
         $host = $routeMatch->getParameter($host_type_id);
-
-        $child = $this->entityTypeManager
-            ->getStorage($container->getChildEntityType())
-            ->load($childId);
-
-        if (!$child instanceof EntityInterface) {
-            throw new NotFoundHttpException;
-        }
 
         $child->delete();
 
@@ -145,16 +136,8 @@ class WmContentController implements ContainerInjectionInterface
         );
     }
 
-    public function edit(WmContentContainerInterface $container, string $child_id)
+    public function edit(EntityInterface $child)
     {
-        $child = $this->entityTypeManager
-            ->getStorage($container->getChildEntityType())
-            ->load($child_id);
-
-        if (!$child instanceof EntityInterface) {
-            throw new NotFoundHttpException;
-        }
-
         $form = $this->entityFormBuilder->getForm($child);
         $form['wmcontent_container']['#access'] = false;
         $form['wmcontent_parent_type']['#access'] = false;

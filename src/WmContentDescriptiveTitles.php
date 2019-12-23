@@ -19,17 +19,13 @@ class WmContentDescriptiveTitles
     protected $currentRouteMatch;
     /** @var EntityTypeBundleInfo */
     protected $entityTypeBundleInfo;
-    /** @var EntityTypeManager */
-    protected $entityTypeManager;
 
     public function __construct(
         CurrentRouteMatch $currentRouteMatch,
-        EntityTypeBundleInfo $entityTypeBundleInfo,
-        EntityTypeManager $entityTypeManager
+        EntityTypeBundleInfo $entityTypeBundleInfo
     ) {
         $this->currentRouteMatch = $currentRouteMatch;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
-        $this->entityTypeManager = $entityTypeManager;
     }
 
     /** @return TranslatableMarkup */
@@ -40,12 +36,7 @@ class WmContentDescriptiveTitles
         $hostType = $this->currentRouteMatch->getParameter('host_type_id');
         $host = $this->currentRouteMatch->getParameter($hostType);
 
-        if ($childId = $this->currentRouteMatch->getParameter('child_id')) {
-            $child = $this
-                ->entityTypeManager
-                ->getStorage($container)
-                ->load($childId);
-
+        if ($child = $this->currentRouteMatch->getParameter('child')) {
             $bundle = $child->bundle();
         } else {
             // Get bundle from its parameter

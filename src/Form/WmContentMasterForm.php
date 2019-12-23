@@ -131,7 +131,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                         [
                             'container' => $container->getId(),
                             'type' => $child->getEntityTypeId(),
-                            'child_id' => $child->id(),
+                            'child' => $child->id(),
                             $container->getHostEntityType() => $host->id(),
                         ],
                         [
@@ -149,7 +149,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                         [
                             'container' => $container->getId(),
                             'type' => $child->getEntityTypeId(),
-                            'child_id' => $child->id(),
+                            'child' => $child->id(),
                             $container->getHostEntityType() => $host->id(),
                         ],
                         [

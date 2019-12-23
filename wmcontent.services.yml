@@ -27,7 +27,6 @@ services:
     arguments:
       - '@current_route_match'
       - '@wmcontent.entity_type.bundle.info'
-      - '@entity_type.manager'
   wmcontent.entity_type.bundle.info:
     class: Drupal\wmcontent\Entity\EntityTypeBundleInfo
     parent: entity_type.bundle.info

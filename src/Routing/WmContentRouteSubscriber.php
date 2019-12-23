@@ -109,7 +109,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_add', $route);
 
             $route = new Route(
-                $path . '/{child_id}/edit',
+                $path . '/{child}/edit',
                 [
                     '_controller' => '\Drupal\wmcontent\Controller\WmContentController::edit',
                     '_title_callback' => 'wmcontent.descriptive_titles:getPageTitle',
@@ -123,6 +123,9 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                         $config['host_entity_type'] => [
                             'type' => 'entity:' . $config['host_entity_type'],
                         ],
+                        'child' => [
+                            'type' => 'entity:' . $config['child_entity_type'],
+                        ],
                         'container' => [
                             'type' => 'entity:wmcontent_container',
                         ],
@@ -133,7 +136,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_edit', $route);
 
             $route = new Route(
-                $path . '/{child_id}/delete',
+                $path . '/{child}/delete',
                 [
                     '_controller' => '\Drupal\wmcontent\Controller\WmContentController::delete',
                     '_title_callback' => 'wmcontent.descriptive_titles:getPageTitle',
@@ -146,6 +149,9 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                     'parameters' => [
                         $config['host_entity_type'] => [
                             'type' => 'entity:' . $config['host_entity_type'],
+                        ],
+                        'child' => [
+                            'type' => 'entity:' . $config['child_entity_type'],
                         ],
                         'container' => [
                             'type' => 'entity:wmcontent_container',
