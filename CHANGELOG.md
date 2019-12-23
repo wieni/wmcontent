@@ -5,6 +5,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+More information about breaking changes, removed functionality and their
+alternatives is provided in the [Upgrade Guide](UPGRADING.md).
+
+### Added
+- Add coding standard fixers
+- Add issue & pull request templates
+
+### Changed
+- Refactor code with code style, typehinting & readability in mind
+- Change PHP version requirement to 7.1
+- Change the container form to show all content entity types with
+  canonical link templates in the dropdowns
+- Change the container form to only show bundles when an entity type is 
+  selected
+- Change routes to convert the `container` and `child` parameters to
+  their respective entities
+- Change link templates to only add to content entity types
+- Update .gitignore
+- Update README
+- Update module title & description
+- Normalize composer.json
+- Re-indent & reformat YAML files
+
+### Fixed
+- Add default value for child_bundles_default
+- Remove support for custom paragraph entity type & section rendering
+
+### Removed
+- Remove config subscriber
+- Remove `wmcontent.descriptive_titles` service in favour of controller methods
+- Remove eck, node & wmmodel dependencies
 
 ## [0.6.1] - 2019-12-13
 ### Added
