@@ -9,7 +9,6 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
@@ -150,75 +149,26 @@ function wmcontent_entity_view(array &$build, EntityInterface $entity, EntityVie
             continue;
         }
 
-        $manager = \Drupal::service('wmcontent.manager');
-        $entities = $manager->getContent($entity, $container->getId());
+        $viewBuilder = \Drupal::entityTypeManager()
+            ->getViewBuilder($entity->getEntityTypeId());
 
-        $delta = 0;
-        $paragraphTypeCount = 1;
-        $paragraphTypeLast = false;
-        $sections = [
-            $delta => [
-                '#theme' => 'wmcontent_section',
-                '#background' => '',
-                '#items' => [],
-                '#delta' => $delta,
-                '#container' => $container->getId(),
-            ],
-        ];
+        $children = array_map(
+            function (ContentEntityInterface $entity) use ($viewBuilder) {
+                $item = $viewBuilder->view($entity);
+                $item['#weight'] = $entity->get('wmcontent_weight')->getString();
+                $item['#size'] = $entity->get('wmcontent_size')->getString();
+                $item['#alignment'] = $entity->get('wmcontent_alignment')->getString();
+                $item['#type'] = $entity->getEntityTypeId();
+                $item['#bundle'] = $entity->bundle();
 
-        foreach ($entities as $content) {
-            // If this is a 'break' then add it to the higher level break and switch.
-            if ($content->bundle() === 'break') {
-                $background = '';
-                if ($content->get('break_background')->value) {
-                    $background = $content->get('break_background')->value;
-                }
-
-                $delta++;
-                $sections[$delta] = [
-                    '#theme' => 'wmcontent_section',
-                    '#background' => $background,
-                    '#items' => [],
-                    '#delta' => $delta,
-                ];
-
-                // Reset the paragraph type count coz we're starting a new
-                // section.
-                $paragraphTypeCount = 1;
-                $paragraphTypeLast = false;
-            } else {
-                // If it's not a break, just add this paragraph.
-                // Do look at the type tough.
-                if ($content->bundle() != $paragraphTypeLast) {
-                    $paragraphTypeCount = 1;
-                    $paragraphTypeLast = $content->bundle();
-                }
-
-                $viewBuilder = \Drupal::entityTypeManager()
-                    ->getViewBuilder($entity->getEntityTypeId());
-
-                $item = $viewBuilder->view($content);
-                $item['#weight'] = $content->get('wmcontent_weight')->getString();
-                $item['#size'] = $content->get('wmcontent_size')->getString();
-                $item['#alignment'] = $content->get('wmcontent_alignment')->getString();
-                $item['#delta'] = $paragraphTypeCount;
-                $item['#type'] = $content->getEntityTypeId();
-                $item['#bundle'] = $content->bundle();
-
-                $sections[$delta]['#items'][] = $item;
-                $paragraphTypeCount++;
-            }
-        }
-
-        // Fetch empty ones (mainly, the first one).
-        foreach ($sections as $delta => $section) {
-            if (empty($section['#items'])) {
-                unset($sections[$delta]);
-            }
-        }
+                return $item;
+            },
+            \Drupal::service('wmcontent.manager')
+                ->getContent($entity, $container->getId())
+        );
 
         $build['wmc_' . $container->getId()] = [
-            '#sections' => $sections,
+            '#children' => $children,
             '#theme' => 'wmcontent',
             '#container' => $container->getId(),
         ];
@@ -230,88 +180,11 @@ function wmcontent_theme(): array
     return [
         'wmcontent' => [
             'variables' => [
-                'sections' => null,
+                'children' => null,
                 'container' => null,
             ],
         ],
-        'wmcontent_section' => [
-            'variables' => [
-                'items' => null,
-                'background' => null,
-                'delta' => null,
-                'container' => null,
-            ],
-        ],
-        'paragraph' => [
-            'render element' => 'elements',
-        ],
-        'items' => [
-            'render element' => 'elements',
-        ],
-        // Cards is used to explode 1 paragraph into multiple 'fake'
-        // paragraphs on the frontend, e.g. for autofill paragraph types.
-        'paragraph_cards' => [
-            'variables' => [
-                'cards' => null,
-                'size' => null,
-                'alignment' => null,
-                'type' => null,
-            ],
-        ],
     ];
-}
-
-function wmcontent_theme_suggestions_eck_entity(array $variables): array
-{
-    $suggestions = [];
-
-    if (!empty($variables['entity']) && isset($variables['entity']['#entity_type'])) {
-        $suggestions = [
-            $variables['entity']['#entity_type'],
-            $variables['entity']['#entity_type'] . '__' . $variables['entity']['#entity']->bundle(),
-        ];
-    }
-
-    return $suggestions;
-}
-
-function wmcontent_preprocess_paragraph(array &$variables): void
-{
-    $paragraph = $variables['entity']['#entity'];
-
-    $variables['bundle'] = $paragraph->bundle();
-
-    if ($size = $paragraph->get('wmcontent_size')->value) {
-        $variables['wmcontent_size'] = $size;
-    }
-
-    if ($alignment = $paragraph->get('wmcontent_alignment')->value) {
-        $variables['wmcontent_alignment'] = $alignment;
-    }
-
-    $variables['wmcontent_delta'] = 0;
-    if (isset($variables['entity']['#delta'])) {
-        $variables['wmcontent_delta'] = (string) $variables['entity']['#delta'];
-    }
-
-    $strip = [
-        'created',
-        'wmcontent_size',
-        'wmcontent_alignment',
-        'wmcontent_weight',
-        'wmcontent_parent',
-    ];
-
-    $variables['content'] = [];
-
-    foreach (Element::children($variables['entity']) as $key) {
-        if (
-            !empty($variables['entity'][$key]['#field_name'])
-            && !in_array($variables['entity'][$key]['#field_name'], $strip)
-        ) {
-            $variables['content'][] = $variables['entity'][$key];
-        }
-    }
 }
 
 function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): array
