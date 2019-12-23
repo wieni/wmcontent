@@ -9,4 +9,4 @@ wmcontent
 [![Total Downloads](https://poser.pugx.org/wieni/wmcontent/downloads)](https://packagist.org/packages/wieni/wmcontent)
 [![License](https://poser.pugx.org/wieni/wmcontent/license)](https://packagist.org/packages/wieni/wmcontent)
 
-> Adds configurable content 'containers' to entity types (for eg. paragraphs)
+> Adds configurable entity containers to entity types (for e.g. paragraphs)

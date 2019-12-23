@@ -1,7 +1,7 @@
 {
     "name": "wieni/wmcontent",
     "type": "drupal-module",
-    "description": "Adds configurable content 'containers' to entity types (for eg.paragraphs)",
+    "description": "Adds configurable entity containers to entity types (for e.g. paragraphs)",
     "license": "MIT",
     "authors": [
         {

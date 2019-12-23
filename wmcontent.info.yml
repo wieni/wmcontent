@@ -1,5 +1,6 @@
-name: Wieni Content
+name: wmcontent
 type: module
+description: Adds configurable entity containers to entity types (for e.g. paragraphs)
 core: 8.x
 package: Wieni
 dependencies:
