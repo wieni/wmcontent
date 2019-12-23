@@ -184,9 +184,6 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             );
     }
 
-    /**
-     * TODO: Move this to an event subscriber
-     */
     public function postSave(EntityStorageInterface $storage, $update = false)
     {
         parent::postSave($storage, $update);
@@ -197,9 +194,6 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         drupal_flush_all_caches();
     }
 
-    /**
-     * TODO: Move this to an event subscriber
-     */
     public static function postDelete(EntityStorageInterface $storage, array $entities)
     {
         parent::postDelete($storage, $entities);
