@@ -2,10 +2,11 @@
 
 namespace Drupal\wmcontent\Form;
 
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\eck\Entity\EckEntityType;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -30,6 +31,8 @@ class WmContentContainerForm extends EntityForm
         if ($this->operation === 'edit') {
             $form['#title'] = $this->t('Edit container: @name', ['@name' => $this->entity->getLabel()]);
         }
+
+        $entityTypeOptions = $this->getEntityTypeOptions();
 
         $form['wrapper'] = [
             '#prefix' => '<div id="wholewrapper">',
@@ -62,7 +65,8 @@ class WmContentContainerForm extends EntityForm
             '#type' => 'select',
             '#title' => $this->t('Host entity type'),
             '#default_value' => $this->entity->getHostEntityType(),
-            '#options' => $this->getContentEntityTypes(),
+            '#empty_option' => $this->t('Choose an entity type'),
+            '#options' => $entityTypeOptions,
             '#validated' => true,
             '#required' => true,
             '#description' => $this->t('The host entity type to which attach content to.'),
@@ -94,7 +98,8 @@ class WmContentContainerForm extends EntityForm
             '#type' => 'select',
             '#title' => $this->t('Child entity type'),
             '#default_value' => $this->entity->getChildEntityType(),
-            '#options' => $this->getContentEntityTypes(),
+            '#empty_option' => $this->t('Choose an entity type'),
+            '#options' => $entityTypeOptions,
             '#validated' => true,
             '#required' => true,
             '#description' => $this->t('The child entity type to which attach content to.'),
@@ -210,26 +215,23 @@ class WmContentContainerForm extends EntityForm
         return $actions;
     }
 
-    /**
-     * Ideally filter out only content entity types here. ECK seems to be
-     * a config type so however, so bollocks.
-     *
-     * TODO: Generalize this
-     */
-    protected function getContentEntityTypes(): array
+    protected function getEntityTypeOptions(): array
     {
-        $types = [];
+        $entityTypes = array_filter(
+            $this->entityTypeManager->getDefinitions(),
+            static function (EntityTypeInterface $entityType) {
+                return $entityType instanceof ContentEntityTypeInterface
+                    && $entityType->hasLinkTemplate('canonical');
+            }
+        );
 
-        $types['node'] = 'Node';
-        $types['taxonomy_term'] = 'Taxonomy Term';
-
-        $eck_types = EckEntityType::loadMultiple();
-        foreach ($eck_types as $machine => $type) {
-            $types[$machine] = $type->label();
+        $options = [];
+        foreach ($entityTypes as $id => $entityType) {
+            $options[$id] = $entityType->getLabel();
         }
 
-        ksort($types);
+        ksort($options);
 
-        return $types;
+        return $options;
     }
 }
