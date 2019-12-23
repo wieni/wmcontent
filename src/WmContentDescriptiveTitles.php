@@ -81,11 +81,7 @@ class WmContentDescriptiveTitles
 
     private function getContainer()
     {
-        $containers = $this
-            ->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->loadByProperties(['id' => $this->currentRouteMatch->getParameter('container')]);
-        return reset($containers);
+        return $this->currentRouteMatch->getParameter('container');
     }
 
     private function getContainerType()

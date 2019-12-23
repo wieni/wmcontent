@@ -26,11 +26,8 @@ class WmContentContainerAccessCheck implements AccessInterface
     {
         /* @var EntityInterface $entity */
         $entity = $routeMatch->getParameter($host_type_id);
-
         /** @var WmContentContainerInterface $container */
-        $container = $this->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->load($routeMatch->getParameter('container'));
+        $container = $routeMatch->getParameter('container');
 
         if ($entity && $container) {
             if (

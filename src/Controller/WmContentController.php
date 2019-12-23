@@ -58,43 +58,27 @@ class WmContentController implements ContainerInjectionInterface
         );
     }
 
-    public function overview(string $container, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
+    public function overview(WmContentContainerInterface $container, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
     {
-        $contentContainer = $this->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->load($container);
-
-        if (!$contentContainer instanceof WmContentContainerInterface) {
-            throw new NotFoundHttpException(
-                $this->t('Container @container does not exist.', ['@container' => $container])
-            );
-        }
-
         $hostEntity = $routeMatch->getParameter($host_type_id);
 
         return [
-            'form' => $this->formBuilder->getForm(WmContentMasterForm::class, $hostEntity, $contentContainer),
+            'form' => $this->formBuilder->getForm(WmContentMasterForm::class, $hostEntity, $container),
             '#title' => $this->t(
                 '%slug for %label',
                 [
-                    '%slug' => $contentContainer->getLabel(),
+                    '%slug' => $container->getLabel(),
                     '%label' => $hostEntity->label(),
                 ],
             ),
         ];
     }
 
-    public function add(string $container, string $bundle, RouteMatchInterface $route, string $host_type_id)
+    public function add(WmContentContainerInterface $container, string $bundle, RouteMatchInterface $route, string $host_type_id)
     {
-        /** @var WmContentContainerInterface $currentContainer */
-        $currentContainer = $this
-            ->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->load($container);
         $host = $route->getParameter($host_type_id);
-
         $blocks = $this->wmContentManager
-            ->getContent($host, $currentContainer->id());
+            ->getContent($host, $container->id());
         $weight = 0;
 
         foreach ($blocks as $block) {
@@ -107,14 +91,14 @@ class WmContentController implements ContainerInjectionInterface
         }
 
         $child = $this->entityTypeManager
-            ->getStorage($currentContainer->getChildEntityType())
+            ->getStorage($container->getChildEntityType())
             ->create([
                 'type' => $bundle,
                 'langcode' => $host->get('langcode')->value,
                 'wmcontent_parent' => $host->id(),
                 'wmcontent_parent_type' => $host_type_id,
                 'wmcontent_weight' => $weight + 1,
-                'wmcontent_container' => $currentContainer->getId(),
+                'wmcontent_container' => $container->getId(),
             ]);
 
         $form = $this->entityFormBuilder->getForm($child);
@@ -126,16 +110,12 @@ class WmContentController implements ContainerInjectionInterface
         return $form;
     }
 
-    public function delete(string $container, string $childId, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
+    public function delete(WmContentContainerInterface $container, string $childId, RouteMatchInterface $routeMatch, ?string $host_type_id = null)
     {
-        $current_container = $this->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->load($container);
-
         $host = $routeMatch->getParameter($host_type_id);
 
         $child = $this->entityTypeManager
-            ->getStorage($current_container->getChildEntityType())
+            ->getStorage($container->getChildEntityType())
             ->load($childId);
 
         if (!$child instanceof EntityInterface) {
@@ -148,7 +128,7 @@ class WmContentController implements ContainerInjectionInterface
             $this->t(
                 '%container_label %name has been deleted.',
                 [
-                    '%container_label' => $current_container->getLabel(),
+                    '%container_label' => $container->getLabel(),
                     '%name' => $child->label(),
                 ]
             )
@@ -156,23 +136,19 @@ class WmContentController implements ContainerInjectionInterface
 
         return new RedirectResponse(
             Url::fromRoute(
-                'entity.' . $current_container->getHostEntityType() . '.wmcontent_overview',
+                'entity.' . $container->getHostEntityType() . '.wmcontent_overview',
                 [
-                    $current_container->getHostEntityType() => $host->id(),
-                    'container' => $current_container->id(),
+                    $container->getHostEntityType() => $host->id(),
+                    'container' => $container->id(),
                 ]
             )->toString()
         );
     }
 
-    public function edit(string $container, string $child_id)
+    public function edit(WmContentContainerInterface $container, string $child_id)
     {
-        $current_container = $this->entityTypeManager
-            ->getStorage('wmcontent_container')
-            ->load($container);
-
         $child = $this->entityTypeManager
-            ->getStorage($current_container->getChildEntityType())
+            ->getStorage($container->getChildEntityType())
             ->load($child_id);
 
         if (!$child instanceof EntityInterface) {

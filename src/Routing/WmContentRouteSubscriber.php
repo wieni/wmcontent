@@ -75,6 +75,9 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                         $config['host_entity_type'] => [
                             'type' => 'entity:' . $config['host_entity_type'],
                         ],
+                        'container' => [
+                            'type' => 'entity:wmcontent_container',
+                        ],
                     ],
                     '_admin_route' => $isAdmin,
                 ]
@@ -95,6 +98,9 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                     'parameters' => [
                         $config['host_entity_type'] => [
                             'type' => 'entity:' . $config['host_entity_type'],
+                        ],
+                        'container' => [
+                            'type' => 'entity:wmcontent_container',
                         ],
                     ],
                     '_admin_route' => $isAdmin,
@@ -117,6 +123,9 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                         $config['host_entity_type'] => [
                             'type' => 'entity:' . $config['host_entity_type'],
                         ],
+                        'container' => [
+                            'type' => 'entity:wmcontent_container',
+                        ],
                     ],
                     '_admin_route' => $isAdmin,
                 ]
@@ -137,6 +146,9 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                     'parameters' => [
                         $config['host_entity_type'] => [
                             'type' => 'entity:' . $config['host_entity_type'],
+                        ],
+                        'container' => [
+                            'type' => 'entity:wmcontent_container',
                         ],
                     ],
                     '_admin_route' => $isAdmin,
