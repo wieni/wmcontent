@@ -35,6 +35,8 @@ alternatives is provided in the [Upgrade Guide](UPGRADING.md).
 ### Removed
 - Remove config subscriber
 - Remove `wmcontent.descriptive_titles` service in favour of controller methods
+- Remove unused `wmcontent.entity_type.bundle.info` service
+  controller methods
 - Remove eck, node & wmmodel dependencies
 
 ## [0.6.1] - 2019-12-13

@@ -27,10 +27,6 @@ services:
         tags:
             - { name: access_check, applies_to: _wmcontent_container_view_access }
 
-    wmcontent.entity_type.bundle.info:
-        class: Drupal\wmcontent\Entity\EntityTypeBundleInfo
-        parent: entity_type.bundle.info
-
     wmcontent.entity_updates:
         class: Drupal\wmcontent\EntityUpdateService
         arguments:

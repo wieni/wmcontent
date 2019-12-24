@@ -34,8 +34,9 @@ interface.
 - `public function getShowAlignmentColumn(): bool`
 - `public function hasChild(EntityInterface $child): bool`
 
-### `WmContentDescriptiveTitles`
-The `wmcontent.descriptive_titles` service was removed, so all
+### Removed services
+The `wmcontent.descriptive_titles` and
+`wmcontent.entity_type.bundle.info` services were removed, so all
 references should be removed as well.
 
 ### Routes
