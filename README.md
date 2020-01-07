@@ -7,6 +7,30 @@ wmcontent
 
 > Adds configurable entity containers to entity types (for e.g. paragraphs)
 
+## Why?
+In Drupal 7 we noticed a couple of shortcomings with the
+[Paragraphs](https://www.drupal.org/project/paragraphs) module (that are
+still not solved in Drupal 8 AFAWK).
+
+- **Backend performance improvements**: Paragraphs creates a widget
+  within the default entity edit forms. This did not only clutter the
+  interface when using > 10 paragraphs, the form itself would regularly
+  become too large and break any decent PHP memory setting on
+  submitting/saving. This module provides a separate tab for its
+  content, instead of mixing it in with the node edit form through
+  inline entity forms or similar solutions.
+- **Frontend performance improvements**: The _paragraphs_ of an entity
+  are loaded separately from the standard entity data, which solves
+  memory issues when displaying a lot of entities on a page.
+- **UI improvements**: Features like cloning/duplication of paragraphs
+  as well as drag and drop sorting of paragraphs become easier when not
+  integrated in the default entity edit form.
+- **More flexibility**: This module allows multiple lists of paragraphs
+  (_containers_) to be attached to entities, where one can limit the
+  available entity types and bundles on a per-container basis. This
+  allows for e.g. a _Content_ tab and a _Program_ tab for activity/event
+  content types.
+
 ## Installation
 
 This package requires PHP 7.1 and Drupal 8.5 or higher. It can be
