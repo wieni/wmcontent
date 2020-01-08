@@ -9,7 +9,7 @@ interface WmContentManagerInterface
     /** @return EntityInterface[] */
     public function getContent(EntityInterface $host, string $containerId): array;
 
-    public function getHost(EntityInterface $child): EntityInterface;
+    public function getHost(EntityInterface $child): ?EntityInterface;
 
     public function isChild(EntityInterface $child): bool;
 

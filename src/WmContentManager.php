@@ -66,7 +66,7 @@ class WmContentManager implements WmContentManagerInterface
         return $storage->loadMultiple($data[$key]);
     }
 
-    public function getHost(EntityInterface $child): EntityInterface
+    public function getHost(EntityInterface $child): ?EntityInterface
     {
         if (!$this->isChild($child)) {
             return null;
