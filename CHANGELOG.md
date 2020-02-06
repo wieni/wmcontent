@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2020-02-06
+### Fixed
+- Remove PHP 7.3 specific syntax
+
 ## [1.0.0] - 2020-01-13
 More information about breaking changes, removed functionality and their
 alternatives is provided in the [Upgrade Guide](UPGRADING.md).

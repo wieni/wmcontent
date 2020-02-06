@@ -59,7 +59,7 @@ class WmContentController implements ContainerInjectionInterface
             $container->get('entity.form_builder'),
             $container->get('form_builder'),
             $container->get('messenger'),
-            $container->get('wmcontent.manager'),
+            $container->get('wmcontent.manager')
         );
     }
 
