@@ -50,7 +50,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             $container->get('entity_type.manager'),
             $container->get('entity_type.bundle.info'),
             $container->get('request_stack'),
-            $container->get('wmcontent.manager'),
+            $container->get('wmcontent.manager')
         );
     }
 

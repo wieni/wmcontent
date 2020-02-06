@@ -51,7 +51,7 @@ class EntityUpdateService
 
         $changeList = array_intersect_key(
             $this->entityDefinitionUpdateManager->getChangeList(),
-            [$childEntityTypeId => 1, $childEntityTypeId . '_type' => 1],
+            [$childEntityTypeId => 1, $childEntityTypeId . '_type' => 1]
         );
 
         if ($changeList) {

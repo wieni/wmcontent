@@ -74,7 +74,7 @@ class WmContentController implements ContainerInjectionInterface
                 [
                     '%slug' => $container->getLabel(),
                     '%label' => $hostEntity->label(),
-                ],
+                ]
             ),
         ];
     }
