@@ -5,6 +5,7 @@ namespace Drupal\wmcontent\Routing;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\wmcontent\Controller\WmContentController;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -35,131 +36,177 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
 
         /** @var WmContentContainerInterface $container */
         foreach ($storage->loadMultiple() as $container) {
-            $config = $container->getConfig();
-            $hostType = $this->entityTypeManager->getDefinition($config['host_entity_type']);
+            $hostEntityTypeId = $container->getHostEntityType();
+            $adminRoute = $this->isAdminRoute($collection, $hostEntityTypeId);
 
-            // Try to get the route from the current collection.
-            $linkTemplate = $hostType->getLinkTemplate('canonical');
-            if (strpos($linkTemplate, '/') !== false) {
-                $basePath = '/' . $linkTemplate;
-            } else {
-                if (!$entityRoute = $collection->get('entity.' . $config['host_entity_type'] . '.canonical')) {
-                    continue;
-                }
-                $basePath = $entityRoute->getPath();
+            $overviewRouteName = "entity.{$hostEntityTypeId}.wmcontent_overview";
+            if (!$collection->get($overviewRouteName)) {
+                $route = $this->getOverviewRoute($container, $adminRoute);
+                $collection->add($overviewRouteName, $route);
             }
 
-            // Inherit admin route status from edit route, if exists.
-            $isAdmin = false;
-            $routeName = 'entity.' . $config['host_entity_type'] . '.edit_form';
-
-            if ($editRoute = $collection->get($routeName)) {
-                $isAdmin = (bool) $editRoute->getOption('_admin_route');
+            $addRouteName = "entity.{$hostEntityTypeId}.wmcontent_add";
+            if (!$collection->get($addRouteName)) {
+                $route = $this->getAddRoute($container, $adminRoute);
+                $collection->add($addRouteName, $route);
             }
 
-            $path = $basePath . '/wmcontent/{container}';
+            $editRouteName = "entity.{$hostEntityTypeId}.wmcontent_edit";
+            if (!$collection->get($editRouteName)) {
+                $route = $this->getEditRoute($container, $adminRoute);
+                $collection->add($editRouteName, $route);
+            }
 
-            $route = new Route(
-                $path,
-                [
-                    '_controller' => '\Drupal\wmcontent\Controller\WmContentController::overview',
-                    'host_type_id' => $config['host_entity_type'],
-                    'container' => $config['id'],
-                ],
-                [
-                    '_entity_access' => $config['host_entity_type'] . '.update',
-                    '_wmcontent_container_view_access' => $config['host_entity_type'],
-                ],
-                [
-                    'parameters' => [
-                        $config['host_entity_type'] => [
-                            'type' => 'entity:' . $config['host_entity_type'],
-                        ],
-                        'container' => [
-                            'type' => 'entity:wmcontent_container',
-                        ],
-                    ],
-                    '_admin_route' => $isAdmin,
-                ]
-            );
-            $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_overview', $route);
-
-            $route = new Route(
-                $path . '/add/{bundle}',
-                [
-                    '_controller' => '\Drupal\wmcontent\Controller\WmContentController::add',
-                    '_title_callback' => '\Drupal\wmcontent\Controller\WmContentController::addTitle',
-                    'host_type_id' => $config['host_entity_type'],
-                ],
-                [
-                    '_entity_access' => $config['host_entity_type'] . '.update',
-                ],
-                [
-                    'parameters' => [
-                        $config['host_entity_type'] => [
-                            'type' => 'entity:' . $config['host_entity_type'],
-                        ],
-                        'container' => [
-                            'type' => 'entity:wmcontent_container',
-                        ],
-                    ],
-                    '_admin_route' => $isAdmin,
-                ]
-            );
-            $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_add', $route);
-
-            $route = new Route(
-                $path . '/{child}/edit',
-                [
-                    '_controller' => '\Drupal\wmcontent\Controller\WmContentController::edit',
-                    '_title_callback' => '\Drupal\wmcontent\Controller\WmContentController::editTitle',
-                    'host_type_id' => $config['host_entity_type'],
-                ],
-                [
-                    '_entity_access' => $config['host_entity_type'] . '.update',
-                ],
-                [
-                    'parameters' => [
-                        $config['host_entity_type'] => [
-                            'type' => 'entity:' . $config['host_entity_type'],
-                        ],
-                        'child' => [
-                            'type' => 'wmcontent-child:' . $config['child_entity_type'],
-                        ],
-                        'container' => [
-                            'type' => 'entity:wmcontent_container',
-                        ],
-                    ],
-                    '_admin_route' => $isAdmin,
-                ]
-            );
-            $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_edit', $route);
-
-            $route = new Route(
-                $path . '/{child}/delete',
-                [
-                    '_controller' => '\Drupal\wmcontent\Controller\WmContentController::delete',
-                    'host_type_id' => $config['host_entity_type'],
-                ],
-                [
-                    '_entity_access' => $config['host_entity_type'] . '.update',
-                ],
-                [
-                    'parameters' => [
-                        $config['host_entity_type'] => [
-                            'type' => 'entity:' . $config['host_entity_type'],
-                        ],
-                        'child' => [
-                            'type' => 'wmcontent-child:' . $config['child_entity_type'],
-                        ],
-                        'container' => [
-                            'type' => 'entity:wmcontent_container',
-                        ],
-                    ],
-                    '_admin_route' => $isAdmin,
-                ]
-            );
-            $collection->add('entity.' . $config['host_entity_type'] . '.wmcontent_delete', $route);
+            $deleteRouteName = "entity.{$hostEntityTypeId}.wmcontent_delete";
+            if (!$collection->get($deleteRouteName)) {
+                $route = $this->getDeleteRoute($container, $adminRoute);
+                $collection->add($deleteRouteName, $route);
+            }
         }
+    }
+
+    protected function getOverviewRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId),
+            [
+                '_controller' => WmContentController::class . '::overview',
+                'host_type_id' => $hostEntityTypeId,
+                'container' => $container->getId(),
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+                '_wmcontent_container_view_access' => $hostEntityTypeId,
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getAddRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/add/{bundle}',
+            [
+                '_controller' => WmContentController::class . '::add',
+                '_title_callback' => WmContentController::class . '::addTitle',
+                'host_type_id' => $hostEntityTypeId,
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getEditRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+        $childEntityTypeId = $container->getChildEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/{child}/edit',
+            [
+                '_controller' => WmContentController::class . '::edit',
+                '_title_callback' => WmContentController::class . '::editTitle',
+                'host_type_id' => $hostEntityTypeId,
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'child' => [
+                        'type' => 'wmcontent-child:' . $childEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getDeleteRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+        $childEntityTypeId = $container->getChildEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/{child}/delete',
+            [
+                '_controller' => WmContentController::class . '::delete',
+                'host_type_id' => $hostEntityTypeId,
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'child' => [
+                        'type' => 'wmcontent-child:' . $childEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getBasePath(string $hostEntityTypeId): string
+    {
+        $hostType = $this->entityTypeManager
+            ->getDefinition($hostEntityTypeId);
+
+        $basePath = $hostType->getLinkTemplate('canonical');
+
+        if (strpos($basePath, '/') !== false) {
+            $basePath = '/' . $basePath;
+        }
+
+        $basePath .= '/wmcontent/{container}';
+
+        return $basePath;
+    }
+
+    protected function isAdminRoute(RouteCollection $collection, string $hostEntityTypeId): bool
+    {
+        if (!$editRoute = $collection->get("entity.{$hostEntityTypeId}.edit_form")) {
+            return false;
+        }
+
+        return (bool) $editRoute->getOption('_admin_route');
     }
 }
