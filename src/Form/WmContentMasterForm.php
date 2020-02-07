@@ -130,7 +130,6 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                         'entity.' . $container->getHostEntityType() . '.wmcontent_edit',
                         [
                             'container' => $container->getId(),
-                            'type' => $child->getEntityTypeId(),
                             'child' => $child->id(),
                             $container->getHostEntityType() => $host->id(),
                         ],
@@ -148,7 +147,6 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                         'entity.' . $container->getHostEntityType() . '.wmcontent_delete',
                         [
                             'container' => $container->getId(),
-                            'type' => $child->getEntityTypeId(),
                             'child' => $child->id(),
                             $container->getHostEntityType() => $host->id(),
                         ],
