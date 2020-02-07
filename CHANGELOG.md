@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2020-02-07
+### Fixed
+- Fix resolving of child entity type in route definitions
+
+### Changed
+- Refactor WmContentRouteSubscriber
+
 ## [1.0.2] - 2020-02-06
 ### Fixed
 - Remove PHP 7.3 specific syntax
