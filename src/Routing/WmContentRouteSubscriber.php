@@ -124,7 +124,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                             'type' => 'entity:' . $config['host_entity_type'],
                         ],
                         'child' => [
-                            'type' => 'entity:' . $config['child_entity_type'],
+                            'type' => 'wmcontent-child:' . $config['child_entity_type'],
                         ],
                         'container' => [
                             'type' => 'entity:wmcontent_container',
@@ -150,7 +150,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                             'type' => 'entity:' . $config['host_entity_type'],
                         ],
                         'child' => [
-                            'type' => 'entity:' . $config['child_entity_type'],
+                            'type' => 'wmcontent-child:' . $config['child_entity_type'],
                         ],
                         'container' => [
                             'type' => 'entity:wmcontent_container',

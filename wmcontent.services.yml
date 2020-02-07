@@ -36,3 +36,8 @@ services:
             - '@entity_type.listener'
             - '@entity_field.manager'
             - '@field_storage_definition.listener'
+
+    wmcontent.paramconverter.wmcontent_child_entity:
+        class: Drupal\wmcontent\ParamConverter\WmContentChildEntityConverter
+        parent: 'paramconverter.entity'
+        tags: [{ name: paramconverter }]
