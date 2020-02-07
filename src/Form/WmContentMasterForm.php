@@ -2,7 +2,6 @@
 
 namespace Drupal\wmcontent\Form;
 
-use Drupal;
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
