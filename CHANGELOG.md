@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Add composer.lock to .gitignore
 
+### Fixed
+- Fix outdated entity type definitions after adding indexes
+
 ## [1.0.3] - 2020-02-07
 ### Fixed
 - Fix resolving of child entity type in route definitions

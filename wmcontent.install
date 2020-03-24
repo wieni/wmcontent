@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
 
@@ -59,5 +60,28 @@ function wmcontent_update_8002()
                 ->addIndex('value');
             $updateManager->updateFieldStorageDefinition($newDefinition);
         }
+    }
+}
+
+/**
+ * Fix outdated entity type definitions after adding indexes
+ */
+function wmcontent_update_8003(array &$sandbox)
+{
+    $definitionUpdateManager = \Drupal::entityDefinitionUpdateManager();
+    /** @var EntityLastInstalledSchemaRepositoryInterface $lastInstalledSchema */
+    $lastInstalledSchema = \Drupal::service('entity.last_installed_schema.repository');
+
+    $entityTypeIds = array_map(
+        static function (WmContentContainer $container) {
+            return $container->getChildEntityType();
+        },
+        WmContentContainer::loadMultiple(),
+    );
+
+    foreach (array_unique($entityTypeIds) as $entityTypeId) {
+        $entityType = $definitionUpdateManager->getEntityType($entityTypeId);
+        $fieldStorageDefinitions = $lastInstalledSchema->getLastInstalledFieldStorageDefinitions($entityTypeId);
+        $definitionUpdateManager->updateFieldableEntityType($entityType, $fieldStorageDefinitions, $sandbox);
     }
 }
