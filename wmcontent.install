@@ -76,7 +76,7 @@ function wmcontent_update_8003(array &$sandbox)
         static function (WmContentContainer $container) {
             return $container->getChildEntityType();
         },
-        WmContentContainer::loadMultiple(),
+        WmContentContainer::loadMultiple()
     );
 
     foreach (array_unique($entityTypeIds) as $entityTypeId) {
