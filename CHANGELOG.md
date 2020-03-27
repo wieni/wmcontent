@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2020-03-27
+### Removed
+- Remove old leftover configs:
+    - `wmcontent.wmcontentfilters`
+    - `wmcontent.wmcontentmaster`
+    - `wmcontent.wmcontentsettings`
+
 ## [1.0.5] - 2020-03-25
 ### Fixed
 - Remove trailing comma

@@ -85,3 +85,14 @@ function wmcontent_update_8003(array &$sandbox)
         $definitionUpdateManager->updateFieldableEntityType($entityType, $fieldStorageDefinitions, $sandbox);
     }
 }
+
+/**
+ * Remove old leftover configs
+ */
+function wmcontent_update_8004()
+{
+    $config = \Drupal::configFactory();
+    $config->getEditable('wmcontent.wmcontentfilters')->delete();
+    $config->getEditable('wmcontent.wmcontentmaster')->delete();
+    $config->getEditable('wmcontent.wmcontentsettings')->delete();
+}
