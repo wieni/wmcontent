@@ -117,44 +117,40 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         ];
 
         foreach ($children as $child) {
-            if ($child->access('view', null, true)->isForbidden()) {
+            if (!$child->access('view')) {
                 continue;
             }
 
-            $operations = [];
+            $operations = $this->entityTypeManager
+                ->getListBuilder($child->getEntityTypeId())
+                ->getOperations($child);
 
-            if (!$child->access('update', null, true)->isForbidden()) {
-                $operations['edit'] = [
-                    'url' => Url::fromRoute(
-                        'entity.' . $container->getHostEntityType() . '.wmcontent_edit',
-                        [
-                            'container' => $container->getId(),
-                            'child' => $child->id(),
-                            $container->getHostEntityType() => $host->id(),
-                        ],
-                        [
-                            'query' => $query,
-                        ]
-                    ),
-                    'title' => $this->t('Edit'),
-                ];
+            if ($child->access('update')) {
+                $operations['edit']['url'] = Url::fromRoute(
+                    'entity.' . $container->getHostEntityType() . '.wmcontent_edit',
+                    [
+                        'container' => $container->getId(),
+                        'child' => $child->id(),
+                        $container->getHostEntityType() => $host->id(),
+                    ],
+                    [
+                        'query' => $query,
+                    ]
+                );
             }
 
-            if (!$child->access('delete', null, true)->isForbidden()) {
-                $operations['delete'] = [
-                    'url' => Url::fromRoute(
-                        'entity.' . $container->getHostEntityType() . '.wmcontent_delete',
-                        [
-                            'container' => $container->getId(),
-                            'child' => $child->id(),
-                            $container->getHostEntityType() => $host->id(),
-                        ],
-                        [
-                            'query' => $query,
-                        ]
-                    ),
-                    'title' => $this->t('Delete'),
-                ];
+            if ($child->access('delete')) {
+                $operations['delete']['url'] = Url::fromRoute(
+                    'entity.' . $container->getHostEntityType() . '.wmcontent_delete',
+                    [
+                        'container' => $container->getId(),
+                        'child' => $child->id(),
+                        $container->getHostEntityType() => $host->id(),
+                    ],
+                    [
+                        'query' => $query,
+                    ]
+                );
             }
 
             $row = [

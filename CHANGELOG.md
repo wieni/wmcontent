@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2020-04-23
+### Fixed
+- Include default entity operations on the master form
+
 ## [1.0.6] - 2020-03-27
 ### Removed
 - Remove old leftover configs:
