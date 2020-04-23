@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RedirectDestinationInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\wmcontent\WmContentContainerInterface;
@@ -28,6 +29,8 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
     protected $entityTypeBundleInfo;
     /** @var RequestStack */
     protected $requestStack;
+    /** @var RedirectDestinationInterface */
+    protected $destination;
     /** @var WmContentManager */
     protected $wmContentManager;
 
@@ -35,11 +38,13 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         EntityTypeManagerInterface $entityTypeManager,
         EntityTypeBundleInfoInterface $entityTypeBundleInfo,
         RequestStack $requestStack,
+        RedirectDestinationInterface $destination,
         WmContentManager $wmContentManager
     ) {
         $this->entityTypeManager = $entityTypeManager;
         $this->entityTypeBundleInfo = $entityTypeBundleInfo;
         $this->requestStack = $requestStack;
+        $this->destination = $destination;
         $this->wmContentManager = $wmContentManager;
     }
 
@@ -49,6 +54,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             $container->get('entity_type.manager'),
             $container->get('entity_type.bundle.info'),
             $container->get('request_stack'),
+            $container->get('redirect.destination'),
             $container->get('wmcontent.manager')
         );
     }
@@ -151,6 +157,12 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                         'query' => $query,
                     ]
                 );
+            }
+
+            foreach ($operations as $operation) {
+                $query = $operation['url']->getOption('query') ?? [];
+                $query['destination'] = $this->destination->get();
+                $operation['url']->setOption('query', $query);
             }
 
             $row = [
