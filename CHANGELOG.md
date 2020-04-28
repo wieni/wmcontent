@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Add a destination query param to all operations on the master form
+- Split controller & simplify route parameters
 
 ### Fixed
 - Fix broken config schema

@@ -5,7 +5,8 @@ namespace Drupal\wmcontent\Routing;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
-use Drupal\wmcontent\Controller\WmContentController;
+use Drupal\wmcontent\Controller\WmContentChildController;
+use Drupal\wmcontent\Controller\WmContentMasterController;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -72,8 +73,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
         return new Route(
             $this->getBasePath($hostEntityTypeId),
             [
-                '_controller' => WmContentController::class . '::overview',
-                'host_type_id' => $hostEntityTypeId,
+                '_controller' => WmContentMasterController::class . '::overview',
                 'container' => $container->getId(),
             ],
             [
@@ -82,7 +82,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             ],
             [
                 'parameters' => [
-                    $hostEntityTypeId => [
+                    'host' => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'container' => [
@@ -101,16 +101,15 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
         return new Route(
             $this->getBasePath($hostEntityTypeId) . '/add/{bundle}',
             [
-                '_controller' => WmContentController::class . '::add',
-                '_title_callback' => WmContentController::class . '::addTitle',
-                'host_type_id' => $hostEntityTypeId,
+                '_controller' => WmContentChildController::class . '::add',
+                '_title_callback' => WmContentChildController::class . '::addTitle',
             ],
             [
                 '_entity_access' => $hostEntityTypeId . '.update',
             ],
             [
                 'parameters' => [
-                    $hostEntityTypeId => [
+                    'host' => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'container' => [
@@ -130,16 +129,15 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
         return new Route(
             $this->getBasePath($hostEntityTypeId) . '/{child}/edit',
             [
-                '_controller' => WmContentController::class . '::edit',
-                '_title_callback' => WmContentController::class . '::editTitle',
-                'host_type_id' => $hostEntityTypeId,
+                '_controller' => WmContentChildController::class . '::edit',
+                '_title_callback' => WmContentChildController::class . '::editTitle',
             ],
             [
                 '_entity_access' => $hostEntityTypeId . '.update',
             ],
             [
                 'parameters' => [
-                    $hostEntityTypeId => [
+                    'host' => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'child' => [
@@ -162,15 +160,14 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
         return new Route(
             $this->getBasePath($hostEntityTypeId) . '/{child}/delete',
             [
-                '_controller' => WmContentController::class . '::delete',
-                'host_type_id' => $hostEntityTypeId,
+                '_controller' => WmContentChildController::class . '::delete',
             ],
             [
                 '_entity_access' => $hostEntityTypeId . '.update',
             ],
             [
                 'parameters' => [
-                    $hostEntityTypeId => [
+                    'host' => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'child' => [
