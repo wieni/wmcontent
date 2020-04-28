@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Add a destination query param to all operations on the master form
 
+### Fixed
+- Fix broken config schema
+
 ## [1.0.7] - 2020-04-23
 ### Fixed
 - Include default entity operations on the master form

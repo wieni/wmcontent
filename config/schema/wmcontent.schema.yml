@@ -24,13 +24,18 @@ wmcontent.wmcontent_container.*:
       label: 'Child bundles'
       sequence:
         type: string
+    child_bundles_default:
+      type: string
+      label: 'Default child bundle'
+      sequence:
+        type: string
     hide_single_option_sizes:
       type: boolean
       label: 'Hide single option sizes'
     hide_single_option_alignments:
       type: boolean
       label: 'Hide single option alignments'
-    show_size_solumn:
+    show_size_column:
       type: boolean
       label: 'Show size column'
     show_alignment_column:
