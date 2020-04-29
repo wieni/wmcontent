@@ -64,6 +64,17 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         return 'wm_content_master_form';
     }
 
+    public function title(WmContentContainerInterface $container, ContentEntityInterface $host)
+    {
+        return $this->t(
+            '%slug for %label',
+            [
+                '%slug' => $container->getLabel(),
+                '%label' => $host->label(),
+            ]
+        );
+    }
+
     public function buildForm(array $form, FormStateInterface $form_state, ?ContentEntityInterface $host = null, ?WmContentContainerInterface $container = null)
     {
         $config = $container->getConfig();

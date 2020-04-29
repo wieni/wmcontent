@@ -6,7 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\wmcontent\Controller\WmContentChildController;
-use Drupal\wmcontent\Controller\WmContentMasterController;
+use Drupal\wmcontent\Form\WmContentMasterForm;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -73,7 +73,8 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
         return new Route(
             $this->getBasePath($hostEntityTypeId),
             [
-                '_controller' => WmContentMasterController::class . '::overview',
+                '_form' => WmContentMasterForm::class,
+                '_title_callback' => WmContentMasterForm::class . '::title',
                 'container' => $container->getId(),
             ],
             [
