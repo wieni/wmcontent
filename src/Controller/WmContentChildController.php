@@ -3,16 +3,14 @@
 namespace Drupal\wmcontent\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\wmcontent\Form\WmContentMasterForm;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Drupal\wmcontent\WmContentManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -48,7 +46,7 @@ class WmContentChildController implements ContainerInjectionInterface
         return $instance;
     }
 
-    public function add(WmContentContainerInterface $container, string $bundle, EntityInterface $host)
+    public function add(WmContentContainerInterface $container, string $bundle, ContentEntityInterface $host)
     {
         $child = $this->createChildEntity($container, $bundle, $host);
 
@@ -61,7 +59,7 @@ class WmContentChildController implements ContainerInjectionInterface
         return $form;
     }
 
-    public function addTitle(WmContentContainerInterface $container, string $bundle, EntityInterface $host)
+    public function addTitle(WmContentContainerInterface $container, string $bundle, ContentEntityInterface $host)
     {
         $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
         $type = $bundleInfo[$container->getChildEntityType()][$bundle]['label'];
@@ -70,12 +68,12 @@ class WmContentChildController implements ContainerInjectionInterface
             'Add new %type to %host',
             [
                 '%type' => $type,
-                '%host' => $host,
+                '%host' => $host->label(),
             ]
         );
     }
 
-    public function delete(WmContentContainerInterface $container, EntityInterface $child, EntityInterface $host)
+    public function delete(WmContentContainerInterface $container, ContentEntityInterface $child, ContentEntityInterface $host)
     {
         $child->delete();
 
@@ -100,7 +98,7 @@ class WmContentChildController implements ContainerInjectionInterface
         );
     }
 
-    public function edit(EntityInterface $child)
+    public function edit(ContentEntityInterface $child)
     {
         $form = $this->entityFormBuilder->getForm($child);
         $form['wmcontent_container']['#access'] = false;
@@ -111,7 +109,7 @@ class WmContentChildController implements ContainerInjectionInterface
         return $form;
     }
 
-    public function editTitle(WmContentContainerInterface $container, EntityInterface $child, EntityInterface $host)
+    public function editTitle(WmContentContainerInterface $container, ContentEntityInterface $child, ContentEntityInterface $host)
     {
         $bundleInfo = $this->entityTypeBundleInfo->getAllBundleInfo();
         $type = $bundleInfo[$container->getChildEntityType()][$child->bundle()]['label'];
@@ -120,16 +118,17 @@ class WmContentChildController implements ContainerInjectionInterface
             'Edit %type from %host',
             [
                 '%type' => $type,
-                '%host' => $host,
+                '%host' => $host->label(),
             ]
         );
     }
 
-    protected function createChildEntity(WmContentContainerInterface $container, string $bundle, EntityInterface $host): EntityInterface
+    protected function createChildEntity(WmContentContainerInterface $container, string $bundle, ContentEntityInterface $host): ContentEntityInterface
     {
         $blocks = $this->wmContentManager->getContent($host, $container->id());
-        $weight = 0;
+        $entityType = $this->entityTypeManager->getDefinition($container->getChildEntityType());
 
+        $weight = 0;
         foreach ($blocks as $block) {
             if (!$block->hasField('wmcontent_weight')) {
                 continue;
@@ -146,24 +145,24 @@ class WmContentChildController implements ContainerInjectionInterface
             'wmcontent_container' => $container->getId(),
         ];
 
-        if ($bundleKey = $host->getEntityType()->getKey('bundle')) {
+        if ($bundleKey = $entityType->getKey('bundle')) {
             $values[$bundleKey] = $bundle;
         }
 
-        if ($langcodeKey = $host->getEntityType()->getKey('langcode')) {
+        if ($langcodeKey = $entityType->getKey('langcode')) {
             $values[$langcodeKey] = $host->language()->getId();
         }
 
-        if ($uidKey = $host->getEntityType()->getKey('uid')) {
+        if ($uidKey = $entityType->getKey('uid')) {
             $values[$uidKey] = $this->currentUser->id();
         }
 
-        if ($ownerKey = $host->getEntityType()->getKey('owner')) {
+        if ($ownerKey = $entityType->getKey('owner')) {
             $values[$ownerKey] = $this->currentUser->id();
         }
 
         return $this->entityTypeManager
-            ->getStorage($container->getChildEntityType())
+            ->getStorage($entityType->id())
             ->create($values);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\wmcontent\EventSubscriber;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Drupal\wmcontent\WmContentManager;
 use Drupal\wmcontent\WmContentManagerInterface;
@@ -33,7 +33,7 @@ class ContentBlockSubscriber implements EventSubscriberInterface
     {
         $host = $this->manager->getHost($event->getContentBlock());
 
-        if (!$host instanceof EntityInterface) {
+        if (!$host instanceof ContentEntityInterface) {
             return;
         }
 

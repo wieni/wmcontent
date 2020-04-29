@@ -22,8 +22,6 @@ services:
 
     wmcontent.container_access:
         class: Drupal\wmcontent\Access\WmContentContainerAccessCheck
-        arguments:
-            - '@entity_type.manager'
         tags:
             - { name: access_check, applies_to: _wmcontent_container_view_access }
 
@@ -40,4 +38,8 @@ services:
     wmcontent.paramconverter.wmcontent_child_entity:
         class: Drupal\wmcontent\ParamConverter\WmContentChildEntityConverter
         parent: 'paramconverter.entity'
-        tags: [{ name: paramconverter }]
+        tags:
+            - { name: paramconverter }
+
+    wmcontent.argument_resolver.host_entity:
+        class: Drupal\wmcontent\ArgumentResolver\HostEntityResolver

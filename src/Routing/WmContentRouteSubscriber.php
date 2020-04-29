@@ -83,7 +83,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             ],
             [
                 'parameters' => [
-                    'host' => [
+                    $hostEntityTypeId => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'container' => [
@@ -110,7 +110,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             ],
             [
                 'parameters' => [
-                    'host' => [
+                    $hostEntityTypeId => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'container' => [
@@ -138,7 +138,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             ],
             [
                 'parameters' => [
-                    'host' => [
+                    $hostEntityTypeId => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'child' => [
@@ -168,7 +168,7 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
             ],
             [
                 'parameters' => [
-                    'host' => [
+                    $hostEntityTypeId => [
                         'type' => 'entity:' . $hostEntityTypeId,
                     ],
                     'child' => [

@@ -4,38 +4,24 @@ namespace Drupal\wmcontent\Access;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\wmcontent\WmContentContainerInterface;
 
 class WmContentContainerAccessCheck implements AccessInterface
 {
-    /** @var EntityTypeManagerInterface */
-    protected $entityTypeManager;
-
-    public function __construct(
-        EntityTypeManagerInterface $entityTypeManager
-    ) {
-        $this->entityTypeManager = $entityTypeManager;
-    }
-
-    public function access(RouteMatchInterface $routeMatch, AccountInterface $account, ?string $host_type_id = null): AccessResultInterface
+    public function access(RouteMatchInterface $routeMatch, WmContentContainerInterface $container): AccessResultInterface
     {
-        /* @var EntityInterface $entity */
-        $entity = $routeMatch->getParameter($host_type_id);
-        /** @var WmContentContainerInterface $container */
-        $container = $routeMatch->getParameter('container');
+        /* @var ContentEntityInterface $entity */
+        $host = $routeMatch->getParameter($container->getHostEntityType());
 
-        if ($entity && $container) {
-            if (
-                empty($container->getHostBundles())
-                || array_key_exists($entity->bundle(), $container->getHostBundles())
-            ) {
-                return AccessResult::allowed();
-            }
+        if (empty($container->getHostBundles())) {
+            return AccessResult::allowed();
+        }
+
+        if ($host && array_key_exists($host->bundle(), $container->getHostBundles())) {
+            return AccessResult::allowed();
         }
 
         return AccessResult::neutral();
