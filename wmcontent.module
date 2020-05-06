@@ -200,7 +200,6 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
 
         $fields['wmcontent_size'] = BaseFieldDefinition::create('list_string')
             ->setLabel(t('Size'))
-            ->setDescription(t('Select the size.'))
             ->setRequired(true)
             ->setSetting('allowed_values_function', '_wmcontent_sizes')
             ->setDefaultValueCallback('_wmcontent_default_size')
@@ -226,7 +225,6 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
 
         $fields['wmcontent_alignment'] = BaseFieldDefinition::create('list_string')
             ->setLabel(t('Alignment'))
-            ->setDescription(t('Select the Alignment.'))
             ->setRequired(true)
             ->setSetting('allowed_values_function', '_wmcontent_alignments')
             ->setDefaultValueCallback('_wmcontent_default_alignment')
@@ -281,7 +279,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
         // entity with $entity->parent->entity.
         $fields['wmcontent_parent'] = IndexableBaseFieldDefinition::create('integer')
             ->setLabel(t('Host'))
-            ->setDescription(t('The entity id of the host.'))
+            ->setDescription(t('The id of the host entity.'))
             ->setRequired(true)
             ->setReadOnly(true)
             ->setDisplayConfigurable('form', true)
@@ -307,7 +305,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
 
         $fields['wmcontent_parent_type'] = IndexableBaseFieldDefinition::create('string')
             ->setLabel(t('Host Type'))
-            ->setDescription(t('The entity type of the host.'))
+            ->setDescription(t('The type of the host entity.'))
             ->setRequired(true)
             ->setReadOnly(true)
             ->setDisplayConfigurable('form', true)
@@ -325,7 +323,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
 
         $fields['wmcontent_container'] = IndexableBaseFieldDefinition::create('string')
             ->setLabel(t('Container'))
-            ->setDescription(t('The container in the host.'))
+            ->setDescription(t('The container this child is attached to.'))
             ->setRequired(true)
             ->setReadOnly(true)
             ->setSetting('default_value', 'content')
