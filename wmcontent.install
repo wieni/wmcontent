@@ -96,3 +96,24 @@ function wmcontent_update_8004()
     $config->getEditable('wmcontent.wmcontentmaster')->delete();
     $config->getEditable('wmcontent.wmcontentsettings')->delete();
 }
+
+/**
+ * Install wmcontent_snapshot entitytype
+ */
+function wmcontent_update_8005()
+{
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
+
+    foreach (['wmcontent_snapshot', 'wmcontent_snapshot_log'] as $entityTypeId) {
+        $entityType = \Drupal::entityTypeManager()->getDefinition($entityTypeId);
+
+        if (!$entityType) {
+            continue;
+        }
+
+        \Drupal::entityDefinitionUpdateManager()->installEntityType($entityType);
+    }
+
+}
+
+

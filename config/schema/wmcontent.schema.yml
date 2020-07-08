@@ -41,3 +41,6 @@ wmcontent.wmcontent_container.*:
     show_alignment_column:
       type: boolean
       label: 'Show alignment column'
+    snapshots_enabled:
+      type: boolean
+      label: 'Enable snapshots'

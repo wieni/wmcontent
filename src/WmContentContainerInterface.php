@@ -38,4 +38,6 @@ interface WmContentContainerInterface extends ConfigEntityInterface
     public function isHost(EntityInterface $host): bool;
 
     public function hasChild(EntityInterface $child): bool;
+
+    public function hasSnapshotsEnabled(): bool;
 }
