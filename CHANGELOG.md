@@ -5,9 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Add first tests
+
 ### Changed
 - Add a destination query param to all operations on the master form
-- Split controller & simplify route parameters
+- Clean up controller
+- Simplify parameters of child entity routes
 
 ### Fixed
 - Fix broken config schema
