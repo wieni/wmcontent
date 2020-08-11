@@ -1,0 +1,3 @@
+snapshot_copy_to_clipboard:
+    js:
+        js/snapshot-copy-to-clipboard.js: {}

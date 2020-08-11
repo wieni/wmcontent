@@ -3,3 +3,6 @@ wmcontent.container.add_form:
     title: 'Add container'
     appears_on:
         - wmcontent.collection
+
+entity.node.wmcontent_snapshot.import:
+    deriver: 'Drupal\wmcontent\Plugin\Derivative\WmContentSnapshotContextualLinks'

@@ -1,3 +1,7 @@
+parameters:
+    wmcontent.environment: 'production'
+    wmcontent.snapshot.secret: 'changeme'
+
 services:
     wmcontent.manager:
         class: Drupal\wmcontent\WmContentManager
@@ -25,6 +29,11 @@ services:
         tags:
             - { name: access_check, applies_to: _wmcontent_container_view_access }
 
+    wmcontent.container_snapshot_access:
+        class: Drupal\wmcontent\Access\WmContentContainerSnapshotAccessCheck
+        tags:
+            - { name: access_check, applies_to: _wmcontent_container_snapshot_access }
+
     wmcontent.entity_updates:
         class: Drupal\wmcontent\EntityUpdateService
         arguments:
@@ -43,3 +52,21 @@ services:
 
     wmcontent.argument_resolver.host_entity:
         class: Drupal\wmcontent\ArgumentResolver\HostEntityResolver
+
+    plugin.manager.wmcontent.snapshot:
+        class: Drupal\wmcontent\Service\Snapshot\SnapshotPluginManager
+        parent: default_plugin_manager
+
+    wmcontent.snapshot_builder.factory:
+        class: Drupal\wmcontent\Service\Snapshot\SnapshotBuilderFactory
+        arguments:
+            - '@plugin.manager.wmcontent.snapshot'
+            - '@class_resolver'
+
+    wmcontent.snapshot:
+        class: Drupal\wmcontent\Service\Snapshot\SnapshotService
+        arguments:
+            - '@language_manager'
+            - '@wmcontent.snapshot_builder.factory'
+            - '%wmcontent.environment%'
+            - '%wmcontent.snapshot.secret%'

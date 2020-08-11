@@ -97,6 +97,8 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             $query['language_content_entity'] = $_GET['language_content_entity'];
         }
 
+        $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
+
         $form['container'] = [
             '#type' => 'value',
             '#value' => $container,

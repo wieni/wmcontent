@@ -5,6 +5,7 @@ namespace Drupal\wmcontent\Routing;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\wmcontent\Controller\SnapshotOverviewController;
 use Drupal\wmcontent\Controller\WmContentChildController;
 use Drupal\wmcontent\Form\WmContentMasterForm;
 use Drupal\wmcontent\WmContentContainerInterface;
@@ -46,10 +47,40 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                 $collection->add($overviewRouteName, $route);
             }
 
+            $snapshotOverviewRouteName = "entity.{$hostEntityTypeId}.wmcontent_snapshot.overview";
+            if (!$collection->get($snapshotOverviewRouteName)) {
+                $route = $this->getSnapshotOverviewRoute($container, $adminRoute);
+                $collection->add($snapshotOverviewRouteName, $route);
+            }
+
             $addRouteName = "entity.{$hostEntityTypeId}.wmcontent_add";
             if (!$collection->get($addRouteName)) {
                 $route = $this->getAddRoute($container, $adminRoute);
                 $collection->add($addRouteName, $route);
+            }
+
+            $snapshotImportRouteName = "entity.{$hostEntityTypeId}.wmcontent_snapshot.import";
+            if (!$collection->get($snapshotImportRouteName)) {
+                $route = $this->getSnapshotImportRoute($container, $adminRoute);
+                $collection->add($snapshotImportRouteName, $route);
+            }
+
+            $snapshotRestoreRouteName = "entity.{$hostEntityTypeId}.wmcontent_snapshot.restore";
+            if (!$collection->get($snapshotRestoreRouteName)) {
+                $route = $this->getSnapshotRestoreRoute($container, $adminRoute);
+                $collection->add($snapshotRestoreRouteName, $route);
+            }
+
+            $snapshotExportRouteName = "entity.{$hostEntityTypeId}.wmcontent_snapshot.export";
+            if (!$collection->get($snapshotExportRouteName)) {
+                $route = $this->getSnapshotExportRoute($container, $adminRoute);
+                $collection->add($snapshotExportRouteName, $route);
+            }
+
+            $snapshotCreateRouteName = "entity.{$hostEntityTypeId}.wmcontent_snapshot.create";
+            if (!$collection->get($snapshotCreateRouteName)) {
+                $route = $this->getSnapshotCreateRoute($container, $adminRoute);
+                $collection->add($snapshotCreateRouteName, $route);
             }
 
             $editRouteName = "entity.{$hostEntityTypeId}.wmcontent_edit";
@@ -146,6 +177,152 @@ class WmContentRouteSubscriber extends RouteSubscriberBase
                     ],
                     'container' => [
                         'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getSnapshotOverviewRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/snapshots',
+            [
+                '_controller' => SnapshotOverviewController::class . '::overview',
+                '_title_callback' => SnapshotOverviewController::class . '::overviewTitle',
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+                '_wmcontent_container_snapshot_access' => $container->id(),
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getSnapshotImportRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/snapshots/import',
+            [
+                '_controller' => SnapshotOverviewController::class . '::import',
+                '_title_callback' => SnapshotOverviewController::class . '::importTitle',
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+                '_wmcontent_container_snapshot_access' => $container->id(),
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getSnapshotRestoreRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/snapshots/restore/{snapshot}',
+            [
+                '_controller' => SnapshotOverviewController::class . '::restore',
+                '_title_callback' => SnapshotOverviewController::class . '::restoreTitle',
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+                '_wmcontent_container_snapshot_access' => $container->id(),
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                    'snapshot' => [
+                        'type' => 'entity:wmcontent_snapshot',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getSnapshotCreateRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/snapshots/create',
+            [
+                '_controller' => SnapshotOverviewController::class . '::createSnapshot', // 'create' was taken
+                '_title_callback' => SnapshotOverviewController::class . '::createTitle',
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+                '_wmcontent_container_snapshot_access' => $container->id(),
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                ],
+                '_admin_route' => $adminRoute,
+            ]
+        );
+    }
+
+    protected function getSnapshotExportRoute(WmContentContainerInterface $container, bool $adminRoute): Route
+    {
+        $hostEntityTypeId = $container->getHostEntityType();
+
+        return new Route(
+            $this->getBasePath($hostEntityTypeId) . '/snapshots/export/{snapshot}',
+            [
+                '_controller' => SnapshotOverviewController::class . '::export',
+                '_title_callback' => SnapshotOverviewController::class . '::exportTitle',
+            ],
+            [
+                '_entity_access' => $hostEntityTypeId . '.update',
+                '_wmcontent_container_snapshot_access' => $container->id(),
+            ],
+            [
+                'parameters' => [
+                    $hostEntityTypeId => [
+                        'type' => 'entity:' . $hostEntityTypeId,
+                    ],
+                    'container' => [
+                        'type' => 'entity:wmcontent_container',
+                    ],
+                    'snapshot' => [
+                        'type' => 'entity:wmcontent_snapshot',
                     ],
                 ],
                 '_admin_route' => $adminRoute,

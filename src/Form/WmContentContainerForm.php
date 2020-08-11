@@ -162,6 +162,12 @@ class WmContentContainerForm extends EntityForm
             '#title' => $this->t('Show the alignment column'),
         ];
 
+        $form['snapshots_enabled'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $this->entity->hasSnapshotsEnabled(),
+            '#title' => $this->t('Enable snapshots'),
+        ];
+
         return parent::form($form, $form_state);
     }
 

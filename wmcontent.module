@@ -6,10 +6,12 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\wmcontent\Entity\Snapshot;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
@@ -68,8 +70,43 @@ function wmcontent_entity_type_alter(array &$entityTypes): void
     }
 }
 
+function wmcontent_entity_operation_alter(array &$operations, EntityInterface $entity)
+{
+    foreach ($operations as &$operation) {
+        /** @var Url $url */
+        $url = $operation['url'] ?? null;
+        if (!$url) {
+            continue;
+        }
+        $queryOption = $url->getOption('query') ?: [];
+        if (empty($queryOption['destination'])) {
+            continue;
+        }
+        $uri = parse_url($queryOption['destination']);
+        if (empty($uri['query'])) {
+            continue;
+        }
+        $query = [];
+        parse_str($uri['query'], $query);
+        unset($query[MainContentViewSubscriber::WRAPPER_FORMAT]);
+        $uri['query'] = http_build_query($query);
+        if (empty($uri['query'])) {
+            unset($uri['query']);
+        }
+        $queryOption['destination'] = _wmcontent_unparse_url($uri);
+        $url->setOption('query', $queryOption);
+    }
+}
+
 function wmcontent_entity_operation(EntityInterface $entity): array
 {
+    if ($entity instanceof Snapshot) {
+        return \Drupal::getContainer()->get('wmcontent.snapshot')->getEntityOperations(
+            $entity,
+            \Drupal::getContainer()->get('current_route_match')
+        );
+    }
+
     if (!$entity instanceof ContentEntityInterface) {
         return [];
     }
@@ -461,4 +498,78 @@ function wmcontent_form_alter(array &$form, FormStateInterface $formState, strin
             }
         }
     }
+}
+
+/**
+ * Alter pagination urls to ajax urls when they are rendered in a Modal
+ */
+function wmcontent_preprocess_pager(&$variables)
+{
+    $request = \Drupal::request();
+    if (
+        !$request
+        || !isset($variables['items']['pages'])
+        || $request->query->get(MainContentViewSubscriber::WRAPPER_FORMAT) !== 'drupal_modal'
+    ) {
+        // Not a modal request or no items being rendered. So bail early
+        return;
+    }
+
+    $turnIntoModalUrl = static function (&$item) use (&$request) {
+        // Remove ?_wrapper_format=modal from the pagination urls.
+        // If they are kept in Drupal does weird things like wrapping it's ajax
+        // response with a <textarea>
+        $query = [];
+        parse_str(trim($item['href'], '?'), $query);
+        unset($query[MainContentViewSubscriber::WRAPPER_FORMAT]);
+
+        // Instead of having a relative ?page=0 we have to add the location.
+        // This is because in the browser the current location is the page
+        // the modal is triggered from.
+        // Eg if you're on /admin/content and you click on /node/5/overview
+        // that opens in a modal and contains pager links. If we'd render those
+        // pager links with '?page=0' the browser would call /admin/content?page=0
+        // instead of /node/5/overview?page=0 when clicked.
+        //
+        // So use the current request to create a non-relative url.
+        $item['href'] = Url::createFromRequest($request)
+            ->mergeOptions(['query' => $query])
+            ->toString(true)->getGeneratedUrl();
+
+        // Have the urls open in a modal.
+        /** @var \Drupal\Core\Template\Attribute $attribute */
+        $attribute = $item['attributes'];
+        $attribute->addClass('use-ajax');
+        $attribute->setAttribute('data-dialog-type', 'modal');
+        $attribute->setAttribute(
+            'data-dialog-options',
+            // Use the dialog options that were used to display the current modal
+            json_encode($request->request->get('dialogOptions', []), JSON_THROW_ON_ERROR)
+        );
+    };
+
+    foreach ($variables['items']['pages'] as &$item) {
+        $turnIntoModalUrl($item);
+    }
+    unset($item);
+
+    foreach (['first', 'previous', 'next', 'last'] as $name) {
+        if (!empty($variables['items'][$name])) {
+            $turnIntoModalUrl($variables['items'][$name]);
+        }
+    }
+}
+
+function _wmcontent_unparse_url($parsed_url)
+{
+    $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+    $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+    $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+    $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+    $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
+    $pass = ($user || $pass) ? "$pass@" : '';
+    $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+    $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+    $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+    return $scheme . $user . $pass . $host . $port . $path . $query . $fragment;
 }
