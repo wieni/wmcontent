@@ -113,7 +113,6 @@ class Snapshot extends ContentEntityBase
             ->setDisplayConfigurable('form', false);
 
         $fields['comment'] = BaseFieldDefinition::create('string_long')
-            ->setRequired(true)
             ->setLabel(t('Comment'))
             ->setDisplayConfigurable('form', true)
             ->setDisplayOptions('form', [

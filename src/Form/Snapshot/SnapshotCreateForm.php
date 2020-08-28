@@ -64,7 +64,6 @@ class SnapshotCreateForm extends SnapshotFormBase
         $form['comment'] = [
             '#type' => 'textarea',
             '#title' => $this->t('Description'),
-            '#required' => true,
             '#description' => $this->t('A good description of what\'s in this snapshot.'),
             '#rows' => 4,
         ];
