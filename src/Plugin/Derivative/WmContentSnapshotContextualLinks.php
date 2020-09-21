@@ -70,8 +70,7 @@ class WmContentSnapshotContextualLinks extends DeriverBase implements ContainerD
                         'class' => ['use-ajax'],
                         'data-dialog-type' => 'modal',
                         'data-dialog-options' => json_encode(
-                            SnapshotFormBase::MODAL_DIALOG_OPTIONS,
-                            JSON_THROW_ON_ERROR
+                            SnapshotFormBase::MODAL_DIALOG_OPTIONS
                         ),
                     ];
                     // Todo: load core/drupal.dialog.ajax when this link is shown
