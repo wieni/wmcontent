@@ -26,7 +26,7 @@ class HtmlRouteProvider extends AdminHtmlRouteProvider
                 [],
                 [
                     '_permission' => 'administer wmcontent',
-                ],
+                ]
             )
         );
 
