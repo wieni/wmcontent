@@ -1,0 +1,39 @@
+.wm-content-master-form {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.wm-content-master-form .form-wrapper {
+    margin: 0
+}
+
+.wm-content-master-form #edit-add-new .fieldset-wrapper .button,
+.wm-content-master-form #edit-add-new .fieldset__wrapper .button {
+    box-sizing: border-box;
+    display: inline-block;
+    position: relative;
+}
+
+.wm-content-master-form #edit-add-new {
+    flex: 0 1 320px;
+    margin: 0 1.5rem 0 0;
+}
+
+.wm-content-master-form #edit-add-new .fieldset-wrapper,
+.wm-content-master-form #edit-add-new .fieldset__wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin: -0.5rem;
+    padding: 1rem 1.5rem;
+}
+
+.wm-content-master-form #edit-add-new .fieldset-wrapper .button,
+.wm-content-master-form #edit-add-new .fieldset__wrapper .button {
+    width: calc(50% - 0.5rem);
+    margin: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+}
