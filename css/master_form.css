@@ -1,5 +1,6 @@
 .wm-content-master-form {
     display: flex;
+    flex-direction: column;
     flex-wrap: nowrap;
 }
 
@@ -16,7 +17,7 @@
 
 .wm-content-master-form #edit-add-new {
     flex: 0 1 320px;
-    margin: 0 1.5rem 0 0;
+    margin: 0 0 1.5rem 0;
 }
 
 .wm-content-master-form #edit-add-new .fieldset-wrapper,
@@ -36,4 +37,24 @@
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.wm-content-master-form #edit-rows .td__type {
+    white-space: nowrap;
+}
+
+.wm-content-master-form #edit-rows .td__content {
+    min-width: 10rem;
+}
+
+@media screen and (min-width: 48em) {
+    .wm-content-master-form {
+        flex-direction: row;
+    }
+
+    .wm-content-master-form #edit-add-new {
+        margin: 0 1.5rem 0 0;
+    }
 }
