@@ -5,7 +5,11 @@
 }
 
 .wm-content-master-form .form-wrapper {
-    margin: 0
+    margin: 0;
+}
+
+.wm-content-master-form .form-wrapper:last-child {
+    flex: 1;
 }
 
 .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
@@ -16,7 +20,7 @@
 }
 
 .wm-content-master-form #edit-add-new {
-    flex: 0 1 320px;
+    flex: 0 1;
     margin: 0 0 1.5rem 0;
 }
 
@@ -25,28 +29,30 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: stretch;
     margin: -0.5rem;
     padding: 1rem 1.5rem;
 }
 
 .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
 .wm-content-master-form #edit-add-new .fieldset__wrapper .button {
-    width: calc(50% - 0.5rem);
+    flex: 0 1 calc(50% - 0.5rem);
     margin: 0.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
     text-align: left;
-    white-space: nowrap;
+    word-break: break-word;
 }
 
 .wm-content-master-form #edit-rows .td__type {
     white-space: nowrap;
 }
 
-.wm-content-master-form #edit-rows .td__content {
-    min-width: 10rem;
+@media screen and (min-width: 28em) {
+    .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
+    .wm-content-master-form #edit-add-new .fieldset__wrapper .button {
+        flex: 0 1 calc(33.333% - 0.5rem);
+    }
 }
 
 @media screen and (min-width: 48em) {
@@ -56,5 +62,15 @@
 
     .wm-content-master-form #edit-add-new {
         margin: 0 1.5rem 0 0;
+        flex-basis: 320px;
+    }
+
+    .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
+    .wm-content-master-form #edit-add-new .fieldset__wrapper .button {
+        flex: 0 1 calc(50% - 0.5rem);
+    }
+
+    .wm-content-master-form .form-wrapper:last-child {
+        max-width: 50vw;
     }
 }
