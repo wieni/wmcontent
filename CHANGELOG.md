@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Remove usage of PHP 7.3 constants JSON_THROW_ON_ERROR
+- Fix typo in snapshot form ajax logic
 
 ## [1.3.1] - 2020-11-03
 ### Changed

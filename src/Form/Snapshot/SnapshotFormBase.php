@@ -73,7 +73,7 @@ abstract class SnapshotFormBase extends FormBase
             ],
         ];
         if (!$this->isAjax()) {
-            unset($button['##ajax']);
+            unset($button['#ajax']);
         }
         return $button;
     }
