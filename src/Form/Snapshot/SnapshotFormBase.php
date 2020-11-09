@@ -88,8 +88,7 @@ abstract class SnapshotFormBase extends FormBase
                 'class' => ['use-ajax'],
                 'data-dialog-type' => 'modal',
                 'data-dialog-options' => json_encode(
-                    static::MODAL_DIALOG_OPTIONS,
-                    JSON_THROW_ON_ERROR
+                    static::MODAL_DIALOG_OPTIONS
                 ),
             ],
         ];

@@ -208,8 +208,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
                 'class' => ['use-ajax'],
                 'data-dialog-type' => 'modal',
                 'data-dialog-options' => json_encode(
-                    SnapshotFormBase::MODAL_DIALOG_OPTIONS,
-                    JSON_THROW_ON_ERROR
+                    SnapshotFormBase::MODAL_DIALOG_OPTIONS
                 ),
             ],
         ];

@@ -170,8 +170,7 @@ class Snapshot extends ContentEntityBase
         return json_decode(
             $blob,
             true,
-            512, // depth - default value
-            JSON_THROW_ON_ERROR
+            512 // depth - default value
         );
     }
 
@@ -219,8 +218,7 @@ class Snapshot extends ContentEntityBase
         $snapshot->set('source_entity_id', $data['source_entity_id'] ?? '');
         $snapshot->set('active', 0);
         $snapshot->set('blob', json_encode(
-            $data['blob'],
-            JSON_THROW_ON_ERROR
+            $data['blob']
         ));
 
         return $snapshot;

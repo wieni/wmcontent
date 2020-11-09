@@ -173,8 +173,7 @@ class SnapshotService
                 'class' => ['use-ajax'],
                 'data-dialog-type' => 'modal',
                 'data-dialog-options' => json_encode(
-                    SnapshotFormBase::MODAL_DIALOG_OPTIONS,
-                    JSON_THROW_ON_ERROR
+                    SnapshotFormBase::MODAL_DIALOG_OPTIONS
                 ),
             ],
         ];
@@ -190,8 +189,7 @@ class SnapshotService
                 'class' => ['use-ajax'],
                 'data-dialog-type' => 'modal',
                 'data-dialog-options' => json_encode(
-                    SnapshotFormBase::MODAL_DIALOG_OPTIONS,
-                    JSON_THROW_ON_ERROR
+                    SnapshotFormBase::MODAL_DIALOG_OPTIONS
                 ),
             ],
         ];
@@ -231,12 +229,12 @@ class SnapshotService
     {
         $blob = $snapshot->toArray();
         $blob['hmac'] = $this->hmac($blob);
-        return base64_encode(json_encode($blob, JSON_THROW_ON_ERROR));
+        return base64_encode(json_encode($blob));
     }
 
     public function import(string $data): Snapshot
     {
-        $blob = json_decode(base64_decode($data), true, 512, JSON_THROW_ON_ERROR);
+        $blob = json_decode(base64_decode($data), true, 512);
         $hmac = $blob['hmac'] ?? '';
         unset($blob['hmac']);
 
@@ -251,7 +249,7 @@ class SnapshotService
     {
         return hash_hmac(
             'sha256',
-            json_encode($blob, JSON_THROW_ON_ERROR),
+            json_encode($blob),
             $this->secret
         );
     }

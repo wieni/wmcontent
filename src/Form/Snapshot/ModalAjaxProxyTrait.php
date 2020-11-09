@@ -77,7 +77,7 @@ trait ModalAjaxProxyTrait
             $this->modalData = $formState->get('modal_data');
             $form['modal_data'] = [
                 '#type' => 'hidden',
-                '#value' => json_encode($this->modalData, JSON_THROW_ON_ERROR)
+                '#value' => json_encode($this->modalData)
             ];
         }
     }
@@ -89,7 +89,7 @@ trait ModalAjaxProxyTrait
         }
 
         if (isset($formState->getUserInput()['modal_data'])) {
-            return json_decode($formState->getUserInput()['modal_data'], true, 512, JSON_THROW_ON_ERROR);
+            return json_decode($formState->getUserInput()['modal_data'], true, 512);
         }
 
         $request = $this->getRequestObject();
