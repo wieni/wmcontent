@@ -5,12 +5,15 @@ namespace Drupal\wmcontent;
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class WmContentContainerListBuilder extends DraggableListBuilder
 {
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
     /** @var MessengerInterface */
     protected $messenger;
 
@@ -19,38 +22,43 @@ class WmContentContainerListBuilder extends DraggableListBuilder
         EntityTypeInterface $entityType
     ) {
         $instance = parent::createInstance($container, $entityType);
+        $instance->entityTypeManager = $container->get('entity_type.manager');
         $instance->messenger = $container->get('messenger');
 
         return $instance;
     }
 
-    public function getFormId()
+    public function getFormId(): string
     {
         return 'wmcontent_entity_wmcontent_container_form';
     }
 
-    public function buildHeader()
+    public function buildHeader(): array
     {
         $header = [
             'label' => $this->t('Name'),
             'id' => $this->t('Slug'),
-            'host_entity_type' => $this->t('Host Entity Type'),
-            'host_bundles' => $this->t('Host Entity Bundles'),
-            'child_entity_type' => $this->t('Child Entity Type'),
-            'child_bundles' => $this->t('Child Entity Bundles'),
+            'host_entity_type' => $this->t('Host entity type'),
+            'host_bundles' => $this->t('Host entity bundles'),
+            'child_entity_type' => $this->t('Child entity type'),
+            'child_bundles' => $this->t('Child entity bundles'),
         ];
 
         return $header + parent::buildHeader();
     }
 
-    public function buildRow(EntityInterface $entity)
+    public function buildRow(EntityInterface $entity): array
     {
         $row = [
             'label' => $entity->getLabel(),
             'id' => $entity->getLabel(),
-            'host_entity_type' => $entity->getHostEntityType(),
+            'host_entity_type' => $this->entityTypeManager
+                ->getDefinition($entity->getHostEntityType())
+                ->getLabel(),
             'host_bundles' => $entity->getHostBundles(),
-            'child_entity_type' => $entity->getChildEntityType(),
+            'child_entity_type' => $this->entityTypeManager
+                ->getDefinition($entity->getChildEntityType())
+                ->getLabel(),
             'child_bundles' => $entity->getChildBundles(),
         ];
 

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2021-02-23
+### Changed
+- Change `WmContentContainerInterface::getChildBundlesDefault` return type to be nullable
+- Change `WmContentContainerInterface::getHostBundles` to return bundles as keys and labels as values
+- Change `WmContentContainerInterface::getChildBundles` to return bundles as keys and labels as values
+- Show entity type & bundle labels instead of machine names on backend forms
+- Make default child bundle option optional
+- Change _Add new_ buttons on master form to flow vertically instead of horizontally
+
 ## [1.3.2] - 2020-11-09
 ### Added
 - Add PHPStan

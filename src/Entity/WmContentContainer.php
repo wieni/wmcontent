@@ -93,7 +93,10 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
 
     public function getHostBundles(): array
     {
-        return $this->host_bundles;
+        return array_intersect_key(
+            $this->getHostBundlesAll(),
+            $this->host_bundles
+        );
     }
 
     public function getHostBundlesAll(): array
@@ -108,7 +111,10 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
 
     public function getChildBundles(): array
     {
-        return $this->child_bundles;
+        return array_intersect_key(
+            $this->getChildBundlesAll(),
+            $this->child_bundles
+        );
     }
 
     public function getChildBundlesAll(): array
@@ -116,7 +122,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         return $this->getAllBundles($this->getChildEntityType());
     }
 
-    public function getChildBundlesDefault(): string
+    public function getChildBundlesDefault(): ?string
     {
         return $this->child_bundles_default;
     }
@@ -176,10 +182,11 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
 
     public function isHost(EntityInterface $host): bool
     {
+        $hostBundles = $this->getHostBundles();
         return $host->getEntityTypeId() === $this->getHostEntityType()
             && (
-                empty($this->getHostBundles())
-                || in_array($host->bundle(), $this->getHostBundles())
+                empty($hostBundles)
+                || array_key_exists($host->bundle(), $hostBundles)
             );
     }
 
@@ -217,12 +224,15 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
 
     protected function getAllBundles(string $entityTypeId): array
     {
-        $bundles = $this->entityTypeBundleInfo()
-            ->getBundleInfo($entityTypeId);
-        $bundles = array_keys($bundles);
+        $bundles = array_map(
+            static function (array $bundleInfo) { return $bundleInfo['label']; },
+            $this->entityTypeBundleInfo()->getBundleInfo($entityTypeId)
+        );
 
-        sort($bundles);
+        uasort($bundles, static function (string $a, string $b) {
+            return strnatcasecmp($a, $b);
+        });
 
-        return array_combine($bundles, $bundles);
+        return $bundles;
     }
 }

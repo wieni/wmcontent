@@ -82,7 +82,7 @@ class WmContentContainerForm extends EntityForm
 
         if ($hostBundles = $this->entity->getHostBundlesAll()) {
             $form['wrapper']['host_bundles_fieldset'] = [
-                '#title' => t('Host Bundles'),
+                '#title' => t('Host bundles'),
                 '#prefix' => '<div id="host-checkboxes-div">',
                 '#suffix' => '</div>',
                 '#type' => 'fieldset',
@@ -91,8 +91,8 @@ class WmContentContainerForm extends EntityForm
 
             $form['wrapper']['host_bundles_fieldset']['host_bundles'] = [
                 '#type' => 'checkboxes',
-                '#options' => $this->entity->getHostBundlesAll(),
-                '#default_value' => $this->entity->getHostBundles(),
+                '#options' => $hostBundles,
+                '#default_value' => array_keys($this->entity->getHostBundles()),
             ];
         }
 
@@ -126,15 +126,16 @@ class WmContentContainerForm extends EntityForm
 
             $form['wrapper']['child_bundles_fieldset']['child_bundles'] = [
                 '#type' => 'checkboxes',
-                '#options' => $this->entity->getChildBundlesAll(),
-                '#default_value' => $this->entity->getChildBundles(),
+                '#options' => $childBundles,
+                '#default_value' => array_keys($this->entity->getChildBundles()),
             ];
 
             $form['wrapper']['child_bundles_default'] = [
                 '#title' => t('Default'),
                 '#type' => 'select',
-                '#options' => $this->entity->getChildBundlesAll(),
+                '#options' => $childBundles,
                 '#default_value' => $this->entity->getChildBundlesDefault(),
+                '#empty_value' => '',
             ];
         }
 
@@ -178,10 +179,16 @@ class WmContentContainerForm extends EntityForm
 
         $host_bundles = $this->entity->get('host_bundles');
         $host_bundles = array_filter($host_bundles);
+        uasort($host_bundles, static function ($a, $b) {
+            return $a <=> $b;
+        });
         $this->entity->set('host_bundles', $host_bundles);
 
         $child_bundles = $this->entity->get('child_bundles');
         $child_bundles = array_filter($child_bundles);
+        uasort($child_bundles, static function ($a, $b) {
+            return $a <=> $b;
+        });
         $this->entity->set('child_bundles', $child_bundles);
 
         $status = $this->entity->save();

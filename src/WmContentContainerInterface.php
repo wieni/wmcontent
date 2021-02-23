@@ -21,7 +21,7 @@ interface WmContentContainerInterface extends ConfigEntityInterface
 
     public function getChildBundles(): array;
 
-    public function getChildBundlesDefault(): string;
+    public function getChildBundlesDefault(): ?string;
 
     public function getChildBundlesAll(): array;
 

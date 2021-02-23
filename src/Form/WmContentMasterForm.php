@@ -113,12 +113,12 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
 
         // Put the default one on first if it is set/existing.
         if (isset($config['child_bundles'][$config['child_bundles_default']])) {
-            $key = $config['child_bundles_default'];
-            $element = $config['child_bundles'][$config['child_bundles_default']];
-            $config['child_bundles'] = [$key => $element] + $config['child_bundles'];
+            $bundle = $config['child_bundles_default'];
+            $label = $config['child_bundles'][$config['child_bundles_default']];
+            $config['child_bundles'] = [$bundle => $label] + $config['child_bundles'];
         }
 
-        foreach ($config['child_bundles'] as $bundle) {
+        foreach ($config['child_bundles'] as $bundle => $label) {
             $access = $this->entityTypeManager
                 ->getAccessControlHandler($config['child_entity_type'])
                 ->createAccess($bundle);
@@ -139,7 +139,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                         'query' => $this->getQueryParams($container, $host),
                     ]
                 ),
-                '#title' => $this->getLabel($config['child_entity_type'], $bundle),
+                '#title' => $label,
                 '#type' => 'link',
                 '#attributes' => [
                     'class' => [
@@ -149,8 +149,6 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                 ],
             ];
         }
-
-        uasort($form['add_new'], [SortArray::class, 'sortByTitleElement']);
 
         $form['wrapper']['actions'] = [
             '#type' => 'actions',
@@ -345,16 +343,5 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         }
 
         return $query;
-    }
-
-    protected function getLabel(string $entityTypeId, string $bundle): string
-    {
-        $entityType = $this->entityTypeManager
-            ->getDefinition($entityTypeId);
-        $bundleDefinition = $this->entityTypeManager
-            ->getStorage($entityType->getBundleEntityType())
-            ->load($bundle);
-
-        return $bundleDefinition->label();
     }
 }

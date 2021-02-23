@@ -26,16 +26,15 @@
 
 .wm-content-master-form #edit-add-new .fieldset-wrapper,
 .wm-content-master-form #edit-add-new .fieldset__wrapper {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    column-count: 2;
+    column-gap: 0.5rem;
     margin: -0.5rem;
     padding: 1rem 1.5rem;
 }
 
 .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
 .wm-content-master-form #edit-add-new .fieldset__wrapper .button {
-    flex: 0 1 calc(50% - 0.5rem);
+    width: 100%;
     margin: 0.25rem;
     display: inline-flex;
     align-items: center;
@@ -49,9 +48,9 @@
 }
 
 @media screen and (min-width: 28em) {
-    .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
-    .wm-content-master-form #edit-add-new .fieldset__wrapper .button {
-        flex: 0 1 calc(33.333% - 0.5rem);
+    .wm-content-master-form #edit-add-new .fieldset-wrapper,
+    .wm-content-master-form #edit-add-new .fieldset__wrapper {
+        column-count: 3;
     }
 }
 
@@ -65,9 +64,10 @@
         flex-basis: 320px;
     }
 
-    .wm-content-master-form #edit-add-new .fieldset-wrapper .button,
-    .wm-content-master-form #edit-add-new .fieldset__wrapper .button {
+    .wm-content-master-form #edit-add-new .fieldset-wrapper,
+    .wm-content-master-form #edit-add-new .fieldset__wrapper {
         flex: 0 1 calc(50% - 0.5rem);
+        column-count: 2;
     }
 
     .wm-content-master-form .form-wrapper:last-child {
