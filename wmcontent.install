@@ -113,7 +113,4 @@ function wmcontent_update_8005()
 
         \Drupal::entityDefinitionUpdateManager()->installEntityType($entityType);
     }
-
 }
-
-

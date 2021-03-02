@@ -62,6 +62,32 @@ abstract class SnapshotFormBase extends FormBase
         return $response;
     }
 
+    public static function addModalDrupalBlocks(array &$form): void
+    {
+        $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
+        $form['#attached']['library'][] = 'core/jquery.form';
+
+        // Add a message container that we can fill with an ajax MessageCommand
+        $form['msg'] = [
+            '#type' => 'container',
+            '#attributes' => [
+                'class' => [static::MODAL_MSG_CLASS],
+            ],
+        ];
+
+        // Add the local actions block
+        $form['local_actions'] = [
+            '#theme' => 'block__local_actions_block',
+            '#configuration' => [
+                'provider' => 'wmcustom',
+            ],
+            '#plugin_id' => 'foo:bar',
+            '#base_plugin_id' => 'foo:bar', /** @see \template_preprocess_block() */
+            '#derivative_plugin_id' => 'foo:bar', /** @see \template_preprocess_block() */
+            'content' => static::getLocalActions(),
+        ];
+    }
+
     protected function createSubmitButton(string $value): array
     {
         $button = [
@@ -110,19 +136,13 @@ abstract class SnapshotFormBase extends FormBase
         );
     }
 
-    /**
-     * @param \Drupal\Core\Form\FormStateInterface $formState
-     * @return \Drupal\Core\Ajax\AjaxResponse|array
-     */
+    /** @return \Drupal\Core\Ajax\AjaxResponse|array */
     protected function onAjax(array $form, FormStateInterface $formState)
     {
         return $form;
     }
 
-    /**
-     * @param \Drupal\Core\Form\FormStateInterface $formState
-     * @return \Drupal\Core\Ajax\AjaxResponse|array
-     */
+    /** @return \Drupal\Core\Ajax\AjaxResponse|array */
     protected function onAjaxError(array $form, FormStateInterface $formState)
     {
         return $form;
@@ -137,32 +157,6 @@ abstract class SnapshotFormBase extends FormBase
                 'type' => $type,
             ]
         );
-    }
-
-    public static function addModalDrupalBlocks(array &$form): void
-    {
-        $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
-        $form['#attached']['library'][] = 'core/jquery.form';
-
-        // Add a message container that we can fill with an ajax MessageCommand
-        $form['msg'] = [
-            '#type' => 'container',
-            '#attributes' => [
-                'class' => [static::MODAL_MSG_CLASS]
-            ],
-        ];
-
-        // Add the local actions block
-        $form['local_actions'] = [
-            '#theme' => 'block__local_actions_block',
-            '#configuration' => [
-                'provider' => 'wmcustom',
-            ],
-            '#plugin_id' => 'foo:bar',
-            '#base_plugin_id' => 'foo:bar', /** @see \template_preprocess_block() */
-            '#derivative_plugin_id' => 'foo:bar', /** @see \template_preprocess_block() */
-            'content' => static::getLocalActions(),
-        ];
     }
 
     private static function getLocalActions()

@@ -2,7 +2,6 @@
 
 namespace Drupal\wmcontent\Form;
 
-use Drupal\Component\Utility\SortArray;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -318,7 +317,6 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
 
         return $operations;
     }
-
 
     /**
      * The query (including the destination) Will be the same for all actions.

@@ -4,25 +4,25 @@ namespace Drupal\wmcontent\Entity\Traits;
 
 use Drupal\Core\Field\BaseFieldDefinition;
 
-trait BaseFieldTrait {
-
+trait BaseFieldTrait
+{
     public static function getBooleanBaseFieldDefinition(bool $required): BaseFieldDefinition
     {
         return BaseFieldDefinition::create('boolean')
             ->setCardinality(1)
-            ->setDisplayConfigurable('form', TRUE)
+            ->setDisplayConfigurable('form', true)
             ->setDisplayOptions('form', [
                 'type' => 'boolean_checkbox',
             ])
             ->setRequired($required)
-            ->setSetting('unsigned', TRUE);
+            ->setSetting('unsigned', true);
     }
 
     public static function getDecimalBaseFieldDefinition(bool $required): BaseFieldDefinition
     {
         return BaseFieldDefinition::create('decimal')
             ->setCardinality(1)
-            ->setDisplayConfigurable('form', TRUE)
+            ->setDisplayConfigurable('form', true)
             ->setDisplayOptions('form', [
                 'type' => 'number',
             ])
@@ -34,11 +34,11 @@ trait BaseFieldTrait {
             ->setStorageRequired(false);
     }
 
-    public static function getEntityReferenceBaseFieldDefinition(bool $required, string $targetType, string $targetBundle = null): BaseFieldDefinition
+    public static function getEntityReferenceBaseFieldDefinition(bool $required, string $targetType, ?string $targetBundle = null): BaseFieldDefinition
     {
         return BaseFieldDefinition::create('entity_reference')
             ->setCardinality(1)
-            ->setDisplayConfigurable('form', TRUE)
+            ->setDisplayConfigurable('form', true)
             ->setDisplayOptions('form', [
                 'type' => 'entity_reference_autocomplete',
             ])
@@ -55,9 +55,9 @@ trait BaseFieldTrait {
     {
         return BaseFieldDefinition::create('integer')
             ->setCardinality(1)
-            ->setSetting('unsigned', TRUE)
+            ->setSetting('unsigned', true)
             ->setRequired($required)
-            ->setDisplayConfigurable('form', TRUE)
+            ->setDisplayConfigurable('form', true)
             ->setDisplayOptions('form', [
                 'type' => 'number',
             ]);
@@ -72,7 +72,7 @@ trait BaseFieldTrait {
                 'text_processing' => 0,
             ])
             ->setRequired($required)
-            ->setDisplayConfigurable('form', TRUE)
+            ->setDisplayConfigurable('form', true)
             ->setDisplayOptions('form', [
                 'type' => 'string_textfield',
             ]);

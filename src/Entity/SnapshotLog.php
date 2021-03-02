@@ -13,18 +13,18 @@ use Drupal\wmcontent\Entity\Traits\BaseFieldTrait;
 
 /**
  * @ContentEntityType(
- *   id = "wmcontent_snapshot_log",
- *   label = @Translation("WmContent Snapshot log"),
- *   handlers = {
- *     "list_builder" = "\Drupal\Core\Entity\EntityListBuilder",
- *     "access" = "Drupal\Core\Entity\EntityAccessControlHandler",
- *   },
- *   base_table = "wmcontent_snapshot_log",
- *   translatable = FALSE,
- *   admin_permission = "administer wmcontent",
- *   entity_keys = {
- *     "id" = "id",
- *   }
+ *     id = "wmcontent_snapshot_log",
+ *     label = @Translation("WmContent Snapshot log"),
+ *     handlers = {
+ *         "list_builder" : "\Drupal\Core\Entity\EntityListBuilder",
+ *         "access" : "Drupal\Core\Entity\EntityAccessControlHandler",
+ *     },
+ *     base_table = "wmcontent_snapshot_log",
+ *     translatable = FALSE,
+ *     admin_permission = "administer wmcontent",
+ *     entity_keys = {
+ *         "id" : "id",
+ *     }
  * )
  */
 class SnapshotLog extends ContentEntityBase

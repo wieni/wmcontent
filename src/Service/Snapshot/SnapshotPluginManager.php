@@ -24,5 +24,4 @@ class SnapshotPluginManager extends DefaultPluginManager
         $this->alterInfo('wmcontent_snapshot_builders');
         $this->setCacheBackend($cacheBackend, 'wmcontent_snapshotbuilder_info_plugins');
     }
-
 }

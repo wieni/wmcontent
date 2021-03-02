@@ -90,7 +90,7 @@ class SnapshotCreateForm extends SnapshotFormBase
                         '#return_value' => $block->id(),
                         '#checked' => isset($input['blocks'])
                             ? !empty($input['blocks'][$block->id()])
-                            : true
+                            : true,
                     ],
                 ],
                 'type' => [

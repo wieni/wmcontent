@@ -13,37 +13,37 @@ use Drupal\wmcontent\WmContentContainerInterface;
 
 /**
  * @ContentEntityType(
- *   id = "wmcontent_snapshot",
- *   label = @Translation("WmContent Snapshot"),
- *   handlers = {
- *     "list_builder" = "Drupal\wmcontent\Service\Snapshot\SnapshotListBuilder",
- *     "form" = {
- *       "default" = "Drupal\Core\Entity\ContentEntityForm",
- *       "add" = "Drupal\Core\Entity\ContentEntityForm",
- *       "edit" = "\Drupal\wmcontent\Form\Snapshot\SnapshotEntityForm",
- *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+ *     id = "wmcontent_snapshot",
+ *     label = @Translation("WmContent Snapshot"),
+ *     handlers = {
+ *         "list_builder" : "Drupal\wmcontent\Service\Snapshot\SnapshotListBuilder",
+ *         "form" : {
+ *             "default" : "Drupal\Core\Entity\ContentEntityForm",
+ *             "add" : "Drupal\Core\Entity\ContentEntityForm",
+ *             "edit" : "\Drupal\wmcontent\Form\Snapshot\SnapshotEntityForm",
+ *             "delete" : "Drupal\Core\Entity\ContentEntityDeleteForm",
+ *         },
+ *         "route_provider" : {
+ *             "html" : "Drupal\wmcontent\Service\Snapshot\HtmlRouteProvider",
+ *         },
+ *         "access" : "Drupal\Core\Entity\EntityAccessControlHandler",
  *     },
- *     "route_provider" = {
- *       "html" = "Drupal\wmcontent\Service\Snapshot\HtmlRouteProvider",
+ *     base_table = "wmcontent_snapshot",
+ *     translatable = FALSE,
+ *     admin_permission = "administer wmcontent",
+ *     entity_keys = {
+ *         "id" : "id",
+ *         "label" : "title",
+ *         "uuid" : "uuid",
+ *         "langcode" : "langcode",
  *     },
- *     "access" = "Drupal\Core\Entity\EntityAccessControlHandler",
- *   },
- *   base_table = "wmcontent_snapshot",
- *   translatable = FALSE,
- *   admin_permission = "administer wmcontent",
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "title",
- *     "uuid" = "uuid",
- *     "langcode" = "langcode",
- *   },
- *   links = {
- *     "add-form" = "/admin/wmcontent/snapshot/add",
- *     "edit-form" = "/admin/wmcontent/snapshot/{wmcontent_snapshot}/edit",
- *     "delete-form" = "/admin/wmcontent/snapshot/{wmcontent_snapshot}/delete",
- *     "collection" = "/admin/wmcontent/snapshot",
- *   },
- *   field_ui_base_route = "entity.wmcontent_snapshot.collection"
+ *     links = {
+ *         "add-form" : "/admin/wmcontent/snapshot/add",
+ *         "edit-form" : "/admin/wmcontent/snapshot/{wmcontent_snapshot}/edit",
+ *         "delete-form" : "/admin/wmcontent/snapshot/{wmcontent_snapshot}/delete",
+ *         "collection" : "/admin/wmcontent/snapshot",
+ *     },
+ *     field_ui_base_route = "entity.wmcontent_snapshot.collection"
  * )
  */
 class Snapshot extends ContentEntityBase

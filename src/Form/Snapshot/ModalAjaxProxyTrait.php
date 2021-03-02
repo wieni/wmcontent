@@ -47,7 +47,7 @@ trait ModalAjaxProxyTrait
             watchdog_exception('wmcontent.modal', $e);
         }
 
-        if (!$response instanceOf AjaxResponse || !$response->getStatusCode() === 200) {
+        if (!$response instanceof AjaxResponse || !$response->getStatusCode() === 200) {
             return null;
         }
 
@@ -77,7 +77,7 @@ trait ModalAjaxProxyTrait
             $this->modalData = $formState->get('modal_data');
             $form['modal_data'] = [
                 '#type' => 'hidden',
-                '#value' => json_encode($this->modalData)
+                '#value' => json_encode($this->modalData),
             ];
         }
     }
@@ -119,12 +119,6 @@ trait ModalAjaxProxyTrait
             );
     }
 
-    private function isModal(Request $request): bool
-    {
-        return $request
-            && $request->query->get(MainContentViewSubscriber::WRAPPER_FORMAT) === 'drupal_modal';
-    }
-
     protected function cloneResponse(AjaxResponse $response): AjaxResponse
     {
         $cloned = new AjaxResponse();
@@ -138,6 +132,12 @@ trait ModalAjaxProxyTrait
         $cloned->setAttachments($response->getAttachments());
 
         return $cloned;
+    }
+
+    private function isModal(Request $request): bool
+    {
+        return $request
+            && $request->query->get(MainContentViewSubscriber::WRAPPER_FORMAT) === 'drupal_modal';
     }
 
     private function getRequestObject(): ?Request

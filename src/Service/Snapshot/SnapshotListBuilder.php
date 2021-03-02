@@ -46,6 +46,66 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
         $this->host = $host;
     }
 
+    public function render()
+    {
+        $overview = [];
+        if ($this->isAjax()) {
+            // In a modal Drupal doesn't load the usual blocks. So we add our own
+            SnapshotFormBase::addModalDrupalBlocks($overview);
+        }
+
+        $overview += parent::render();
+        $overview['table']['#empty'] = $this->t('There are no snapshots yet');
+        return $overview;
+    }
+
+    public function buildHeader(): array
+    {
+        $header['name'] = $this->t('Title');
+        $header['created'] = $this->t('Date created');
+        $header['user'] = $this->t('Created by');
+        $header['comment'] = $this->t('Description');
+        if (!$this->host) {
+            $header['parent'] = $this->t('Parent');
+        }
+        return $header + parent::buildHeader();
+    }
+
+    public function buildRow(EntityInterface $entity): array
+    {
+        /** @var \Drupal\wmcontent\Entity\Snapshot $entity*/
+        $row['name'] = [
+            'data' => [
+                '#markup' => $entity->label(),
+            ],
+        ];
+        $row['created'] = [
+            'data' => [
+                '#markup' => date('d/m/Y H:i', $entity->getCreatedTime()),
+            ],
+        ];
+        $row['user'] = [
+            'data' => [
+                '#markup' => $entity->getOwner()
+                    ? $entity->getOwner()->label()
+                    : '',
+            ],
+        ];
+        $row['comment'] = [
+            'data' => [
+                '#markup' => $entity->getComment(),
+            ],
+        ];
+        if (!$this->host) {
+            $row['parent'] = Link::createFromRoute(
+                $entity->getHost()->label(),
+                'entity.wmcontent_snapshot.edit_form',
+                ['wmcontent_snapshot' => $entity->id()]
+            );
+        }
+        return $row + parent::buildRow($entity);
+    }
+
     protected function getEntityIds()
     {
         $q = $this->getStorage()->getQuery();
@@ -80,66 +140,6 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
         }
 
         return $q->execute();
-    }
-
-    public function render()
-    {
-        $overview = [];
-        if ($this->isAjax()) {
-            // In a modal Drupal doesn't load the usual blocks. So we add our own
-            SnapshotFormBase::addModalDrupalBlocks($overview);
-        }
-
-        $overview += parent::render();
-        $overview['table']['#empty'] = $this->t('There are no snapshots yet');
-        return $overview;
-    }
-
-    public function buildHeader(): array
-    {
-        $header['name'] = $this->t('Title');
-        $header['created'] = $this->t('Date created');
-        $header['user'] = $this->t('Created by');
-        $header['comment'] = $this->t('Description');
-        if (!$this->host) {
-            $header['parent'] = $this->t('Parent');
-        }
-        return $header + parent::buildHeader();
-    }
-
-    public function buildRow(EntityInterface $entity): array
-    {
-        /** @var \Drupal\wmcontent\Entity\Snapshot $entity*/
-        $row['name'] = [
-            'data' => [
-                '#markup' => $entity->label(),
-            ]
-        ];
-        $row['created'] = [
-            'data' => [
-                '#markup' => date('d/m/Y H:i', $entity->getCreatedTime()),
-            ]
-        ];
-        $row['user'] = [
-            'data' => [
-                '#markup' => $entity->getOwner()
-                    ? $entity->getOwner()->label()
-                    : '',
-            ]
-        ];
-        $row['comment'] = [
-            'data' => [
-                '#markup' => $entity->getComment(),
-            ]
-        ];
-        if (!$this->host) {
-            $row['parent'] = Link::createFromRoute(
-                $entity->getHost()->label(),
-                'entity.wmcontent_snapshot.edit_form',
-                ['wmcontent_snapshot' => $entity->id()]
-            );
-        }
-        return $row + parent::buildRow($entity);
     }
 
     protected function getLangcode(): string

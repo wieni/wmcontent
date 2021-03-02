@@ -17,6 +17,10 @@ abstract class WmContentTestBase extends KernelTestBase
 {
     use UserCreationTrait;
 
+    protected const ENTITY_TYPE_ID = 'node';
+    protected const CHILD_BUNDLE = 'child_bundle';
+    protected const HOST_BUNDLE = 'host_bundle';
+
     public static $modules = [
         'node',
         'options',
@@ -24,10 +28,6 @@ abstract class WmContentTestBase extends KernelTestBase
         'user',
         'wmcontent',
     ];
-
-    protected const ENTITY_TYPE_ID = 'node';
-    protected const CHILD_BUNDLE = 'child_bundle';
-    protected const HOST_BUNDLE = 'host_bundle';
 
     /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;

@@ -25,7 +25,7 @@ abstract class SnapshotBuilderBase
                 static::class
             ));
         }
-        return (new \DateTime(static::VERSION));
+        return new \DateTime(static::VERSION);
     }
 
     public function getViolations(): ConstraintViolationListInterface

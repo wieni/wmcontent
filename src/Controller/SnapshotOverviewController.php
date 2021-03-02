@@ -6,8 +6,6 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
-use Drupal\Core\Form\FormBuilder;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -147,7 +145,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
             '#type' => 'container',
             '#attached' => [
                 'library' => [
-                    'wmcontent/snapshot_copy_to_clipboard'
+                    'wmcontent/snapshot_copy_to_clipboard',
                 ],
             ],
         ];
@@ -159,7 +157,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
             '#attributes' => [
                 'readonly' => 'readonly',
                 'class' => [
-                    'wmcontent-snapshot-export-to-clipboard--blob'
+                    'wmcontent-snapshot-export-to-clipboard--blob',
                 ],
             ],
         ];
@@ -189,7 +187,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
             '#attributes' => [
                 'class' => [
                     'button',
-                    'wmcontent-snapshot-export-to-clipboard--button'
+                    'wmcontent-snapshot-export-to-clipboard--button',
                 ],
             ],
         ];

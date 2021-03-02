@@ -48,10 +48,7 @@ class SnapshotService
         return $builder !== null;
     }
 
-    /**
-     * @param \Drupal\Core\Entity\EntityInterface[] $blocks
-     * @return Snapshot
-     */
+    /** @param \Drupal\Core\Entity\EntityInterface[] $blocks */
     public function createSnapshot(
         array $blocks,
         string $title,
@@ -60,8 +57,7 @@ class SnapshotService
         WmContentContainerInterface $container,
         ?EntityInterface $host,
         ?string $environment
-    ): Snapshot
-    {
+    ): Snapshot {
         $normalized = [];
 
         foreach ($blocks as $block) {
@@ -105,7 +101,6 @@ class SnapshotService
     /**
      * Convert array of normalized content blocks back to entities
      *
-     * @param array $data
      * @return DenormalizationResult[]
      */
     public function denormalize(
@@ -126,17 +121,17 @@ class SnapshotService
             $block['data']['wmcontent_container'] = [
                 [
                     'value' => $container->id(),
-                ]
+                ],
             ];
             $block['data']['wmcontent_parent'] = [
                 [
                     'value' => $host->id(),
-                ]
+                ],
             ];
             $block['data']['wmcontent_parent_type'] = [
                 [
                     'value' => $host->getEntityTypeId(),
-                ]
+                ],
             ];
 
             $denormalized[] = new DenormalizationResult(
@@ -197,9 +192,28 @@ class SnapshotService
         return $operations;
     }
 
+    public function export(Snapshot $snapshot): string
+    {
+        $blob = $snapshot->toArray();
+        $blob['hmac'] = $this->hmac($blob);
+        return base64_encode(json_encode($blob));
+    }
+
+    public function import(string $data): Snapshot
+    {
+        $blob = json_decode(base64_decode($data), true, 512);
+        $hmac = $blob['hmac'] ?? '';
+        unset($blob['hmac']);
+
+        if (!hash_equals($hmac, $this->hmac($blob))) {
+            throw new \Exception('Snapshot is invalid.');
+        }
+
+        return Snapshot::fromArray($blob, $this->languageManager->getCurrentLanguage()->getId());
+    }
+
     /**
      * @param string|EntityInterface $entityTypeId
-     * @param string|null $bundle
      * @return \Drupal\wmcontent\Service\Snapshot\SnapshotBuilderBase
      */
     protected function getSnapshotBuilder($entityTypeId, ?string $bundle = null): SnapshotBuilderBase
@@ -223,26 +237,6 @@ class SnapshotService
         }
 
         return $builder;
-    }
-
-    public function export(Snapshot $snapshot): string
-    {
-        $blob = $snapshot->toArray();
-        $blob['hmac'] = $this->hmac($blob);
-        return base64_encode(json_encode($blob));
-    }
-
-    public function import(string $data): Snapshot
-    {
-        $blob = json_decode(base64_decode($data), true, 512);
-        $hmac = $blob['hmac'] ?? '';
-        unset($blob['hmac']);
-
-        if (!hash_equals($hmac, $this->hmac($blob))) {
-            throw new \Exception('Snapshot is invalid.');
-        }
-
-        return Snapshot::fromArray($blob, $this->languageManager->getCurrentLanguage()->getId());
     }
 
     protected function hmac(array $blob): string
