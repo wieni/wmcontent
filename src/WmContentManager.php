@@ -52,6 +52,9 @@ class WmContentManager implements WmContentManagerInterface
             ->condition('langcode', $host->language()->getId())
             ->condition('wmcontent_container', $container->id())
             ->sort('wmcontent_weight', 'ASC')
+            // If for some reason a parent entity has children with equal wmcontent_weight
+            // fields, this sort acts as a fallback to order by created date
+            ->sort('id', 'ASC')
             ->execute();
 
         // Put in cache. Mind the invalidating array that should invalidate
