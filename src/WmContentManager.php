@@ -29,16 +29,9 @@ class WmContentManager implements WmContentManagerInterface
 
     public function getContent(EntityInterface $host, string $containerId): array
     {
-        $data = &drupal_static(__FUNCTION__);
         $container = $this->getContainer($containerId);
-
         $storage = $this->entityTypeManager->getStorage($container->getChildEntityType());
         $key = 'wmcontent:' . $container->id() . ':' . $host->getEntityTypeId() . ':' . $host->id() . ':' . $host->get('langcode')->value;
-
-        // Return statically cached data
-        if (isset($data[$key])) {
-            return $storage->loadMultiple($data[$key]);
-        }
 
         // Return database-cached data
         if ($cache = $this->cacheBackend->get($key)) {
