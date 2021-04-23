@@ -16,13 +16,13 @@ use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Event\ContentBlockChangedEvent;
 use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
 use Drupal\wmcontent\WmContentContainerInterface;
-use Drupal\wmcontent\WmContentManager;
+use Drupal\wmcontent\WmContentManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 function wmcontent_entity_extra_field_info(): array
 {
     $extra = [];
-    /** @var WmContentManager $manager */
+    /** @var WmContentManagerInterface $manager */
     $manager = \Drupal::service('wmcontent.manager');
 
     foreach ($manager->getContainers() as $container) {
@@ -148,7 +148,7 @@ function wmcontent_entity_update(EntityInterface $entity): void
 
     /** @var EventDispatcherInterface $dispatcher */
     $dispatcher = \Drupal::service('event_dispatcher');
-    /** @var WmContentManager $manager */
+    /** @var WmContentManagerInterface $manager */
     $manager = \Drupal::service('wmcontent.manager');
 
     if ($manager->isChild($entity)) {
@@ -167,7 +167,26 @@ function wmcontent_entity_insert(EntityInterface $entity): void
 
     /** @var EventDispatcherInterface $dispatcher */
     $dispatcher = \Drupal::service('event_dispatcher');
-    /** @var WmContentManager $manager */
+    /** @var WmContentManagerInterface $manager */
+    $manager = \Drupal::service('wmcontent.manager');
+
+    if ($manager->isChild($entity)) {
+        $dispatcher->dispatch(
+            ContentBlockChangedEvent::NAME,
+            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity))
+        );
+    }
+}
+
+function wmcontent_entity_delete(EntityInterface $entity): void
+{
+    if (!$entity instanceof ContentEntityInterface) {
+        return;
+    }
+
+    /** @var EventDispatcherInterface $dispatcher */
+    $dispatcher = \Drupal::service('event_dispatcher');
+    /** @var WmContentManagerInterface $manager */
     $manager = \Drupal::service('wmcontent.manager');
 
     if ($manager->isChild($entity)) {

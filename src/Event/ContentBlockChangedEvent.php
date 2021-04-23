@@ -7,7 +7,7 @@ use Drupal\wmcontent\WmContentContainerInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Event that fires when a content block has been created/updated
+ * Event that fires when a content block has been created/updated/deleted
  */
 class ContentBlockChangedEvent extends Event
 {
