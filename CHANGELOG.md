@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.6] - 2021-05-18
+### Fixed
+- Use content language instead of interface language when creating/restoring snapshots.
+
 ## [1.3.5] - 2021-04-23
 ### Changed
 - Dispatch `ContentBlockChangedEvent` when a content block is deleted. This causes the host entity changed time to update.

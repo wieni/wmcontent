@@ -5,6 +5,7 @@ namespace Drupal\wmcontent\Service\Snapshot;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Link;
 use Drupal\wmcontent\Form\Snapshot\ModalAjaxProxyTrait;
 use Drupal\wmcontent\Form\Snapshot\SnapshotFormBase;
@@ -146,6 +147,6 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
     {
         return $this->host
             ? $this->host->language()->getId()
-            : $this->languageManager->getCurrentLanguage()->getId();
+            : $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
     }
 }

@@ -3,6 +3,7 @@
 namespace Drupal\wmcontent\Service\Snapshot;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -58,6 +59,7 @@ class SnapshotService
         ?EntityInterface $host,
         ?string $environment
     ): Snapshot {
+        $language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
         $normalized = [];
 
         foreach ($blocks as $block) {
@@ -93,7 +95,7 @@ class SnapshotService
             'wmcontent_container' => $container,
             'environment' => $environment ?: $this->environment,
             'blob' => $normalized,
-        ], $this->languageManager->getCurrentLanguage()->getId());
+        ], $language->getId());
 
         return $snapshot;
     }
@@ -108,6 +110,7 @@ class SnapshotService
         WmContentContainerInterface $container,
         EntityInterface $host
     ): array {
+        $language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
         $denormalized = [];
 
         foreach ($snapshot->getBlob() as $block) {
@@ -135,7 +138,7 @@ class SnapshotService
             ];
 
             $denormalized[] = new DenormalizationResult(
-                $builder->denormalize($block['data'], $this->languageManager->getCurrentLanguage()->getId()),
+                $builder->denormalize($block['data'], $language->getId()),
                 $builder
             );
         }
@@ -201,6 +204,7 @@ class SnapshotService
 
     public function import(string $data): Snapshot
     {
+        $language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
         $blob = json_decode(base64_decode($data), true, 512);
         $hmac = $blob['hmac'] ?? '';
         unset($blob['hmac']);
@@ -209,7 +213,7 @@ class SnapshotService
             throw new \Exception('Snapshot is invalid.');
         }
 
-        return Snapshot::fromArray($blob, $this->languageManager->getCurrentLanguage()->getId());
+        return Snapshot::fromArray($blob, $language->getId());
     }
 
     /**
