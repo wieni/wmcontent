@@ -2,9 +2,7 @@ name: wmcontent
 type: module
 description: Adds configurable entity containers to entity types (for e.g. paragraphs)
 version: 1.3.0
-core: 8.x
 core_version_requirement: ^8 || ^9
 package: Wieni
 dependencies:
-    - drupal:system (>= 8.5)
     - options
