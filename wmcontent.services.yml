@@ -3,12 +3,18 @@ parameters:
     wmcontent.snapshot.secret: 'changeme'
 
 services:
+    cache.wmcontent:
+        class: Drupal\Core\Cache\CacheBackendInterface
+        tags: [{ name: cache.bin }]
+        factory: cache_factory:get
+        arguments: ['wmcontent']
+
     wmcontent.manager:
         class: Drupal\wmcontent\WmContentManager
         arguments:
             - '@entity_type.manager'
             - '@event_dispatcher'
-            - '@cache.data'
+            - '@cache.wmcontent'
 
     wmcontent.subscriber:
         class: Drupal\wmcontent\Routing\WmContentRouteSubscriber

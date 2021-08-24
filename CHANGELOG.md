@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### Fixed 
+
+## [1.3.7] - 2021-08-24
 ### Fixed
-- Change the minimum Drupal version to 8.7.7 because the `drupal.message` library used in the snapshots functionality was introduced in 8.7.0. 
+- Change the minimum Drupal version to 8.7.7 because the `drupal.message` library used in the snapshots functionality was introduced in 8.7.0.
+### Changed
+- Add `wmcontent` cache bin
 
 ## [1.3.6] - 2021-05-18
 ### Fixed
