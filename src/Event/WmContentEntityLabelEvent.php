@@ -4,7 +4,7 @@ namespace Drupal\wmcontent\Event;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\FieldConfigInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Drupal\Component\EventDispatcher\Event;
 
 /**
  * The Event that fires when looking for entity labels on wmcontent tabs
