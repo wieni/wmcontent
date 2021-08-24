@@ -40,6 +40,7 @@ class WmContentManager implements WmContentManagerInterface
         }
 
         $data[$key] = $storage->getQuery()
+            ->accessCheck(true)
             ->condition('wmcontent_parent', $host->id())
             ->condition('wmcontent_parent_type', $host->getEntityTypeId())
             ->condition('langcode', $host->language()->getId())
