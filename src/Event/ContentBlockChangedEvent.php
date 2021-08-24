@@ -4,7 +4,7 @@ namespace Drupal\wmcontent\Event;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\wmcontent\WmContentContainerInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Drupal\Component\EventDispatcher\Event;
 
 /**
  * Event that fires when a content block has been created/updated/deleted

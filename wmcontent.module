@@ -153,8 +153,8 @@ function wmcontent_entity_update(EntityInterface $entity): void
 
     if ($manager->isChild($entity)) {
         $dispatcher->dispatch(
-            ContentBlockChangedEvent::NAME,
-            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity))
+            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity)),
+            ContentBlockChangedEvent::NAME
         );
     }
 }
@@ -172,8 +172,8 @@ function wmcontent_entity_insert(EntityInterface $entity): void
 
     if ($manager->isChild($entity)) {
         $dispatcher->dispatch(
-            ContentBlockChangedEvent::NAME,
-            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity))
+            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity)),
+            ContentBlockChangedEvent::NAME
         );
     }
 }
@@ -191,8 +191,8 @@ function wmcontent_entity_delete(EntityInterface $entity): void
 
     if ($manager->isChild($entity)) {
         $dispatcher->dispatch(
-            ContentBlockChangedEvent::NAME,
-            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity))
+            new ContentBlockChangedEvent($entity, $manager->getChildContainers($entity)),
+            ContentBlockChangedEvent::NAME
         );
     }
 }
