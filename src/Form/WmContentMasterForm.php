@@ -174,9 +174,17 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         $rows = $values['rows'] ?: [];
 
         foreach ($rows as $row) {
+            if (!isset($row['hiddens']['type'], $row['hiddens']['id'])) {
+                continue;
+            }
+
             $child = $this->entityTypeManager
                 ->getStorage($row['hiddens']['type'])
                 ->load($row['hiddens']['id']);
+
+            if (!$child) {
+                continue;
+            }
 
             $child->set('wmcontent_weight', $row['wmcontent_weight']);
             $child->save();
