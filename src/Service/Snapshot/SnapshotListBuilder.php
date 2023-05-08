@@ -140,6 +140,8 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
             $q->pager($this->limit);
         }
 
+        $q->accessCheck(false);
+
         return $q->execute();
     }
 
