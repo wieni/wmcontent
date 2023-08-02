@@ -19,6 +19,10 @@ class HostEntityResolver implements ValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
+        if ($this->supports($request, $argument) === false) {
+            return [];
+        }
+
         $container = $request->attributes->get('container');
         yield $request->attributes->get($container->getHostEntityType());
     }
