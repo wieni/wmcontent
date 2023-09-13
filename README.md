@@ -33,7 +33,7 @@ still not solved in Drupal 8 AFAWK).
 
 ## Installation
 
-This package requires PHP 8.0 and Drupal 9.1 or higher. It can be
+This package requires PHP 8.1 and Drupal 10.0 or higher. It can be
 installed using Composer:
 
 ```bash
