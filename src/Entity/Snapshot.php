@@ -6,6 +6,7 @@ use Drupal\Core\Entity\Annotation\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\user\UserInterface;
 use Drupal\wmcontent\Entity\Traits\BaseFieldTrait;
@@ -65,6 +66,11 @@ class Snapshot extends ContentEntityBase
         return (string) $this->get('comment')->value;
     }
 
+    public function getSourceLangcode(): string
+    {
+        return (string) $this->get('source_langcode')->value;
+    }
+
     public function getOwner(): ?UserInterface
     {
         return $this->get('user_id')->entity;
@@ -82,16 +88,34 @@ class Snapshot extends ContentEntityBase
 
     public function getHost(): ?EntityInterface
     {
+        // These properties should be renamed to 'host_entity_type' and
+        // 'host_entity_id'. I hope to fix this in a future major.
         $entityType = (string) $this->get('source_entity_type')->value;
         $entityId = (string) $this->get('source_entity_type')->value;
+
+        // Don't use 'source_langcode', it's the langcode of the initial
+        // snapshots' host. Not the langcode of the current host. Sorry for the
+        // confusion.
+        $langcode = $this->language()->getId();
 
         if (empty($entityType) || empty($entityId)) {
             return null;
         }
 
-        return $this->entityTypeManager()
+        $host = $this->entityTypeManager()
             ->getStorage($entityType)
             ->load($entityId);
+
+        if (
+            !empty($langcode)
+            && $host instanceof TranslatableInterface
+            && $host->isTranslatable()
+            && $host->hasTranslation($langcode)
+        ) {
+            $host = $host->getTranslation($langcode);
+        }
+
+        return $host;
     }
 
     public static function baseFieldDefinitions(EntityTypeInterface $entityType): array
@@ -133,11 +157,18 @@ class Snapshot extends ContentEntityBase
             ->setSetting('handler', 'default')
             ->setDisplayConfigurable('form', false);
 
+        $fields['source_langcode'] = static::getStringBaseFieldDefinition(true)
+            ->setRequired(true)
+            ->setLabel(t('Source langcode'))
+            ->setDisplayConfigurable('form', false);
+
+        // Todo: Rename this to 'host_entity_type'
         $fields['source_entity_type'] = static::getStringBaseFieldDefinition(true)
             ->setRequired(false) // todo: if null this snapshot can be applied to any host
             ->setLabel(t('Source entity type'))
             ->setDisplayConfigurable('form', false);
 
+        // Todo: Rename this to 'host_entity_id'
         $fields['source_entity_id'] = static::getIntegerBaseFieldDefinition(true)
             ->setRequired(false) // todo: if null this snapshot can be applied to any host
             ->setLabel(t('Source entity id'))
@@ -190,6 +221,7 @@ class Snapshot extends ContentEntityBase
             'user_id' => $this->getOwner()
                 ? $this->getOwner()->id()
                 : 0,
+            'source_langcode' => $this->get('source_langcode')->value,
             'source_entity_type' => $this->get('source_entity_type')->value,
             'source_entity_id' => $this->get('source_entity_id')->value,
             'wmcontent_container' => $this->getContainer()
@@ -214,6 +246,7 @@ class Snapshot extends ContentEntityBase
         }
         $snapshot->set('wmcontent_container', $data['wmcontent_container'] ?? null);
         $snapshot->set('user_id', $data['user_id'] ?? null);
+        $snapshot->set('source_langcode', $data['source_langcode'] ?? $langcode);
         $snapshot->set('source_entity_type', $data['source_entity_type'] ?? '');
         $snapshot->set('source_entity_id', $data['source_entity_id'] ?? '');
         $snapshot->set('active', 0);
@@ -226,6 +259,12 @@ class Snapshot extends ContentEntityBase
 
     public function setHost(EntityInterface $host)
     {
+        // Don't set 'source_langcode', that's the langcode of the initial
+        // snapshots' host. When we import an 'nl' snapshot to an 'fr' host
+        // 'source_langcode' stays 'nl' and 'langcode' is 'fr'.
+        //
+        // These properties should be renamed to 'host_entity_type' and
+        // 'host_entity_id'. I hope to fix this in a future major.
         $this->set('source_entity_type', $host->getEntityTypeId());
         $this->set('source_entity_id', $host->id());
         return $this;

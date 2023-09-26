@@ -1,8 +1,35 @@
 <?php
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface;
 use Drupal\wmcontent\Entity\WmContentContainer;
 use Drupal\wmcontent\Field\IndexableBaseFieldDefinition;
+
+function _wmcontent_update_base_entity(string $entityTypeId, string $provider = 'wmcontent'): void
+{
+    /* @var EntityFieldManagerInterface $fieldManager */
+    $fieldManager = \Drupal::service('entity_field.manager');
+    $fieldStorageDefinitions = $fieldManager->getFieldStorageDefinitions($entityTypeId);
+    /** @var EntityLastInstalledSchemaRepositoryInterface $lastInstalledSchemaRepository */
+    $lastInstalledSchemaRepository = \Drupal::service('entity.last_installed_schema.repository');
+    $lastInstalledSchema = $lastInstalledSchemaRepository->getLastInstalledFieldStorageDefinitions($entityTypeId);
+
+    foreach (array_keys($fieldStorageDefinitions) as $field) {
+        if (isset($lastInstalledSchema[$field])) {
+            Drupal::entityDefinitionUpdateManager()->updateFieldStorageDefinition(
+                $fieldStorageDefinitions[$field]
+            );
+            continue;
+        }
+
+        Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+            $field,
+            $entityTypeId,
+            $provider,
+            $fieldStorageDefinitions[$field]
+        );
+    }
+}
 
 function wmcontent_install()
 {
@@ -113,4 +140,20 @@ function wmcontent_update_8005()
 
         \Drupal::entityDefinitionUpdateManager()->installEntityType($entityType);
     }
+}
+
+/**
+ * Add 'source_langcode' to wmcontent_snapshot entity type
+ */
+function wmcontent_update_8006()
+{
+    _wmcontent_update_base_entity('wmcontent_snapshot');
+    $entityType = \Drupal::entityTypeManager()->getDefinition('wmcontent_snapshot');
+
+    // Fill the new field with the current langcode.
+    // ::setInitialValue('langcode') did not work because "Illegal initial value definition on source_langcode: The field types do not match."
+    \Drupal::database()
+        ->update($entityType->getBaseTable())
+        ->expression('source_langcode', 'langcode')
+        ->execute();
 }
