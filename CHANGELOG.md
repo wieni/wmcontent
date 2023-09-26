@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2023-09-26
+- Add `source_langcode` field to `wmcontent_snapshot` entity type. An update hook is provided.
+- **BC**: Changed [SnapshotBuilderBase::denormalize()](https://github.com/wieni/wmcontent/blob/2.2.1/src/Service/Snapshot/SnapshotBuilderBase.php#L18) argument parameters. Read the [upgrade guide](UPGRADING.md) for more information.
+
 ## [2.2.0] - 2024-09-13
 - Deleted the `2.1.0` tag (see #50)
 - Update composer requirements to Drupal 10.0 and PHP 8.1
+
+## [2.0.2] - 2023-09-26
+- Add `source_langcode` field to `wmcontent_snapshot` entity type. An update hook is provided.
+- **BC**: Changed [SnapshotBuilderBase::denormalize()](https://github.com/wieni/wmcontent/blob/2.0.2/src/Service/Snapshot/SnapshotBuilderBase.php#L18) argument parameters. Read the [upgrade guide](UPGRADING.md) for more information.
 
 ## [2.0.0] - 2021-08-24
 - Update composer requirements to Drupal 9.1 and PHP 8.0

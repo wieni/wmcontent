@@ -4,6 +4,16 @@ This document describes breaking changes and how to upgrade. For a
 complete list of changes including minor and patch releases, please
 refer to the [`CHANGELOG`](CHANGELOG.md).
 
+## `2.2.1` and `2.0.2`
+
+The arguments of [SnapshotBuilderBase::denormalize()](https://github.com/wieni/wmcontent/blob/2.2.1/src/Service/Snapshot/SnapshotBuilderBase.php#L18) have changed.
+You'll need to update every class that extends `SnapshotBuilderBase`.
+
+```diff
+- public function denormalize(array $data, string $langcode): EntityInterface;
++ public function denormalize(array $data, string $sourceLangcode, string $targetLangcode): EntityInterface;
+```
+
 ## v1
 ### Type hints
 Argument and return types were added for most methods and functions, so
