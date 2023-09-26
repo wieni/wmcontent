@@ -98,11 +98,20 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
             ],
         ];
         if (!$this->host) {
-            $row['parent'] = Link::createFromRoute(
-                $entity->getHost()->label(),
-                'entity.wmcontent_snapshot.edit_form',
-                ['wmcontent_snapshot' => $entity->id()]
-            );
+            $host = $entity->getHost();
+            $row['parent'] = [
+                'data' => [
+                    '#markup' => $this->t('Unknown parent'),
+                ],
+            ];
+
+            if ($host) {
+                $row['parent'] = Link::createFromRoute(
+                    $host->label(),
+                    'entity.wmcontent_snapshot.edit_form',
+                    ['wmcontent_snapshot' => $entity->id()],
+                );
+            }
         }
         return $row + parent::buildRow($entity);
     }

@@ -15,7 +15,7 @@ abstract class SnapshotBuilderBase
 
     abstract public function normalize(EntityInterface $block): array;
 
-    abstract public function denormalize(array $data, string $langcode): EntityInterface;
+    abstract public function denormalize(array $data, string $sourceLangcode, string $targetLangcode): EntityInterface;
 
     public function version(): \DateTime
     {

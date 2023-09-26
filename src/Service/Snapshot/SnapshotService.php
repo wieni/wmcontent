@@ -90,6 +90,7 @@ class SnapshotService
             'title' => $title,
             'comment' => $description,
             'user_id' => $user,
+            'source_langcode' => $host ? $host->language()->getId() : $language->getId(),
             'source_entity_type' => $host ? $host->getEntityTypeId() : null,
             'source_entity_id' => $host ? $host->id() : null,
             'wmcontent_container' => $container,
@@ -138,7 +139,7 @@ class SnapshotService
             ];
 
             $denormalized[] = new DenormalizationResult(
-                $builder->denormalize($block['data'], $language->getId()),
+                $builder->denormalize($block['data'], $snapshot->getSourceLangcode(), $language->getId()),
                 $builder
             );
         }
