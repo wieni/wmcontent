@@ -304,6 +304,24 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         }
 
         if ($child->access('delete')) {
+            // Since Drupal 10.1, all delete operations are handled through ajax
+            // Drupal assumes a ConfirmFormBase is used which will be rendered
+            // in a modal now.
+            // see https://www.drupal.org/project/drupal/issues/2253257
+            // Instead, we replace the default delete url with our own where we
+            // do an immediate delete and redirect back to the current form.
+            // Ideally we _can_ replace this with some kind of ajax operation,
+            // it would greatly improve the UX. But how often does an editor
+            // make actual use of this delete button? Is it worth the effort?
+            //
+            // For now, we'll disable the ajax magic by removing the 'use-ajax'
+            // class set by Drupal.
+            if (isset($operations['delete']['attributes']['class'])) {
+                $operations['delete']['attributes']['class'] = array_diff(
+                    $operations['delete']['attributes']['class'],
+                    ['use-ajax']
+                );
+            }
             $operations['delete']['url'] = Url::fromRoute(
                 "entity.{$container->getHostEntityType()}.wmcontent_delete",
                 [
