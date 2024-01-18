@@ -11,10 +11,12 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RedirectDestinationInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Drupal\wmcontent\WmContentManager;
+use Drupal\wmcustom\Entity\Presenter\Elastic\Page\Node;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -32,6 +34,8 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
     protected $destination;
     /** @var WmContentManager */
     protected $wmContentManager;
+    /** @var AccountProxyInterface */
+    protected $currentUser;
 
     public static function create(ContainerInterface $container)
     {
@@ -40,6 +44,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         $instance->requestStack = $container->get('request_stack');
         $instance->destination = $container->get('redirect.destination');
         $instance->wmContentManager = $container->get('wmcontent.manager');
+        $instance->currentUser = $container->get('current_user');
 
         return $instance;
     }
@@ -159,6 +164,29 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             '#weight' => 0,
             '#access' => !empty(Element::children($form['wrapper']['rows'])),
         ];
+
+        if ($this->currentUser->hasPermission('view wmcontent preview')) {
+            $form['preview_wrapper'] = [
+                '#type' => 'container',
+                '#weight' => 10,
+            ];
+            $form['preview_wrapper']['preview'] = [
+                '#type' => 'html_tag',
+                '#tag' => 'iframe',
+                '#attributes' => [
+                    'src' => $this->getHostPreviewUrl($host),
+                    'allow' => 'fullscreen',
+                    'width' => 360,
+                    'height' => 800,
+                    'loading' => 'eager',
+                    'class' => ['wmcontent__preview'],
+                ],
+            ];
+
+            // add class for special styling in master_form.css
+            $form['#attributes']['class'][] = 'wm-content-master-form__with-preview';
+        }
+
 
         return $form;
     }
@@ -367,5 +395,19 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         }
 
         return $query;
+    }
+
+    protected function getHostPreviewUrl(ContentEntityInterface $host): string
+    {
+        return Url::fromRoute(
+            'entity.' . $host->getEntityTypeId() . '.canonical',
+            [$host->getEntityTypeId() => $host->id()],
+            [
+                'absolute' => true,
+                'query' => [
+                    'preview' => 'true',
+                ]
+            ]
+        )->toString();
     }
 }

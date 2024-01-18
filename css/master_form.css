@@ -19,9 +19,15 @@
     position: relative;
 }
 
-.wm-content-master-form #edit-add-new {
+.wm-content-master-form #edit-add-new
+{
     flex: 0 1;
     margin: 0 0 1.5rem 0;
+}
+
+.wm-content-master-form__with-preview #edit-preview-wrapper
+{
+    margin: 0 0 0 1.5rem;
 }
 
 .wm-content-master-form #edit-add-new .fieldset-wrapper,
@@ -47,10 +53,28 @@
     white-space: nowrap;
 }
 
+.wm-content-master-form__with-preview #edit-add-new .fieldset-wrapper,
+.wm-content-master-form__with-preview #edit-add-new .fieldset__wrapper {
+    column-count: 1;
+}
+
+.wm-content-master-form__with-preview #edit-add-new {
+    flex-basis: 160px;
+}
+
 @media screen and (min-width: 28em) {
     .wm-content-master-form #edit-add-new .fieldset-wrapper,
     .wm-content-master-form #edit-add-new .fieldset__wrapper {
         column-count: 3;
+    }
+
+    .wm-content-master-form__with-preview #edit-add-new .fieldset-wrapper,
+    .wm-content-master-form__with-preview #edit-add-new .fieldset__wrapper {
+        column-count: 1;
+    }
+
+    .wm-content-master-form__with-preview #edit-add-new {
+        flex-basis: 160px;
     }
 }
 
@@ -72,5 +96,14 @@
 
     .wm-content-master-form .form-wrapper:last-child {
         max-width: 50vw;
+    }
+
+    .wm-content-master-form__with-preview #edit-add-new .fieldset-wrapper,
+    .wm-content-master-form__with-preview #edit-add-new .fieldset__wrapper {
+        column-count: 1;
+    }
+
+    .wm-content-master-form__with-preview #edit-add-new {
+        flex-basis: 160px;
     }
 }

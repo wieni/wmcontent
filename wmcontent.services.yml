@@ -30,6 +30,13 @@ services:
         tags:
             - { name: event_subscriber }
 
+    wmcontent.default_variable_subscriber:
+        class: Drupal\wmcontent\EventSubscriber\DefaultVariableSubscriber
+        arguments:
+            - '@request_stack'
+        tags:
+            - { name: event_subscriber }
+
     wmcontent.container_access:
         class: Drupal\wmcontent\Access\WmContentContainerAccessCheck
         tags:
