@@ -50,7 +50,7 @@ installed using Composer:
   a paragraph. Every entity can only be attached to a single container.
 
 Children and hosts can be entities of any type with a canonical route,
-implementing `Drupal\Core\Entity\ContentEntityTypeInterface`. 
+implementing `Drupal\Core\Entity\ContentEntityTypeInterface`.
 
 When updating a child entity, the changed time of the host entity is
 updated as well.
@@ -68,7 +68,12 @@ entity. A new tab should have appeared with the name of the container
 you just created.
 
 Clicking that link brings you to the master form, where you can add
-children to and edit/delete/reorder children from this host. 
+children to and edit/delete/reorder children from this host.
+
+#### Enabling preview
+If you want to enable preview for a page, you can grant the `view wmcontent preview` permission.
+To alter the preview, you can use the `wmcontent_preview` default variable in your twig templates.
+This can be useful when trying to hide elements that are only visible to the editors.
 
 ### Displaying children
 If you use Display Suite to build your pages, you can use the

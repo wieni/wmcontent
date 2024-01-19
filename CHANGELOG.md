@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2024-01-xx
+### Added
+- Add preview functionality to the master form
+ - Add `view wmcontent preview` permission
+ - Add `wmcontent_preview` default variable available in twig templates
+ - Hide toolbar on pages with the `wmcontent_preview=true` query parameter
+
 ## [2.2.2] - 2023-12-05
 - Fix Error Ajax message upon deleting a content block in Drupal 10.1
 
@@ -153,7 +160,6 @@ alternatives is provided in the [Upgrade Guide](UPGRADING.md).
 - Change PHP version requirement to 7.1
 - Change the container form to show all content entity types with
   canonical link templates in the dropdowns
-- Change the container form to only show bundles when an entity type is 
   selected
 - Change routes to convert the `container` and `child` parameters to
   their respective entities
