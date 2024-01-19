@@ -16,7 +16,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\wmcontent\WmContentContainerInterface;
 use Drupal\wmcontent\WmContentManager;
-use Drupal\wmcustom\Entity\Presenter\Elastic\Page\Node;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
