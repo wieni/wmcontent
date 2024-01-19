@@ -585,6 +585,15 @@ function wmcontent_template_preprocess_default_variables_alter(&$variables)
     $variables['wmcontent_is_preview'] = filter_var($is_preview, FILTER_VALIDATE_BOOLEAN);
 }
 
+function wmcontent_toolbar_alter(&$items)
+{
+    $is_preview = \Drupal::request()->query->get('wmcontent_preview', 'false');
+    if (filter_var($is_preview, FILTER_VALIDATE_BOOLEAN)) {
+        // We empty the toolbar items to hide the toolbar in preview mode
+        $items = [];
+    }
+}
+
 function _wmcontent_unparse_url($parsed_url)
 {
     $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
