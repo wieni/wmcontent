@@ -581,8 +581,8 @@ function wmcontent_preprocess_pager(&$variables)
 
 function wmcontent_template_preprocess_default_variables_alter(&$variables)
 {
-    $is_preview = \Drupal::request()->query->get('preview', 'false');
-    $variables['is_preview'] = filter_var($is_preview, FILTER_VALIDATE_BOOLEAN);
+    $is_preview = \Drupal::request()->query->get('wmcontent_preview', 'false');
+    $variables['wmcontent_is_preview'] = filter_var($is_preview, FILTER_VALIDATE_BOOLEAN);
 }
 
 function _wmcontent_unparse_url($parsed_url)

@@ -405,7 +405,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             [
                 'absolute' => true,
                 'query' => [
-                    'preview' => 'true',
+                    'wmcontent_preview' => 'true',
                 ]
             ]
         )->toString();
