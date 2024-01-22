@@ -579,6 +579,28 @@ function wmcontent_preprocess_pager(&$variables)
     }
 }
 
+function wmcontent_template_preprocess_default_variables_alter(&$variables)
+{
+    $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
+    $currentUser = \Drupal::currentUser();
+    if ($currentUser->hasPermission('view wmcontent inline render')) {
+        $variables['wmcontent_is_inline_render'] = filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN);
+    }
+}
+
+function wmcontent_toolbar_alter(&$items)
+{
+    $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
+    $currentUser = \Drupal::currentUser();
+    if (
+        filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN)
+        && $currentUser->hasPermission('view wmcontent inline render')
+    ) {
+        // We empty the toolbar items to hide the toolbar in inline_render mode
+        $items = [];
+    }
+}
+
 function _wmcontent_unparse_url($parsed_url)
 {
     $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';

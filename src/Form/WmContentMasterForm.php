@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RedirectDestinationInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\wmcontent\WmContentContainerInterface;
@@ -32,6 +33,8 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
     protected $destination;
     /** @var WmContentManager */
     protected $wmContentManager;
+    /** @var AccountProxyInterface */
+    protected $currentUser;
 
     public static function create(ContainerInterface $container)
     {
@@ -40,6 +43,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         $instance->requestStack = $container->get('request_stack');
         $instance->destination = $container->get('redirect.destination');
         $instance->wmContentManager = $container->get('wmcontent.manager');
+        $instance->currentUser = $container->get('current_user');
 
         return $instance;
     }
@@ -62,6 +66,13 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
 
     public function buildForm(array $form, FormStateInterface $form_state, ?ContentEntityInterface $host = null, ?WmContentContainerInterface $container = null)
     {
+        if ($container === null) {
+            throw new \InvalidArgumentException('Container is required');
+        }
+        if ($host === null) {
+            throw new \InvalidArgumentException('Host is required');
+        }
+
         $config = $container->getConfig();
         $children = $this->wmContentManager->getContent($host, $container->getId());
 
@@ -159,6 +170,32 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             '#weight' => 0,
             '#access' => !empty(Element::children($form['wrapper']['rows'])),
         ];
+
+        if (
+            $container->hasInlineRenderEnabled()
+            && $this->currentUser->hasPermission('view wmcontent inline render')
+        ) {
+            $form['inline_render_wrapper'] = [
+                '#type' => 'container',
+                '#weight' => 10,
+            ];
+            $form['inline_render_wrapper']['inline_render'] = [
+                '#type' => 'html_tag',
+                '#tag' => 'iframe',
+                '#attributes' => [
+                    'src' => $this->getHostPreviewUrl($host),
+                    'allow' => 'fullscreen',
+                    'width' => 360,
+                    'height' => 800,
+                    'loading' => 'eager',
+                    'class' => ['wmcontent__inline-render'],
+                ],
+            ];
+
+            // add class for special styling in master_form.css
+            $form['#attributes']['class'][] = 'wm-content-master-form__with-inline-render';
+        }
+
 
         return $form;
     }
@@ -362,10 +399,24 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             )->toString(),
         ];
 
-        if ($language = $request->query->get('language_content_entity')) {
+        if ($language = $request?->query->get('language_content_entity')) {
             $query['language_content_entity'] = $language;
         }
 
         return $query;
+    }
+
+    protected function getHostPreviewUrl(ContentEntityInterface $host): string
+    {
+        return Url::fromRoute(
+            'entity.' . $host->getEntityTypeId() . '.canonical',
+            [$host->getEntityTypeId() => $host->id()],
+            [
+                'absolute' => true,
+                'query' => [
+                    'wmcontent_inline_render' => 'true',
+                ]
+            ]
+        )->toString();
     }
 }

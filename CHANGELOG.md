@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2024-01-22
+### Added
+- Add inline_render functionality to the master form
+- Add `view wmcontent inline render` permission
+- Add `wmcontent_is_inline_render` default variable available in twig templates
+- Hide toolbar on pages with the `wmcontent_inline_render=true` query parameter
+
 ## [2.2.2] - 2023-12-05
 - Fix Error Ajax message upon deleting a content block in Drupal 10.1
 
@@ -37,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dispatch `ContentBlockChangedEvent` when a content block is deleted. This causes the host entity changed time to update.
 
 ### Removed
-- Remove static cache from `WmContentManagerInterface::getContent`. This caused issues when handling multiple Symfony 
+- Remove static cache from `WmContentManagerInterface::getContent`. This caused issues when handling multiple Symfony
   requests in the same PHP request. The root cause is this cache not being invalidated when content blocks are updated.
 
 ## [1.3.4] - 2021-03-08
@@ -88,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2020-08-11
 ### Added
 - Add snapshots: make it possible to save the state of your content
- at any given time, with export/import functionality
+  at any given time, with export/import functionality
 
 ## [1.1.0] - 2020-07-23
 ### Added
@@ -153,7 +160,7 @@ alternatives is provided in the [Upgrade Guide](UPGRADING.md).
 - Change PHP version requirement to 7.1
 - Change the container form to show all content entity types with
   canonical link templates in the dropdowns
-- Change the container form to only show bundles when an entity type is 
+- Change the container form to only show bundles when an entity type is
   selected
 - Change routes to convert the `container` and `child` parameters to
   their respective entities
@@ -186,10 +193,10 @@ alternatives is provided in the [Upgrade Guide](UPGRADING.md).
 ### Added
 - Add indexes to the following base fields
   ([#32](https://github.com/wieni/wmcontent/issues/32)):
-  - wmcontent_weight
-  - wmcontent_parent
-  - wmcontent_parent_type
-  - wmcontent_container
+    - wmcontent_weight
+    - wmcontent_parent
+    - wmcontent_parent_type
+    - wmcontent_container
 - Add php & drupal/core composer dependencies
 
 ### Changed

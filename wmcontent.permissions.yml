@@ -2,3 +2,7 @@ administer wmcontent:
     title: 'administer wmcontent'
     description: 'Administer wmcontent'
     restrict access: true
+
+view wmcontent inline render:
+    title: 'view wmcontent inline render'
+    description: 'View wmcontent inline render'
