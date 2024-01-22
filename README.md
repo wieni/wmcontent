@@ -70,11 +70,6 @@ you just created.
 Clicking that link brings you to the master form, where you can add
 children to and edit/delete/reorder children from this host.
 
-#### Enabling preview
-If you want to enable preview for a page, you can grant the `view wmcontent preview` permission.
-To alter the preview, you can use the `wmcontent_preview` default variable in your twig templates.
-This can be useful when trying to hide elements that are only visible to the editors.
-
 ### Displaying children
 If you use Display Suite to build your pages, you can use the
 _WmContent: Content blocks_ field to display the content of the children
