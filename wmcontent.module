@@ -588,7 +588,11 @@ function wmcontent_template_preprocess_default_variables_alter(&$variables)
 function wmcontent_toolbar_alter(&$items)
 {
     $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
-    if (filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN)) {
+    $currentUser = \Drupal::currentUser();
+    if (
+        filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN)
+        && $currentUser->hasPermission('view wmcontent inline render')
+    ) {
         // We empty the toolbar items to hide the toolbar in inline_render mode
         $items = [];
     }
