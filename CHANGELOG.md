@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add inline_render functionality to the master form
 - Add `view wmcontent inline render` permission
-- Add `wmcontent_inline_render` default variable available in twig templates
+- Add `wmcontent_is_inline_render` default variable available in twig templates
 - Hide toolbar on pages with the `wmcontent_inline_render=true` query parameter
 
 ## [2.2.2] - 2023-12-05
