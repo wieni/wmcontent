@@ -66,6 +66,13 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
 
     public function buildForm(array $form, FormStateInterface $form_state, ?ContentEntityInterface $host = null, ?WmContentContainerInterface $container = null)
     {
+        if ($container === null) {
+            throw new \InvalidArgumentException('Container is required');
+        }
+        if ($host === null) {
+            throw new \InvalidArgumentException('Host is required');
+        }
+
         $config = $container->getConfig();
         $children = $this->wmContentManager->getContent($host, $container->getId());
 
@@ -392,7 +399,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             )->toString(),
         ];
 
-        if ($language = $request->query->get('language_content_entity')) {
+        if ($language = $request?->query->get('language_content_entity')) {
             $query['language_content_entity'] = $language;
         }
 
