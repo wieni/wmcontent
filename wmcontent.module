@@ -581,15 +581,15 @@ function wmcontent_preprocess_pager(&$variables)
 
 function wmcontent_template_preprocess_default_variables_alter(&$variables)
 {
-    $is_preview = \Drupal::request()->query->get('wmcontent_preview', 'false');
-    $variables['wmcontent_is_preview'] = filter_var($is_preview, FILTER_VALIDATE_BOOLEAN);
+    $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
+    $variables['wmcontent_is_inline_render'] = filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN);
 }
 
 function wmcontent_toolbar_alter(&$items)
 {
-    $is_preview = \Drupal::request()->query->get('wmcontent_preview', 'false');
-    if (filter_var($is_preview, FILTER_VALIDATE_BOOLEAN)) {
-        // We empty the toolbar items to hide the toolbar in preview mode
+    $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
+    if (filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN)) {
+        // We empty the toolbar items to hide the toolbar in inline_render mode
         $items = [];
     }
 }

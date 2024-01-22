@@ -25,7 +25,7 @@
     margin: 0 0 1.5rem 0;
 }
 
-.wm-content-master-form__with-preview #edit-preview-wrapper
+.wm-content-master-form__with-inline-render #edit-inline-render-wrapper
 {
     margin: 0 0 0 1.5rem;
 }
@@ -53,12 +53,12 @@
     white-space: nowrap;
 }
 
-.wm-content-master-form__with-preview #edit-add-new .fieldset-wrapper,
-.wm-content-master-form__with-preview #edit-add-new .fieldset__wrapper {
+.wm-content-master-form__with-inline-render #edit-add-new .fieldset-wrapper,
+.wm-content-master-form__with-inline-render #edit-add-new .fieldset__wrapper {
     column-count: 1;
 }
 
-.wm-content-master-form__with-preview #edit-add-new {
+.wm-content-master-form__with-inline-render #edit-add-new {
     flex-basis: 160px;
 }
 
@@ -68,12 +68,12 @@
         column-count: 3;
     }
 
-    .wm-content-master-form__with-preview #edit-add-new .fieldset-wrapper,
-    .wm-content-master-form__with-preview #edit-add-new .fieldset__wrapper {
+    .wm-content-master-form__with-inline-render #edit-add-new .fieldset-wrapper,
+    .wm-content-master-form__with-inline-render #edit-add-new .fieldset__wrapper {
         column-count: 1;
     }
 
-    .wm-content-master-form__with-preview #edit-add-new {
+    .wm-content-master-form__with-inline-render #edit-add-new {
         flex-basis: 160px;
     }
 }
@@ -98,12 +98,12 @@
         max-width: 50vw;
     }
 
-    .wm-content-master-form__with-preview #edit-add-new .fieldset-wrapper,
-    .wm-content-master-form__with-preview #edit-add-new .fieldset__wrapper {
+    .wm-content-master-form__with-inline-render #edit-add-new .fieldset-wrapper,
+    .wm-content-master-form__with-inline-render #edit-add-new .fieldset__wrapper {
         column-count: 1;
     }
 
-    .wm-content-master-form__with-preview #edit-add-new {
+    .wm-content-master-form__with-inline-render #edit-add-new {
         flex-basis: 160px;
     }
 }

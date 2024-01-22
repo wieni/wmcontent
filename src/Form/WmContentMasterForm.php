@@ -164,12 +164,12 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             '#access' => !empty(Element::children($form['wrapper']['rows'])),
         ];
 
-        if ($this->currentUser->hasPermission('view wmcontent preview')) {
-            $form['preview_wrapper'] = [
+        if ($this->currentUser->hasPermission('view wmcontent inline render')) {
+            $form['inline_render_wrapper'] = [
                 '#type' => 'container',
                 '#weight' => 10,
             ];
-            $form['preview_wrapper']['preview'] = [
+            $form['inline_render_wrapper']['inline_render'] = [
                 '#type' => 'html_tag',
                 '#tag' => 'iframe',
                 '#attributes' => [
@@ -178,12 +178,12 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
                     'width' => 360,
                     'height' => 800,
                     'loading' => 'eager',
-                    'class' => ['wmcontent__preview'],
+                    'class' => ['wmcontent__inline-render'],
                 ],
             ];
 
             // add class for special styling in master_form.css
-            $form['#attributes']['class'][] = 'wm-content-master-form__with-preview';
+            $form['#attributes']['class'][] = 'wm-content-master-form__with-inline-render';
         }
 
 
@@ -404,7 +404,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             [
                 'absolute' => true,
                 'query' => [
-                    'wmcontent_preview' => 'true',
+                    'wmcontent_inline_render' => 'true',
                 ]
             ]
         )->toString();
