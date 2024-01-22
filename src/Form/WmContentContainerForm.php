@@ -169,6 +169,12 @@ class WmContentContainerForm extends EntityForm
             '#title' => $this->t('Enable snapshots'),
         ];
 
+        $form['inline_render_enabled'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $this->entity->hasSnapshotsEnabled(),
+            '#title' => $this->t('Enable snapshots'),
+        ];
+
         return parent::form($form, $form_state);
     }
 

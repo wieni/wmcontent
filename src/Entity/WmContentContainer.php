@@ -45,7 +45,8 @@ use Drupal\wmcontent\WmContentContainerInterface;
  *         "hide_single_option_alignments",
  *         "show_size_column",
  *         "show_alignment_column",
- *         "snapshots_enabled"
+ *         "snapshots_enabled",
+ *         "inline_render_enabled"
  *     }
  * )
  */
@@ -75,6 +76,8 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
     public $show_alignment_column = true;
     /** @var bool */
     public $snapshots_enabled = false;
+    /** @var bool */
+    public $inline_render_enabled = false;
 
     public function getLabel(): string
     {
@@ -152,6 +155,11 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
         return $this->snapshots_enabled;
     }
 
+    public function hasInlineRenderEnabled(): bool
+    {
+        return $this->inline_render_enabled;
+    }
+
     public function getConfig(): array
     {
         $config = [
@@ -167,6 +175,7 @@ class WmContentContainer extends ConfigEntityBase implements WmContentContainerI
             'show_size_column' => $this->getShowSizeColumn(),
             'show_alignment_column' => $this->getShowAlignmentColumn(),
             'snapshots_enabled' => $this->hasSnapshotsEnabled(),
+            'inline_render_enabled' => $this->hasInlineRenderEnabled(),
         ];
 
         if (empty($config['host_bundles'])) {

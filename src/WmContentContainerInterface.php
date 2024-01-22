@@ -40,4 +40,6 @@ interface WmContentContainerInterface extends ConfigEntityInterface
     public function hasChild(EntityInterface $child): bool;
 
     public function hasSnapshotsEnabled(): bool;
+
+    public function hasInlineRenderEnabled(): bool;
 }

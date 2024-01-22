@@ -44,3 +44,6 @@ wmcontent.wmcontent_container.*:
     snapshots_enabled:
       type: boolean
       label: 'Enable snapshots'
+    inline_render_enabled:
+        type: boolean
+        label: 'Enable inline rendering of the page'

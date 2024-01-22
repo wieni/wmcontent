@@ -3,6 +3,6 @@ administer wmcontent:
     description: 'Administer wmcontent'
     restrict access: true
 
-view wmcontent preview:
-    title: 'view wmcontent preview'
-    description: 'View wmcontent preview'
+view wmcontent inline render:
+    title: 'view wmcontent inline render'
+    description: 'View wmcontent inline render'

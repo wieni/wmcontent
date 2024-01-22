@@ -164,7 +164,10 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
             '#access' => !empty(Element::children($form['wrapper']['rows'])),
         ];
 
-        if ($this->currentUser->hasPermission('view wmcontent inline render')) {
+        if (
+            $container->hasInlineRenderEnabled()
+            && $this->currentUser->hasPermission('view wmcontent inline render')
+        ) {
             $form['inline_render_wrapper'] = [
                 '#type' => 'container',
                 '#weight' => 10,
