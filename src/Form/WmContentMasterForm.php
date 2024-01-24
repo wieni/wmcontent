@@ -177,7 +177,7 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         ) {
             $form['inline_render_wrapper'] = [
                 '#type' => 'container',
-                '#weight' => 10,
+                '#weight' => 4,
             ];
             $form['inline_render_wrapper']['inline_render'] = [
                 '#type' => 'html_tag',
