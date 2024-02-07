@@ -588,7 +588,7 @@ function wmcontent_template_preprocess_default_variables_alter(&$variables)
     }
 }
 
-function wmcontent_toolbar_alter(&$items)
+function wmcontent_page_top(array &$page_top)
 {
     $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
     $currentUser = \Drupal::currentUser();
@@ -596,8 +596,33 @@ function wmcontent_toolbar_alter(&$items)
         filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN)
         && $currentUser->hasPermission('view wmcontent inline render')
     ) {
-        // We empty the toolbar items to hide the toolbar in inline_render mode
-        $items = [];
+        // if toolbar exists, remove it
+        if (isset($page_top['toolbar'])) {
+            unset($page_top['toolbar']);
+        }
+    }
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function wmcontent_page_attachments_alter(array &$attachments)
+{
+    $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
+    $currentUser = \Drupal::currentUser();
+    if (
+        filter_var($is_inline_render, FILTER_VALIDATE_BOOLEAN)
+        && $currentUser->hasPermission('view wmcontent inline render')
+    ) {
+        // remove gin attachments
+        $oldLibraries = $attachments['#attached']['library'] ?? [];
+        $newLibraries = [];
+        foreach ($oldLibraries as $lib) {
+            if (strpos($lib, 'gin') === false) {
+                $newLibraries[] = $lib;
+            }
+        }
+        $attachments['#attached']['library'] = $newLibraries;
     }
 }
 
