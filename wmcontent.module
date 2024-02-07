@@ -590,6 +590,7 @@ function wmcontent_template_preprocess_default_variables_alter(&$variables)
 
 function wmcontent_page_top(array &$page_top)
 {
+    $page_top['#cache']['contexts'][] = 'url.query_args:wmcontent_inline_render';
     $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
     $currentUser = \Drupal::currentUser();
     if (
@@ -608,6 +609,7 @@ function wmcontent_page_top(array &$page_top)
  */
 function wmcontent_page_attachments_alter(array &$attachments)
 {
+    $attachments['#cache']['contexts'][] = 'url.query_args:wmcontent_inline_render';
     $is_inline_render = \Drupal::request()->query->get('wmcontent_inline_render', 'false');
     $currentUser = \Drupal::currentUser();
     if (
