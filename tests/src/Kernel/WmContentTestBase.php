@@ -21,7 +21,7 @@ abstract class WmContentTestBase extends KernelTestBase
     protected const CHILD_BUNDLE = 'child_bundle';
     protected const HOST_BUNDLE = 'host_bundle';
 
-    public static $modules = [
+    protected static $modules = [
         'node',
         'options',
         'system',

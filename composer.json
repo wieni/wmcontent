@@ -11,10 +11,10 @@
     ],
     "require": {
         "php": "^8.1",
-        "drupal/core": "^10.0"
+        "drupal/core": "^10.1"
     },
     "require-dev": {
-        "drupal/core-dev": "^10.0",
+        "drupal/core-dev": "^10.1",
         "ergebnis/composer-normalize": "^2.0",
         "wieni/wmcodestyle": "^1.7"
     },
