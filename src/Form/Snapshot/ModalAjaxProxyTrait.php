@@ -8,6 +8,7 @@ use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Form\FormBuilder;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Utility\Error;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -44,7 +45,7 @@ trait ModalAjaxProxyTrait
             $response = $this->getKernel()->handle($request, HttpKernelInterface::SUB_REQUEST, false);
         } catch (\Exception $e) {
             // todo: meh
-            watchdog_exception('wmcontent.modal', $e);
+            Error::logException(\Drupal::logger('wmcontent.modal'), $e);
         }
 
         if (!$response instanceof AjaxResponse || !$response->getStatusCode() === 200) {

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3] - 2024-03-15
+### Fixed
+- Fix Drupal deprecations
+
+## [2.3.2] - 2024-02-07
+### Changed
+- Add cache context to hook_page_attachments_alter and hook_page_top
+
+## [2.3.1] - 2024-02-07
+### Fixed
+- Fix gin and toolbar css still trying to make space for toolbar
+
 ## [2.3.0] - 2024-01-22
 ### Added
 - Add inline_render functionality to the master form
