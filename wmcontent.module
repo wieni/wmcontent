@@ -563,7 +563,7 @@ function wmcontent_preprocess_pager(&$variables)
         $attribute->setAttribute(
             'data-dialog-options',
             // Use the dialog options that were used to display the current modal
-            json_encode($request->request->get('dialogOptions', []), JSON_THROW_ON_ERROR)
+            json_encode(($request->request->all()['dialogOptions'] ?? []), JSON_THROW_ON_ERROR)
         );
     };
 
