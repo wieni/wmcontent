@@ -2,7 +2,7 @@ name: wmcontent
 type: module
 description: Adds configurable entity containers to entity types (for e.g. paragraphs)
 version: 2.2.0
-core_version_requirement: ^10
+core_version_requirement: ^10 || ^11
 package: Wieni
 dependencies:
     - options
