@@ -313,11 +313,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
             ->setDisplayOptions(
                 'form',
                 [
-                    'type' => 'hidden',
-                    'settings' => [
-                        'display_label' => true,
-                    ],
-                    'weight' => 20,
+                  'region' => 'hidden',
                 ]
             )
             ->setDisplayOptions(
@@ -342,11 +338,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
             ->setDisplayOptions(
                 'form',
                 [
-                    'type' => 'hidden',
-                    'settings' => [
-                        'display_label' => true,
-                    ],
-                    'weight' => 20,
+                  'region' => 'hidden',
                 ]
             )
             ->setDisplayOptions(
@@ -368,11 +360,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
             ->setDisplayOptions(
                 'form',
                 [
-                    'type' => 'hidden',
-                    'settings' => [
-                        'display_label' => true,
-                    ],
-                    'weight' => 20,
+                  'region' => 'hidden',
                 ]
             )
             ->addIndex('value');
@@ -387,11 +375,7 @@ function wmcontent_entity_base_field_info(EntityTypeInterface $entity_type): arr
             ->setDisplayOptions(
                 'form',
                 [
-                    'type' => 'hidden',
-                    'settings' => [
-                        'display_label' => true,
-                    ],
-                    'weight' => 20,
+                  'region' => 'hidden',
                 ]
             )
             ->addIndex('value');
