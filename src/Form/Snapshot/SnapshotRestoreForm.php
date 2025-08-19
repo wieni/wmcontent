@@ -89,7 +89,7 @@ class SnapshotRestoreForm extends SnapshotFormBase
             '#title' => $this->t('Keep existing content blocks'),
             '#required' => false,
             '#description' => $this->t('When checked this snapshot gets added to the existing content blocks. <br />If left unchecked the existing content blocks are replaced.'),
-            '#default_value' => $input['reason'] ?? false,
+            '#default_value' => $input['append'] ?? false,
         ];
 
         $form['actions']['submit'] = $this->createSubmitButton('Restore snapshot');
