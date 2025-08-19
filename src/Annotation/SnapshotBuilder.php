@@ -16,7 +16,7 @@ class SnapshotBuilder extends Plugin
 
     public function getId()
     {
-        foreach (['entity_type', 'entity_type'] as $param) {
+        foreach (['entity_type', 'bundle'] as $param) {
             if (empty($this->definition[$param])) {
                 throw new \RuntimeException(sprintf(
                     'The "%s" annotation parameter is required in %s',
