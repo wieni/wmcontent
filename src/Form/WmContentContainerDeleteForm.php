@@ -23,7 +23,7 @@ class WmContentContainerDeleteForm extends EntityConfirmFormBase
 
     public function getQuestion()
     {
-        return $this->t('Are you sure you want to delete the container %name?', ['%name' => $this->entity->label()]);
+        return $this->t('Are you sure you want to delete the container %name?', ['%name' => (string) $this->entity->label()]);
     }
 
     public function getCancelUrl()
@@ -39,8 +39,8 @@ class WmContentContainerDeleteForm extends EntityConfirmFormBase
     public function submitForm(array &$form, FormStateInterface $form_state)
     {
         $this->entity->delete();
-        $this->logger('wmcontent_container_entity')->notice('Container %name has been deleted.', ['%name' => $this->entity->label()]);
-        $this->messenger->addStatus($this->t('Container %name has been deleted.', ['%name' => $this->entity->label()]));
+        $this->logger('wmcontent_container_entity')->notice('Container %name has been deleted.', ['%name' => (string) $this->entity->label()]);
+        $this->messenger->addStatus($this->t('Container %name has been deleted.', ['%name' => (string) $this->entity->label()]));
         $form_state->setRedirectUrl($this->getCancelUrl());
     }
 }

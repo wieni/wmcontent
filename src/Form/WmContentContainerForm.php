@@ -42,7 +42,7 @@ class WmContentContainerForm extends EntityForm
         $form['wrapper']['label'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Container name'),
-            '#default_value' => $this->entity->label(),
+            '#default_value' => (string) $this->entity->label(),
             '#size' => 30,
             '#required' => true,
             '#maxlength' => 64,
@@ -181,7 +181,7 @@ class WmContentContainerForm extends EntityForm
     public function save(array $form, FormStateInterface $form_state)
     {
         // Prevent leading and trailing spaces.
-        $this->entity->set('label', trim($this->entity->label()));
+        $this->entity->set('label', trim((string) $this->entity->label()));
 
         $host_bundles = $this->entity->get('host_bundles');
         $host_bundles = array_filter($host_bundles);
@@ -204,14 +204,14 @@ class WmContentContainerForm extends EntityForm
         $this->messenger->addStatus($this->t(
             'Container %label has been %action.',
             [
-                '%label' => $this->entity->label(),
+                '%label' => (string) $this->entity->label(),
                 '%action' => $action,
             ]
         ));
         $this->logger('wmcontent')->notice(
             'Container %label has been %action.',
             [
-                '%label' => $this->entity->label(),
+                '%label' => (string) $this->entity->label(),
                 '%action' => $action,
             ]
         );

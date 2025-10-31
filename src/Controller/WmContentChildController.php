@@ -68,7 +68,7 @@ class WmContentChildController implements ContainerInjectionInterface
             'Add new %type to %host',
             [
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }
@@ -82,7 +82,7 @@ class WmContentChildController implements ContainerInjectionInterface
                 '%container_label %name has been deleted.',
                 [
                     '%container_label' => $container->getLabel(),
-                    '%name' => $child->label(),
+                    '%name' => (string) $child->label(),
                 ]
             )
         );
@@ -118,7 +118,7 @@ class WmContentChildController implements ContainerInjectionInterface
             'Edit %type from %host',
             [
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }

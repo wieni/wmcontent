@@ -29,7 +29,7 @@ function wmcontent_entity_extra_field_info(): array
         foreach ($container->getHostBundles() as $bundle) {
             $extra[$container->getHostEntityType()][$bundle]['display']['wmc_' . $container->id()] = [
                 'label' => 'WmContent: ' . $container->label(),
-                'description' => $container->label(),
+                'description' => (string) $container->label(),
                 'weight' => 0,
                 'visible' => true,
             ];
@@ -122,7 +122,7 @@ function wmcontent_entity_operation(EntityInterface $entity): array
     /** @var WmContentContainerInterface $container */
     foreach ($containers as $container) {
         $operations[$container->id()] = [
-            'title' => $container->label(),
+            'title' => (string) $container->label(),
             'url' => Url::fromRoute(
                 $routeName,
                 [

@@ -74,7 +74,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
             'Snapshots of %type %host',
             [
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }
@@ -98,7 +98,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
             'Create new snapshot of %type %host',
             [
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }
@@ -121,7 +121,7 @@ class SnapshotOverviewController implements ContainerInjectionInterface
             'Import existing snapshot to %type %host',
             [
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }
@@ -221,10 +221,10 @@ class SnapshotOverviewController implements ContainerInjectionInterface
         return $this->t(
             'Export snapshot code of %snapshot_title (%snapshot_date)',
             [
-                '%snapshot_title' => $snapshot->label(),
+                '%snapshot_title' => (string) $snapshot->label(),
                 '%snapshot_date' => date('d/m/Y H:i', $snapshot->getCreatedTime()),
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }
@@ -237,10 +237,10 @@ class SnapshotOverviewController implements ContainerInjectionInterface
         return $this->t(
             'Restore snapshot of %snapshot_date to %type %host',
             [
-                '%snapshot_title' => $snapshot->label(),
+                '%snapshot_title' => (string) $snapshot->label(),
                 '%snapshot_date' => date('d/m/Y H:i', $snapshot->getCreatedTime()),
                 '%type' => $type,
-                '%host' => $host->label(),
+                '%host' => (string) $host->label(),
             ]
         );
     }
