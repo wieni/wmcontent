@@ -95,12 +95,12 @@ class SnapshotCreateForm extends SnapshotFormBase
                 ],
                 'type' => [
                     'data' => [
-                        '#markup' => $block->type->entity->label(), // is bundle
+                        '#markup' => (string) $block->type->entity->label(), // is bundle
                     ],
                 ],
                 'label' => [
                     'data' => [
-                        '#markup' => $block->label(),
+                        '#markup' => (string) $block->label(),
                     ],
                 ],
             ];

@@ -77,7 +77,7 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
         /** @var \Drupal\wmcontent\Entity\Snapshot $entity*/
         $row['name'] = [
             'data' => [
-                '#markup' => $entity->label(),
+                '#markup' => (string) $entity->label(),
             ],
         ];
         $row['created'] = [
@@ -88,7 +88,7 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
         $row['user'] = [
             'data' => [
                 '#markup' => $entity->getOwner()
-                    ? $entity->getOwner()->label()
+                    ? (string) $entity->getOwner()->label()
                     : '',
             ],
         ];
@@ -107,7 +107,7 @@ class SnapshotListBuilder extends EntityListBuilder implements SnapshotListBuild
 
             if ($host) {
                 $row['parent'] = Link::createFromRoute(
-                    $host->label(),
+                    (string) $host->label(),
                     'entity.wmcontent_snapshot.edit_form',
                     ['wmcontent_snapshot' => $entity->id()],
                 );

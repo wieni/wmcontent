@@ -137,12 +137,12 @@ class SnapshotRestoreForm extends SnapshotFormBase
             $form['table']['#rows'][$i] = [
                 'type' => [
                     'data' => [
-                        '#markup' => $block->type->entity->label(), // is bundle
+                        '#markup' => (string) $block->type->entity->label(), // is bundle
                     ],
                 ],
                 'label' => [
                     'data' => [
-                        '#markup' => $block->label(),
+                        '#markup' => (string) $block->label(),
                     ],
                 ],
                 'errors' => [

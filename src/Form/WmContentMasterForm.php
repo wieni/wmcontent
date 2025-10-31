@@ -58,8 +58,8 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
         return $this->t(
             '%slug for %label',
             [
-                '%slug' => $container->getLabel(),
-                '%label' => $host->label(),
+                '%slug' => (string) $container->getLabel(),
+                '%label' => (string) $host->label(),
             ]
         );
     }
@@ -278,12 +278,12 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
 
         $row['bundle'] = [
             '#type' => 'container',
-            '#markup' => $child->get('type')->entity->label(),
+            '#markup' => (string) $child->get('type')->entity->label(),
         ];
 
         $row['content'] = [
             '#type' => 'container',
-            '#markup' => $child->label(),
+            '#markup' => (string) $child->label(),
         ];
 
         if ($container->getShowSizeColumn()) {
