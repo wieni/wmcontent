@@ -42,4 +42,6 @@ interface WmContentContainerInterface extends ConfigEntityInterface
     public function hasSnapshotsEnabled(): bool;
 
     public function hasInlineRenderEnabled(): bool;
+
+    public function getSnapshotRestoreKeepBlocks(): bool;
 }

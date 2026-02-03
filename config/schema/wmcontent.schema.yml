@@ -47,3 +47,6 @@ wmcontent.wmcontent_container.*:
     inline_render_enabled:
         type: boolean
         label: 'Enable inline rendering of the page'
+    snapshot_restore_keep_blocks:
+        type: boolean
+        label: 'Default state for "keep existing content blocks" toggle in snapshot restore'

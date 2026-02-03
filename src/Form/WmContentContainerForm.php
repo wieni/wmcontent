@@ -169,6 +169,18 @@ class WmContentContainerForm extends EntityForm
             '#title' => $this->t('Enable snapshots'),
         ];
 
+        $form['snapshot_restore_keep_blocks'] = [
+            '#type' => 'checkbox',
+            '#default_value' => $this->entity->getSnapshotRestoreKeepBlocks(),
+            '#title' => $this->t('Keep existing content blocks when restoring snapshots'),
+            '#description' => $this->t('When enabled, the "keep existing content blocks" toggle will be checked by default in the snapshot restore form.'),
+            '#states' => [
+                'visible' => [
+                    ':input[name="snapshots_enabled"]' => ['checked' => true],
+                ],
+            ],
+        ];
+
         $form['inline_render_enabled'] = [
             '#type' => 'checkbox',
             '#default_value' => $this->entity->hasInlineRenderEnabled(),
