@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent\Form;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -75,6 +76,22 @@ class WmContentMasterForm implements FormInterface, ContainerInjectionInterface
 
         $config = $container->getConfig();
         $children = $this->wmContentManager->getContent($host, $container->getId());
+
+        // This overview lists the host's content blocks. When Drupal's dynamic
+        // page cache is active (e.g. on an admin domain), this form's render
+        // array is cached and can only be invalidated through its cache tags.
+        // Adding, editing, deleting or reordering a content block re-saves the
+        // host entity (see \Drupal\wmcontent\EventSubscriber\ContentBlockSubscriber),
+        // which invalidates the host's cache tags. Attaching those tags - along
+        // with the container's and each visible child's - makes sure a cached
+        // overview is refreshed whenever its contents change.
+        $cacheability = CacheableMetadata::createFromRenderArray($form);
+        $cacheability->addCacheableDependency($host);
+        $cacheability->addCacheableDependency($container);
+        foreach ($children as $child) {
+            $cacheability->addCacheableDependency($child);
+        }
+        $cacheability->applyTo($form);
 
         $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
         $form['#attached']['library'][] = 'wmcontent/master_form';
