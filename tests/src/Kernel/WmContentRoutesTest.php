@@ -12,7 +12,7 @@ class WmContentRoutesTest extends WmContentTestBase
     /** @var RouterInterface */
     protected $router;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
