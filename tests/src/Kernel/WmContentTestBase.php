@@ -41,7 +41,7 @@ abstract class WmContentTestBase extends KernelTestBase
     /** @var WmContentContainer */
     protected $contentContainer;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -229,6 +229,8 @@ class WmContentContainerForm extends EntityForm
         );
 
         $form_state->setRedirect('wmcontent.collection');
+
+        return $status;
     }
 
     public function updateForm($form, FormStateInterface $form_state)
