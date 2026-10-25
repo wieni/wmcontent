@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
@@ -70,7 +71,7 @@ function wmcontent_entity_type_alter(array &$entityTypes): void
     }
 }
 
-function wmcontent_entity_operation_alter(array &$operations, EntityInterface $entity)
+function wmcontent_entity_operation_alter(array &$operations, EntityInterface $entity, ?CacheableMetadata $cacheability = null)
 {
     foreach ($operations as &$operation) {
         /** @var Url $url */
@@ -98,7 +99,7 @@ function wmcontent_entity_operation_alter(array &$operations, EntityInterface $e
     }
 }
 
-function wmcontent_entity_operation(EntityInterface $entity): array
+function wmcontent_entity_operation(EntityInterface $entity, ?CacheableMetadata $cacheability = null): array
 {
     if ($entity instanceof Snapshot) {
         return \Drupal::getContainer()->get('wmcontent.snapshot')->getEntityOperations(

@@ -2,6 +2,7 @@
 
 namespace Drupal\wmcontent;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -77,9 +78,9 @@ class WmContentContainerListBuilder extends DraggableListBuilder
         return $row + parent::buildRow($entity);
     }
 
-    public function getDefaultOperations(EntityInterface $entity)
+    public function getDefaultOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = null)
     {
-        $operations = parent::getDefaultOperations($entity);
+        $operations = parent::getDefaultOperations($entity, $cacheability);
 
         if ($entity->hasLinkTemplate('edit-form')) {
             $operations['edit'] = [
