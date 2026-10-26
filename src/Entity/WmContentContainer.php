@@ -3,9 +3,14 @@
 namespace Drupal\wmcontent\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\wmcontent\Form\WmContentContainerDeleteForm;
+use Drupal\wmcontent\Form\WmContentContainerForm;
 use Drupal\wmcontent\WmContentContainerInterface;
+use Drupal\wmcontent\WmContentContainerListBuilder;
 
 /**
  * Defines the wmcontent_container entity.
@@ -51,6 +56,46 @@ use Drupal\wmcontent\WmContentContainerInterface;
  *     }
  * )
  */
+#[ConfigEntityType(
+    id: 'wmcontent_container',
+    label: new TranslatableMarkup('WmContent Container'),
+    config_prefix: 'wmcontent_container',
+    entity_keys: [
+        'id' => 'id',
+        'label' => 'label',
+    ],
+    handlers: [
+        'list_builder' => WmContentContainerListBuilder::class,
+        'form' => [
+            'add' => WmContentContainerForm::class,
+            'edit' => WmContentContainerForm::class,
+            'delete' => WmContentContainerDeleteForm::class,
+        ],
+    ],
+    links: [
+        'collection' => '/admin/config/wmcontent/containers',
+        'add-form' => '/admin/config/wmcontent/containers/add',
+        'edit-form' => '/admin/config/wmcontent/containers/{wmcontent_container}',
+        'delete-form' => '/admin/config/wmcontent/containers/{wmcontent_container}/delete',
+    ],
+    admin_permission: 'administer wmcontent',
+    config_export: [
+        'id',
+        'label',
+        'host_entity_type',
+        'host_bundles',
+        'child_entity_type',
+        'child_bundles',
+        'child_bundles_default',
+        'hide_single_option_sizes',
+        'hide_single_option_alignments',
+        'show_size_column',
+        'show_alignment_column',
+        'snapshots_enabled',
+        'inline_render_enabled',
+        'snapshot_restore_keep_blocks',
+    ],
+)]
 class WmContentContainer extends ConfigEntityBase implements WmContentContainerInterface
 {
     /** @var string */

@@ -2,14 +2,21 @@
 
 namespace Drupal\wmcontent\Entity;
 
-use Drupal\Core\Entity\Annotation\ContentEntityType;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\ContentEntityDeleteForm;
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\UserInterface;
 use Drupal\wmcontent\Entity\Traits\BaseFieldTrait;
+use Drupal\wmcontent\Form\Snapshot\SnapshotEntityForm;
+use Drupal\wmcontent\Service\Snapshot\HtmlRouteProvider;
+use Drupal\wmcontent\Service\Snapshot\SnapshotListBuilder;
 use Drupal\wmcontent\WmContentContainerInterface;
 
 /**
@@ -47,6 +54,39 @@ use Drupal\wmcontent\WmContentContainerInterface;
  *     field_ui_base_route = "entity.wmcontent_snapshot.collection"
  * )
  */
+#[ContentEntityType(
+    id: 'wmcontent_snapshot',
+    label: new TranslatableMarkup('WmContent Snapshot'),
+    entity_keys: [
+        'id' => 'id',
+        'label' => 'title',
+        'uuid' => 'uuid',
+        'langcode' => 'langcode',
+    ],
+    handlers: [
+        'list_builder' => SnapshotListBuilder::class,
+        'form' => [
+            'default' => ContentEntityForm::class,
+            'add' => ContentEntityForm::class,
+            'edit' => SnapshotEntityForm::class,
+            'delete' => ContentEntityDeleteForm::class,
+        ],
+        'route_provider' => [
+            'html' => HtmlRouteProvider::class,
+        ],
+        'access' => EntityAccessControlHandler::class,
+    ],
+    links: [
+        'add-form' => '/admin/wmcontent/snapshot/add',
+        'edit-form' => '/admin/wmcontent/snapshot/{wmcontent_snapshot}/edit',
+        'delete-form' => '/admin/wmcontent/snapshot/{wmcontent_snapshot}/delete',
+        'collection' => '/admin/wmcontent/snapshot',
+    ],
+    admin_permission: 'administer wmcontent',
+    base_table: 'wmcontent_snapshot',
+    translatable: false,
+    field_ui_base_route: 'entity.wmcontent_snapshot.collection',
+)]
 class Snapshot extends ContentEntityBase
 {
     use BaseFieldTrait;

@@ -2,11 +2,13 @@
 
 namespace Drupal\wmcontent\Plugin\views\field;
 
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\EntityLink;
 
 /**
  * @ViewsField("wmcontent_delete_link")
  */
+#[ViewsField('wmcontent_delete_link')]
 class WmContentDelete extends EntityLink
 {
     protected function getEntityLinkTemplate()

@@ -41,7 +41,7 @@ abstract class WmContentTestBase extends KernelTestBase
     /** @var WmContentContainer */
     protected $contentContainer;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -105,7 +105,6 @@ abstract class WmContentTestBase extends KernelTestBase
         $controller = $this->controllerResolver->getControllerFromDefinition(WmContentChildController::class);
 
         $method = new \ReflectionMethod($controller, 'createChildEntity');
-        $method->setAccessible(true);
 
         $child = $method->invokeArgs($controller, [$this->contentContainer, self::CHILD_BUNDLE, $host]);
         $child->set('title', 'Bar');

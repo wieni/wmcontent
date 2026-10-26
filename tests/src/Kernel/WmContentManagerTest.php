@@ -9,7 +9,7 @@ class WmContentManagerTest extends WmContentTestBase
     /** @var WmContentManagerInterface */
     protected $manager;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

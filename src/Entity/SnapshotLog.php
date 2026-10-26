@@ -3,11 +3,14 @@
 namespace Drupal\wmcontent\Entity;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Entity\Annotation\ContentEntityType;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\UserInterface;
 use Drupal\wmcontent\Entity\Traits\BaseFieldTrait;
 
@@ -27,6 +30,20 @@ use Drupal\wmcontent\Entity\Traits\BaseFieldTrait;
  *     }
  * )
  */
+#[ContentEntityType(
+    id: 'wmcontent_snapshot_log',
+    label: new TranslatableMarkup('WmContent Snapshot log'),
+    entity_keys: [
+        'id' => 'id',
+    ],
+    handlers: [
+        'list_builder' => EntityListBuilder::class,
+        'access' => EntityAccessControlHandler::class,
+    ],
+    admin_permission: 'administer wmcontent',
+    base_table: 'wmcontent_snapshot_log',
+    translatable: false,
+)]
 class SnapshotLog extends ContentEntityBase
 {
     use BaseFieldTrait;
