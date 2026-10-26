@@ -2,11 +2,13 @@
 
 namespace Drupal\wmcontent\Plugin\views\field;
 
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\EntityLink;
 
 /**
  * @ViewsField("wmcontent_edit_link")
  */
+#[ViewsField('wmcontent_edit_link')]
 class WmContentEdit extends EntityLink
 {
     protected function getEntityLinkTemplate()
