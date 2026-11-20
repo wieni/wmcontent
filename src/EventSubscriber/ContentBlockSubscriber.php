@@ -21,7 +21,7 @@ class ContentBlockSubscriber implements EventSubscriberInterface
         $this->manager = $manager;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         $events[ContentBlockChangedEvent::NAME][] = ['updateHostEntity'];
 
